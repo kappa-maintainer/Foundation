@@ -1,0 +1,65 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+repositories {
+    maven {
+        url "https://libraries.minecraft.net/"
+    }
+    mavenCentral()
+}
+
+group = 'top.outlands'
+archivesBaseName = 'foundation'
+version = '0.2.3'
+java.targetCompatibility(JavaVersion.VERSION_21)
+
+dependencies {
+    implementation 'net.sf.jopt-simple:jopt-simple:5.0.4'
+    implementation 'org.javassist:javassist:3.30.2-GA'
+    implementation 'org.apache.logging.log4j:log4j-core:2.22.1'
+    implementation 'org.apache.logging.log4j:log4j-api:2.22.1'
+    implementation 'org.burningwave:jvm-driver:8.15.0'
+    implementation 'org.burningwave:core:12.64.3'
+    implementation 'org.ow2.asm:asm:9.6'
+
+}
+
+compileJava {
+    options.compilerArgs += [
+            '--add-exports=java.base/jdk.internal.reflect=ALL-UNNAMED'
+    ]
+}
+
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "outlands"
+            url = "https://maven.outlands.top/releases"
+            credentials(PasswordCredentials)
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            groupId = project.group
+            artifactId = "foundation"
+            version = project.version
+            artifact sourcesJar
+            from components.java
+        }
+    }
+}
