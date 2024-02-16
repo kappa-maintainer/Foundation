@@ -390,6 +390,14 @@ public class ActualClassLoader extends URLClassLoader {
         }
     }
 
+    public Map<String, Class<?>> getCachedClasses() {
+        return cachedClasses;
+    }
+
+    public Set<String> getInvalidClasses() {
+        return invalidClasses;
+    }
+
     protected static void closeSilently(Closeable closeable) {
         if (closeable != null) {
             try {
