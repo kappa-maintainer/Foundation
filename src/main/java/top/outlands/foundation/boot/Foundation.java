@@ -2,15 +2,13 @@ package top.outlands.foundation.boot;
 
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.Logger;
-import org.burningwave.core.classes.Modules;
-import top.outlands.foundation.UCEHandler;
+import zone.rong.imaginebreaker.ImagineBreaker;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static top.outlands.foundation.JVMDriver.DRIVER;
+import static top.outlands.foundation.boot.JVMDriver.DRIVER;
 
 public class Foundation {
     public static Logger LOGGER = new EmptyLogger();
@@ -30,11 +28,8 @@ public class Foundation {
     }
     
     private static void breakModuleAndReflection() {
-        Modules.create().exportAllToAll();
-        Class<?> reflection = DRIVER.getClassByName("jdk.internal.reflect.Reflection",true, Foundation.class.getClassLoader(), Foundation.class );
-        DRIVER.setFieldValue(null, Arrays.stream(DRIVER.getDeclaredFields(reflection)).filter(field -> field.getName().equals("fieldFilterMap")).findFirst().get(), null);
-        DRIVER.setFieldValue(null, Arrays.stream(DRIVER.getDeclaredFields(reflection)).filter(field -> field.getName().equals("methodFilterMap")).findFirst().get(), null);
-        DRIVER.setFieldValue(Class.class, Arrays.stream(DRIVER.getDeclaredFields(Class.class)).filter(field -> field.getName().equals("reflectionData")).findFirst().get(), null);
-        
+        ImagineBreaker.openBootModules();
+        ImagineBreaker.wipeFieldFilters();
+        ImagineBreaker.wipeMethodFilters();
     }
 }

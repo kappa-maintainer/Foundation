@@ -1,4 +1,4 @@
-package top.outlands.foundation;
+package top.outlands.foundation.boot;
 
 import top.outlands.foundation.boot.Foundation;
 

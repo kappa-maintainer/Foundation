@@ -55,7 +55,7 @@ public class LaunchHandler {
 
         final List<String> argumentList = new ArrayList<>();
         blackboard = new HashMap<>();
-        classLoader = (LaunchClassLoader) LaunchHandler.class.getClassLoader();
+        classLoader = LaunchClassLoader.getInstance();
         Thread.currentThread().setContextClassLoader(classLoader);
         fillTransformHandler(classLoader.getTransformHandler());
         

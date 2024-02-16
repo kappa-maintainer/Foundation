@@ -7,6 +7,9 @@ repositories {
     maven {
         url "https://libraries.minecraft.net/"
     }
+    maven {
+        url "https://repo.cleanroommc.com/releases"
+    }
     mavenCentral()
 }
 
@@ -21,7 +24,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-core:2.22.1'
     implementation 'org.apache.logging.log4j:log4j-api:2.22.1'
     implementation 'org.burningwave:jvm-driver:8.15.0'
-    implementation 'org.burningwave:core:12.64.3'
+    implementation "zone.rong:imaginebreaker:2.0"
     implementation 'org.ow2.asm:asm:9.6'
 
 }

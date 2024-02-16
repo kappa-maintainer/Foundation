@@ -1,4 +1,4 @@
-package top.outlands.foundation;
+package top.outlands.foundation.boot;
 
 import io.github.toolfactory.jvm.Driver;
 
