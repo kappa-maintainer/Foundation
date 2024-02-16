@@ -80,13 +80,13 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("top.outlands.ActualClassLoader");
         addClassLoaderExclusion("top.outlands.Foundation");
         addClassLoaderExclusion("top.outlands.TransformHandler");
+        addClassLoaderExclusion("top.outlands.EmptyLogger");
         addClassLoaderExclusion("top.outlands.function.");
         addClassLoaderExclusion("top.outlands.trie.");
         addClassLoaderExclusion("io.github.toolfactory.jvm.");
         addClassLoaderExclusion("org.burningwave.");
         addClassLoaderExclusion("javassist");
         addClassLoaderExclusion("com.google.");
-        addClassLoaderExclusion("org.objectweb.asm.");
         if (DEBUG_SAVE) {
             int x = 1;
             tempFolder = new File(Launch.minecraftHome, "CLASS_DUMP");
@@ -95,10 +95,8 @@ public class ActualClassLoader extends URLClassLoader {
             }
 
             if (tempFolder.exists()) {
-                LOGGER.info("DEBUG_SAVE enabled, but 10 temp directories already exist, clean them and try again.");
                 tempFolder = null;
             } else {
-                LOGGER.info("DEBUG_SAVE Enabled, saving all classes to \"%s\"", tempFolder.getAbsolutePath().replace('\\', '/'));
                 tempFolder.mkdirs();
             }
         }
@@ -220,7 +218,6 @@ public class ActualClassLoader extends URLClassLoader {
                 invalidClasses.add(name);
                 if (DEBUG) {
                     LOGGER.trace("Exception encountered attempting classloading of %s", name, e);
-                    LogManager.getLogger("LaunchWrapper").log(Level.ERROR, "Exception encountered attempting classloading of %s", e);
                 }
                 throw new ClassNotFoundException(name, e);
             
@@ -229,13 +226,7 @@ public class ActualClassLoader extends URLClassLoader {
     
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
-        try {
-            return findClass(name);
-        } catch (Throwable t) {
-            LOGGER.error(t);
-            throw t;
-            //return super.loadClass(name);
-        }
+        return findClass(name);
     }
 
     protected void saveTransformedClass(final byte[] data, final String transformedName) {

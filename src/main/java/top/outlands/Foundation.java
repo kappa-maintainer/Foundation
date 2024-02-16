@@ -7,11 +7,14 @@ import org.burningwave.core.classes.Modules;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static top.outlands.JVMDriver.DRIVER;
 
 public class Foundation {
-    public static Logger LOGGER = LogManager.getLogger("Foundation");
+    public static Logger LOGGER = new EmptyLogger();
+    public static final Set<String> OUTDATED_VISITOR = new HashSet<>();
 
     public static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler(new UCEHandler());

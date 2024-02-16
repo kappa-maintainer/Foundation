@@ -8,6 +8,7 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import top.outlands.trie.TrieNode;
 
 import java.io.File;
@@ -35,6 +36,7 @@ public class LaunchHandler {
 
 
     public void launch(String[] args) {
+        LOGGER = LogManager.getLogger("Foundation");
         final OptionParser parser = new OptionParser();
         parser.allowsUnrecognizedOptions();
 
@@ -56,7 +58,7 @@ public class LaunchHandler {
         Thread.currentThread().setContextClassLoader(classLoader);
         fillTransformHandler(classLoader.getTransformHandler());
         
-        /*classLoader.registerExplicitTransformer(new String[]{
+        classLoader.registerExplicitTransformer(new String[]{
                 "org.objectweb.asm.FieldVisitor",
                 "org.objectweb.asm.ClassVisitor",
                 "org.objectweb.asm.MethodVisitor"
@@ -67,7 +69,8 @@ public class LaunchHandler {
             classLoader.findClass("org.objectweb.asm.MethodVisitor");
         } catch (ClassNotFoundException e) {
             LOGGER.error("Can't find ASM", e);
-        }*/
+        }
+        classLoader.addTransformerExclusion("org.objectweb.asm.");
 
         // any 'discovered' tweakers from their preferred mod loading mechanism
         // By making this object discoverable and accessible it's possible to perform
