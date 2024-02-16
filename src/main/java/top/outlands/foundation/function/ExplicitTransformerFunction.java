@@ -1,4 +1,4 @@
-package top.outlands.function;
+package top.outlands.foundation.function;
 
 @FunctionalInterface
 public interface ExplicitTransformerFunction {

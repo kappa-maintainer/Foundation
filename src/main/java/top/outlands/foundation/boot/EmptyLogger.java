@@ -1,4 +1,4 @@
-package top.outlands;
+package top.outlands.foundation.boot;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;

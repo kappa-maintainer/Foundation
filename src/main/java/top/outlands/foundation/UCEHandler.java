@@ -1,4 +1,6 @@
-package top.outlands;
+package top.outlands.foundation;
+
+import top.outlands.foundation.boot.Foundation;
 
 public class UCEHandler implements Thread.UncaughtExceptionHandler {
     @Override

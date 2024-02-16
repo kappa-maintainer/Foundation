@@ -1,7 +1,8 @@
-package top.outlands;
+package top.outlands.foundation;
 
 import javassist.ClassPool;
 import javassist.CtClass;
+import top.outlands.foundation.boot.Foundation;
 
 import java.io.ByteArrayInputStream;
 

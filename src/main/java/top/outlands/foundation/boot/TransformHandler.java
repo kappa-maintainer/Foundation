@@ -1,10 +1,11 @@
-package top.outlands;
+package top.outlands.foundation.boot;
 
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
-import top.outlands.function.ExplicitTransformerFunction;
-import top.outlands.function.TransformerFunction;
-import top.outlands.trie.PrefixTrie;
+import top.outlands.foundation.IExplicitTransformer;
+import top.outlands.foundation.function.ExplicitTransformerFunction;
+import top.outlands.foundation.function.TransformerFunction;
+import top.outlands.foundation.trie.PrefixTrie;
 
 import java.util.LinkedHashMap;
 import java.util.List;

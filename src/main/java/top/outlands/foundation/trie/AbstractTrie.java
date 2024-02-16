@@ -1,4 +1,4 @@
-package top.outlands.trie;
+package top.outlands.foundation.trie;
 
 import java.util.Arrays;
 import java.util.Collections;

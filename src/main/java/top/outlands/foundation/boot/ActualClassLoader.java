@@ -1,10 +1,8 @@
-package top.outlands;
+package top.outlands.foundation.boot;
 
 import net.minecraft.launchwrapper.Launch;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import top.outlands.trie.PrefixTrie;
-import top.outlands.trie.TrieNode;
+import top.outlands.foundation.trie.PrefixTrie;
+import top.outlands.foundation.trie.TrieNode;
 
 import java.io.Closeable;
 import java.io.File;
@@ -30,9 +28,6 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-
-import static net.minecraft.launchwrapper.Launch.classLoader;
-import static top.outlands.Foundation.LOGGER;
 
 public class ActualClassLoader extends URLClassLoader {
     
@@ -77,12 +72,9 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("com.sun.");
         addClassLoaderExclusion("net.minecraft.launchwrapper.LaunchClassLoader");
         addClassLoaderExclusion("net.minecraft.launchwrapper.Launch");
-        addClassLoaderExclusion("top.outlands.ActualClassLoader");
-        addClassLoaderExclusion("top.outlands.Foundation");
-        addClassLoaderExclusion("top.outlands.TransformHandler");
-        addClassLoaderExclusion("top.outlands.EmptyLogger");
-        addClassLoaderExclusion("top.outlands.function.");
-        addClassLoaderExclusion("top.outlands.trie.");
+        addClassLoaderExclusion("top.outlands.foundation.boot.");
+        addClassLoaderExclusion("top.outlands.foundation.function.");
+        addClassLoaderExclusion("top.outlands.foundation.trie.");
         addClassLoaderExclusion("io.github.toolfactory.jvm.");
         addClassLoaderExclusion("org.burningwave.");
         addClassLoaderExclusion("javassist");
@@ -170,9 +162,9 @@ public class ActualClassLoader extends URLClassLoader {
                             definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
                         } else {
                             if (pkg.isSealed() && !pkg.isSealed(jarURLConnection.getJarFileURL())) {
-                                LOGGER.warn("The jar file %s is trying to seal already secured path %s", jarFile.getName(), packageName);
+                                Foundation.LOGGER.warn("The jar file %s is trying to seal already secured path %s", jarFile.getName(), packageName);
                             } else if (isSealed(packageName, manifest)) {
-                                LOGGER.warn("The jar file %s has a security seal for path %s, but that path is defined and not secure", jarFile.getName(), packageName);
+                                Foundation.LOGGER.warn("The jar file %s has a security seal for path %s, but that path is defined and not secure", jarFile.getName(), packageName);
                             }
                         }
                     }
@@ -181,7 +173,7 @@ public class ActualClassLoader extends URLClassLoader {
                     if (pkg == null) {
                         definePackage(packageName, null, null, null, null, null, null, null);
                     } else if (pkg.isSealed()) {
-                        LOGGER.warn("The URL %s is defining elements for sealed path %s", urlConnection.getURL(), packageName);
+                        Foundation.LOGGER.warn("The URL %s is defining elements for sealed path %s", urlConnection.getURL(), packageName);
                     }
                 }
             }
@@ -217,7 +209,7 @@ public class ActualClassLoader extends URLClassLoader {
         } catch (Throwable e) {
                 invalidClasses.add(name);
                 if (DEBUG) {
-                    LOGGER.trace("Exception encountered attempting classloading of %s", name, e);
+                    Foundation.LOGGER.trace("Exception encountered attempting classloading of %s", name, e);
                 }
                 throw new ClassNotFoundException(name, e);
             
@@ -246,13 +238,13 @@ public class ActualClassLoader extends URLClassLoader {
         }
 
         try {
-            LOGGER.debug("Saving transformed class \"%s\" to \"%s\"", transformedName, outFile.getAbsolutePath().replace('\\', '/'));
+            Foundation.LOGGER.debug("Saving transformed class \"%s\" to \"%s\"", transformedName, outFile.getAbsolutePath().replace('\\', '/'));
 
             final OutputStream output = new FileOutputStream(outFile);
             output.write(data);
             output.close();
         } catch (IOException ex) {
-            LOGGER.warn("Could not save transformed class \"%s\"", transformedName, ex);
+            Foundation.LOGGER.warn("Could not save transformed class \"%s\"", transformedName, ex);
         }
     }
 
@@ -336,7 +328,7 @@ public class ActualClassLoader extends URLClassLoader {
             System.arraycopy(buffer, 0, result, 0, totalLength);
             return result;
         } catch (Throwable t) {
-            LOGGER.warn("Problem loading class", t);
+            Foundation.LOGGER.warn("Problem loading class", t);
             return new byte[0];
         }
     }
@@ -383,13 +375,13 @@ public class ActualClassLoader extends URLClassLoader {
             final URL classResource = findResource(resourcePath);
 
             if (classResource == null) {
-                if (DEBUG) LOGGER.debug("Failed to find class resource %s", resourcePath);
+                if (DEBUG) Foundation.LOGGER.debug("Failed to find class resource %s", resourcePath);
                 negativeResourceCache.add(name);
                 return null;
             }
             classStream = classResource.openStream();
 
-            if (DEBUG) LOGGER.debug("Loading class %s from resource %s", name, classResource.toString());
+            if (DEBUG) Foundation.LOGGER.debug("Loading class %s from resource %s", name, classResource.toString());
             final byte[] data = readFully(classStream);
             resourceCache.put(name, data);
             return data;

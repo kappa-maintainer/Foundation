@@ -1,4 +1,4 @@
-package top.outlands;
+package top.outlands.foundation;
 
 /**
  * The new transformer type. It can bypass transformer exclusion but can't do wildcards matching.

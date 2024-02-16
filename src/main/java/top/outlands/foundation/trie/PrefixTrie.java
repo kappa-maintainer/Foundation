@@ -1,26 +1,31 @@
-package top.outlands.trie;
+
+package top.outlands.foundation.trie;
 
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
- * a data structure for suffix trie
  * 
+ * a data structure for prefix trie
  * @author Lin Chi-Min (v381654729@gmail.com)
  * 
  * @param <V> a generic type 
  */
-public class SuffixTrie<V> extends AbstractTrie<V> {
-	
-	
+public class PrefixTrie<V> extends AbstractTrie<V> {
+
+	/**
+	 * constructor for an empty trie
+	 */
+	public PrefixTrie() {
+		super();
+	}
 
 	/**
 	 * constructor for constructing a trie with the keys and values
 	 * @param keys : the keys for trie construction 
 	 * @param values : the corresponding values of the keys
 	 */
-	public SuffixTrie(List<String> keys, List<V> values) {
+	public PrefixTrie(List<String> keys, List<V> values) {
 		super(keys, values);
 	}
 	
@@ -31,17 +36,16 @@ public class SuffixTrie<V> extends AbstractTrie<V> {
 	 * @param values : the corresponding values of the keys
 	 * @param scores: the scores of each of the key-value pairs 
 	 */
-	public SuffixTrie(List<String> keys, List<V> values, int[] scores){
+	public PrefixTrie(List<String> keys, List<V> values, int[] scores){
 		super(keys, values, scores);
 	}
-	
 	
 	/**
 	 * constructor for constructing a trie with the keys and values
 	 * @param keys : the keys for trie construction 
 	 * @param values : the corresponding values of the keys
 	 */
-	public SuffixTrie(String[] keys, V[] values) {
+	public PrefixTrie(String[] keys, V[] values) {
 		super(Arrays.asList(keys), Arrays.asList(values));
 	}
 	
@@ -52,18 +56,17 @@ public class SuffixTrie<V> extends AbstractTrie<V> {
 	 * @param values : the corresponding values of the keys
 	 * @param scores: the scores of each of the key-value pairs 
 	 */
-	public SuffixTrie(String[] keys, V[] values, int[] scores) {
+	public PrefixTrie(String[] keys, V[] values, int[] scores) {
 		super(Arrays.asList(keys), Arrays.asList(values), scores);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
-	protected boolean put(String word, V value, int score) {
+	public boolean put(String key, V value, int score) {
 		
 		TrieNode<V> node = root;
-		
-		char[] chars = word.toCharArray();
+		char[] chars = key.toCharArray();
 		int[] indices = lookupIndices(chars);
 		if (indices == null){
 			// not allowed to add this word if one of the chars is unsupported
@@ -71,16 +74,16 @@ public class SuffixTrie<V> extends AbstractTrie<V> {
 		}
 		
 		int level = 0;
-		for (int i = chars.length - 1; i >= 0; i--) {
+		for (int i = 0; i < chars.length; i++) {
 			level++;
 			int index = indices[i];
 			if (node.children[index] == null) {
-				TrieNode<V> temp = new TrieNode<V>(chars[i], level);
+				TrieNode<V> temp = new TrieNode<>(chars[i], level);
 				node.addChildIndex(index);
 				node.children[index] = temp;
 				temp.parent = node;
 				if (node.level + 1 != temp.level) {
-					throw new RuntimeException("SuffixTrie: Bugs occurred: "
+					throw new RuntimeException("PrefixTrie: Bugs occurred: "
 							+ "node.level + 1 should be equal to temp.level, while node.level = " + 
 							node.level + ", temp.level = " + temp.level);
 				}
@@ -89,12 +92,12 @@ public class SuffixTrie<V> extends AbstractTrie<V> {
 				node = node.children[index];
 			}
 			if (node.level < 0) {
-				throw new RuntimeException("SuffixTrie: Bugs occurred: "
+				throw new RuntimeException("PrefixTrie: Bugs occurred: "
 						+ "node.level should be nonnegative, while node.level = " + node.level);
 			}
 		}
 		
-		if (node.isKeyValueNode == false){
+		if (!node.isKeyValueNode){
 			size++;
 		}
 		node.isKeyValueNode = true;
@@ -103,35 +106,30 @@ public class SuffixTrie<V> extends AbstractTrie<V> {
 		return true;
 	}
 	
-
-	
 	
 	/**
-	 *
 	 * 1. For input word "abcde", 
-	 * if the node that has the longest common suffix with level &lt;= maxSuffixLength is "r4de", 
-	 * return node 'd'
+	 * if the node that has the longest common prefix with level &lt;= maxPrefixLength is "abc3", 
+	 * return node 'c'
 	 * 
-	 * 2. Equivalent to getNodeWithLongestCommonPart(word.substring(word.length() - maxSuffixLength, word.length()))
+	 * 2. Equivalent to getNodeWithLongestCommonPart(word.substring(0, maxPrefixLength))
 	 *  
 	 * @param word : a word
-	 * @param maxSuffixLength : as described above
+	 * @param maxPrefixLength : as described above
 	 * @return the node that has the longest common prefix with word
 	 */
 	@Override
-	protected TrieNode<V> getNodeWithLongestCommonPart(String word, int maxSuffixLength) {
-		
-		if (maxSuffixLength < 0) {
+	protected TrieNode<V> getNodeWithLongestCommonPart(String word, int maxPrefixLength) {
+		if (maxPrefixLength < 0) {
 			throw new IllegalArgumentException(
-					"IllegalArgumentException: the argument 'maxSuffixLength' (" + maxSuffixLength + ") should be non-negative.");
-		} else if (maxSuffixLength > word.length()) {
+					"IllegalArgumentException: the argument 'maxPrefixLength' (" + maxPrefixLength + ") should be non-negative.");
+		} else if (maxPrefixLength > word.length()) {
 			throw new IllegalArgumentException(
-					"IllegalArgumentException: the argument 'maxSuffixLength' (" + maxSuffixLength + ") should not be larger than word.length().");
+					"IllegalArgumentException: the argument 'maxPrefixLength' (" + maxPrefixLength + ") should not be larger than word.length().");
 		}
 		
 		TrieNode<V> node = root;
-		int start = word.length() - 1, end = word.length() - maxSuffixLength;
-		for (int i = start; i >= end; i--) {
+		for (int i = 0; i < maxPrefixLength; i++) {
 			int index = charToIndex(word.charAt(i));
 			if (index >= 0 && node.children[index] != null) {
 				node = node.children[index];
@@ -142,9 +140,26 @@ public class SuffixTrie<V> extends AbstractTrie<V> {
 		return node;
 	}
 	
+	public TrieNode<V> getFirstKeyValueNode(String key) {
+		TrieNode<V> node = root;
+		for (int i = 0; i < key.length(); i++) {
+			if (node.isKeyValueNode) {
+				return node;
+			}
+			int index = charToIndex(key.charAt(i));
+			if (index >= 0 && node.children[index] != null) {
+				node = node.children[index];
+			} else {
+				return null;
+			}
+		}
+		if (node.isKeyValueNode) {
+			return node;
+		}
+		return null;
+	}
 	
 	
 	
 
-	
 }

@@ -1,16 +1,16 @@
-package top.outlands;
+package top.outlands.foundation.boot;
 
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.burningwave.core.classes.Modules;
+import top.outlands.foundation.UCEHandler;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static top.outlands.JVMDriver.DRIVER;
+import static top.outlands.foundation.JVMDriver.DRIVER;
 
 public class Foundation {
     public static Logger LOGGER = new EmptyLogger();
@@ -20,7 +20,7 @@ public class Foundation {
         Thread.setDefaultUncaughtExceptionHandler(new UCEHandler());
         try {
             breakModuleAndReflection();
-            Object handler = DRIVER.allocateInstance(Class.forName("top.outlands.LaunchHandler", true, LaunchClassLoader.getInstance()));
+            Object handler = DRIVER.allocateInstance(Class.forName("top.outlands.foundation.LaunchHandler", true, LaunchClassLoader.getInstance()));
             Method launch = handler.getClass().getMethod("launch", String[].class);
             launch.invoke(handler, (Object) args);
         } catch (Throwable e) {
