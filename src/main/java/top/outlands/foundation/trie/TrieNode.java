@@ -13,7 +13,7 @@ import java.util.function.Function;
  * @author Lin Chi-Min (v381654729@gmail.com)
  *
  */
-public class TrieNode<V> implements Comparable<TrieNode<V>>{
+public class TrieNode<V> {
 
 	/**
 	 * the default characters; 
@@ -76,13 +76,6 @@ public class TrieNode<V> implements Comparable<TrieNode<V>>{
 	 */
 	boolean isKeyValueNode;
 	
-	
-	/**1. used to determine the most important descendant node of a node
-	 * 2. only key-value nodes have a score;
-	 * 3. can use word frequencies as score values
-	 */
-	int score;
-	
 	/**
 	 * a value stored in this node
 	 */
@@ -122,7 +115,6 @@ public class TrieNode<V> implements Comparable<TrieNode<V>>{
 		this.children = new TrieNode[chars.length];
 		this.value = null;
 		this.level = level;
-		this.score = 0;
 		this.c = c;
 		this.childrenIndices = new int[chars.length];
 		Arrays.fill(childrenIndices, -1);
@@ -140,20 +132,6 @@ public class TrieNode<V> implements Comparable<TrieNode<V>>{
 	 */
 	public void setValue(V value) {
 		this.value = value;
-	}
-	
-	/**
-	 * @return the score
-	 */
-	public int getScore() {
-		return score;
-	}
-	
-	/**
-	 * @param score : the score to set
-	 */
-	public void setScore(int score) {
-		this.score = score;
 	}
 	
 	/**
@@ -230,16 +208,10 @@ public class TrieNode<V> implements Comparable<TrieNode<V>>{
 	
 	@Override
 	public String toString() {
-		return "SuffixTrieNode [isKeyValueNode=" + isKeyValueNode + ", score=" + score
-				+ ", value=" + String.valueOf(value) + ", level=" + level + ", key=" + getKey() + ", char=" + c +"]";
+		return "SuffixTrieNode [isKeyValueNode=" + isKeyValueNode + ", value=" + String.valueOf(value) + ", level=" + level + ", key=" + getKey() + ", char=" + c +"]";
 	}
-	
-	@Override
-	public int compareTo(TrieNode<V> o) {
-		return score - o.score;
-	}
-	
-	
+
+
 	/**
 	 * @param index : the child index to add; 
 	 * the index is according CHAR_TO_INDEX_MAP
@@ -298,14 +270,6 @@ public class TrieNode<V> implements Comparable<TrieNode<V>>{
 		return result;
 	}
 	
-	
-	/**
-	 * @return the key-value node with the highest score at the sub tree succeeding 'this'
-	 */
-	public TrieNode<V> getBestKeyValueNode() {
-		return getBestKeyValueNode((a, b) -> (a.score - b.score));
-	}
-	
 	/**
 	 * @param comparator : for comparison of nodes
 	 * @return the best key-value node according to the comparator
@@ -314,14 +278,7 @@ public class TrieNode<V> implements Comparable<TrieNode<V>>{
 		List<TrieNode<V>> KvNodes = getKeyValueNodes();
 		return Collections.max(KvNodes, comparator);
 	}
-	
-	/**
-	 * @param numTopKeyValueNodes : number of top key-value nodes to select
-	 * @return the top key-value nodes according to scores
-	 */
-	public List<TrieNode<V>> getBestKeyValueNodes(int numTopKeyValueNodes){
-		return getBestKeyValueNodes(numTopKeyValueNodes, (a, b) -> (a.score - b.score));
-	}
+
 	
 	/**@param numTopKeyValueNodes : number of top key-value nodes to select
 	 * @param comparator : comparator

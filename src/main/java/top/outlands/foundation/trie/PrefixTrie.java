@@ -28,17 +28,7 @@ public class PrefixTrie<V> extends AbstractTrie<V> {
 	public PrefixTrie(List<String> keys, List<V> values) {
 		super(keys, values);
 	}
-	
-	/**
-	 * constructor for constructing a trie with the keys and values and scores;
-	 * the scores are used for TrieNode comparison 
-	 * @param keys : the keys for trie construction 
-	 * @param values : the corresponding values of the keys
-	 * @param scores: the scores of each of the key-value pairs 
-	 */
-	public PrefixTrie(List<String> keys, List<V> values, int[] scores){
-		super(keys, values, scores);
-	}
+
 	
 	/**
 	 * constructor for constructing a trie with the keys and values
@@ -48,22 +38,12 @@ public class PrefixTrie<V> extends AbstractTrie<V> {
 	public PrefixTrie(String[] keys, V[] values) {
 		super(Arrays.asList(keys), Arrays.asList(values));
 	}
-	
-	/**
-	 * constructor for constructing a trie with the keys and values and scores;
-	 * the scores are used for TrieNode comparison 
-	 * @param keys : the keys for trie construction 
-	 * @param values : the corresponding values of the keys
-	 * @param scores: the scores of each of the key-value pairs 
-	 */
-	public PrefixTrie(String[] keys, V[] values, int[] scores) {
-		super(Arrays.asList(keys), Arrays.asList(values), scores);
-	}
+
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean put(String key, V value, int score) {
+	public boolean put(String key, V value) {
 		
 		TrieNode<V> node = root;
 		char[] chars = key.toCharArray();
@@ -102,7 +82,6 @@ public class PrefixTrie<V> extends AbstractTrie<V> {
 		}
 		node.isKeyValueNode = true;
 		node.value = value;
-		node.score = score;
 		return true;
 	}
 	

@@ -43,30 +43,20 @@ abstract class AbstractTrie<V>  {
 	}
 
 	/**
-	 * constructor for constructing a trie with the keys and values
-	 * @param keys : the keys for trie construction 
-	 * @param values : the corresponding values of the keys
-	 */
-	public AbstractTrie(List<String> keys, List<V> values) {
-		this(keys, values, ones(keys.size()));
-	}
-
-	/**
 	 * constructor for constructing a trie with the keys and values and scores;
 	 * the scores are used for TrieNode comparison 
 	 * @param keys : the keys for trie construction 
 	 * @param values : the corresponding values of the keys
-	 * @param scores: the scores of each of the key-value pairs 
 	 */
-	public AbstractTrie(List<String> keys, List<V> values, int[] scores) {
+	public AbstractTrie(List<String> keys, List<V> values) {
 		this();
-		if (keys.size() != values.size() || keys.size() != scores.length){
+		if (keys.size() != values.size()){
 			throw new IllegalArgumentException("IllegalArgumentException: the sizes of 'elements', 'values' and 'scores' should agree; "
-					+ "elements.size() = " + keys.size() + ", values.size() = " + values.size() +  ", scores.length = " + scores.length);
+					+ "elements.size() = " + keys.size() + ", values.size() = " + values.size());
 		}
 		boolean allAdded = true;
 		for (int i = 0; i < keys.size(); i++) {
-			boolean added = put(keys.get(i), values.get(i), scores[i]);
+			boolean added = put(keys.get(i), values.get(i));
 			if (!added){
 				allAdded = false;
 			}
@@ -126,15 +116,6 @@ abstract class AbstractTrie<V>  {
 	 */
 	public TrieNode<V> getRoot() {
 		return root;
-	}
-	
-	/**
-	 * inserts a key and its value, a key-value pair, into this trie.
-	 * @param key : the key 
-	 * @param value : the value 
-	 */
-	public void put(String key, V value) {
-		put(key, value, 1);
 	}
 
 	
@@ -240,14 +221,6 @@ abstract class AbstractTrie<V>  {
 		return (theNode.isKeyValueNode && theNode.level == word.length()) ? theNode : null;
 	}
 	
-	
-	/**
-	 * @return the top scored leaf node
-	 */
-	public TrieNode<V> getBestKeyValueNode(){
-		return getRoot().getBestKeyValueNode();
-	}
-	
 
 	/**
 	 * @param comparator : comparator for key-value nodes comparison and selection
@@ -255,33 +228,6 @@ abstract class AbstractTrie<V>  {
 	 */
 	public TrieNode<V> getBestKeyValueNode(Comparator<TrieNode<V>> comparator){
 		return getRoot().getBestKeyValueNode(comparator);
-	}
-	
-	
-	
-	/**
-	 * see getBestKeyValueNode(word, length)
-	 * @param word : prefix for PrefixTrie and suffix for SuffixTrie
-	 * @return the highest scored key-value node
-	 */
-	public TrieNode<V> getBestKeyValueNode(String word){
-		return getBestKeyValueNode(word, word.length());
-	}
-	
-
-	/**
-	 * 
-	 * Equivalent to getBestKeyValueNode(word.substring(0, maxLength)) for PrefixTrie,
-	 * and equivalent to getBestKeyValueNode(word.substring(word.length() - maxLength)) for SuffixTrie
-	 * 
-	 * @param word : a word
-	 * @param substringLength : substring length of 'word' for prefix for PrefixTrie and suffix for SuffixTrie;
-	 * for example, if word is "abcde" and substringLength is 3, then it's "abc" for PrefixTrie and "cde" for SuffixTrie
-	 * @return 
-	 * the key-value node with the highest score among key-value nodes with level &gt;= substringLength 
-	 */
-	protected TrieNode<V> getBestKeyValueNode(String word, int substringLength) {
-		return getBestKeyValueNode(word, substringLength, (a, b) -> (a.score - b.score));
 	}
 
 
@@ -317,16 +263,7 @@ abstract class AbstractTrie<V>  {
 	}
 	
 	//////////////////////////////////////////////////////////
-	
-	/**
-	 * @param word : prefix for PrefixTrie and suffix for SuffixTrie
-	 * @param numTopKeyValueNodes : number of top key-value nodes
-	 * @return best key-value nodes
-	 */
-	public List<TrieNode<V>> getBestKeyValueNodes(String word, int numTopKeyValueNodes) {
-		return getBestKeyValueNodes(word, word.length(), numTopKeyValueNodes, (a, b) -> (a.score - b.score));
-	}
-	
+
 	
 	public List<TrieNode<V>> getBestKeyValueNodes(String word, int numTopKeyValueNodes, Comparator<TrieNode<V>> comparator) {
 		return getBestKeyValueNodes(word, word.length(), numTopKeyValueNodes, comparator);
@@ -354,11 +291,10 @@ abstract class AbstractTrie<V>  {
 	/**
 	 * inserts a key and its value, a key-value pair, with score 'score', into this trie.
 	 * @param key : the key 
-	 * @param value : the value 
-	 * @param score : the score of the key value pair
+	 * @param value : the value
 	 * @return true if succesfully added, and false if the word contains unsupported characters
 	 */
-	protected abstract boolean put(String key, V value, int score);
+	protected abstract boolean put(String key, V value);
 	
 	
 	/**
