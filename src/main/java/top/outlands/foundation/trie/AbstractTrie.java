@@ -39,7 +39,7 @@ abstract class AbstractTrie<V>  {
 	 * an internal constructor
 	 */
 	protected AbstractTrie() {
-		root = new TrieNode<V>((char) 0, 0);
+		root = new TrieNode<>("", 0);
 	}
 
 	/**
@@ -218,7 +218,7 @@ abstract class AbstractTrie<V>  {
 	 */
 	public TrieNode<V> getKeyValueNode(String word){
 		TrieNode<V> theNode = getNodeWithLongestCommonPart(word);
-		return (theNode.isKeyValueNode && theNode.level == word.length()) ? theNode : null;
+		return (theNode.isKeyValueNode && theNode.getKey().equals(word)) ? theNode : null;
 	}
 	
 

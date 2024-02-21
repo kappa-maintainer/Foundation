@@ -19,15 +19,16 @@ public class TrieNode<V> {
 	 * the default characters; 
 	 */
 	private static final String DEFAULT_CHARS_STRING = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-+._";
+	public static final int CHAR_LENGTH = DEFAULT_CHARS_STRING.length();
 	
 	static {
-		/** 
-		 * 1. The default supported chars are "abcdefghijklmnopqrstuvwxyz0123456789";
-		 * 2. warning: words that contain one or more unsupported chars are automatically not added to a trie
-		 * to check if all words are added, check trie.isAllAdded() to see if all characters are added; 
-		 * 3. Minimize the number of supported chars for speed optimization; 
+		/*
+		  1. The default supported chars are "abcdefghijklmnopqrstuvwxyz0123456789";
+		  2. warning: words that contain one or more unsupported chars are automatically not added to a trie
+		  to check if all words are added, check trie.isAllAdded() to see if all characters are added;
+		  3. Minimize the number of supported chars for speed optimization;
 		 */
-		setSupportedChars(DEFAULT_CHARS_STRING);
+		setSupportedChars();
 	}
 	
 	private static char[] chars;
@@ -37,12 +38,11 @@ public class TrieNode<V> {
 	/**
 	 * 1. The default supported chars are "abcdefghijklmnopqrstuvwxyz0123456789";
 	 * 2. warning: words that contain one or more unsupported chars are automatically not added to a trie
-	 * to check if all words are added, check trie.isAllAdded() to see if all characters are added; 
-	 * 3. Minimize the number of supported chars for speed optimization; 
-	 * @param charsString : like "abcdefghijklmnopqrstuvwxyz0123456789,.-_:'"
+	 * to check if all words are added, check trie.isAllAdded() to see if all characters are added;
+	 * 3. Minimize the number of supported chars for speed optimization;
 	 */
-	public static void setSupportedChars(String charsString){
-		chars = charsString.toCharArray();
+	private static void setSupportedChars(){
+		chars = TrieNode.DEFAULT_CHARS_STRING.toCharArray();
 		int maxChar = -1;
 		for (char c : chars) {
 			if (c > maxChar){
@@ -84,12 +84,12 @@ public class TrieNode<V> {
 	/**the level of root is 0, 
 	 * and the level of other nodes are 1, 2, 3, etc.
 	 */
-	final int level;
+	int level;
 	
 	/**
-	 * character for this node, for debugging
+	 * snippet for this node
 	 */
-	final char c;
+	String snippet;
 	
 
 	/**
@@ -106,16 +106,16 @@ public class TrieNode<V> {
 	List<TrieNode<V>> KeyValueNodes;
 	
 	/**
-	 * @param c : char c field of this node  
+	 * @param snippet : char snippet field of this node
 	 * @param level : the level of this node in the trie
 	 */
 	@SuppressWarnings("unchecked")
-	protected TrieNode(char c, int level) {
+	protected TrieNode(String snippet, int level) {
 		// english characters, and -'._
 		this.children = new TrieNode[chars.length];
 		this.value = null;
 		this.level = level;
-		this.c = c;
+		this.snippet = snippet;
 		this.childrenIndices = new int[chars.length];
 		Arrays.fill(childrenIndices, -1);
 	}
@@ -156,31 +156,16 @@ public class TrieNode<V> {
 	public TrieNode<V> getParent() {
 		return parent;
 	}
-	
-	
-	/**
-	 * @return anscestors including the root and exclusive of this;
-	 * For example, if the level of this is 5, the returned list is of size 5 
-	 */
-	public ArrayList<TrieNode<V>> getAncestors() {
-		TrieNode<V> node = parent;
-		ArrayList<TrieNode<V>> result = new ArrayList<TrieNode<V>>(level);
-		while (node != null) { 
-			result.add(node);
-			node = node.parent;
-		}
-		return result;
-	}
+
 	
 	/**
 	 * @return key based on ancestors and this node 
 	 */
 	public String getKey(){
-		char[] keyChars = new char[level];
-		int offset = level - 1;
+		StringBuilder keyChars = new StringBuilder();
 		TrieNode<V> node = this;
-		while (node.level > 0){
-			keyChars[offset--] = node.c;
+		while (!node.isRoot()){
+			keyChars.insert(0, node.snippet);
 			node = node.parent;
 		}
 		return new String(keyChars);
@@ -197,7 +182,7 @@ public class TrieNode<V> {
 	 * @return non-null elements of 'children'	
 	 */
 	public List<TrieNode<V>> getNonNullChildren(){
-		ArrayList<TrieNode<V>> result = new ArrayList<TrieNode<V>>(numChildren);
+		ArrayList<TrieNode<V>> result = new ArrayList<>(numChildren);
 		for (int i = 0; i < numChildren; i++) {
 			TrieNode<V> child = children[childrenIndices[i]];
 			result.add(child);
@@ -208,9 +193,19 @@ public class TrieNode<V> {
 	
 	@Override
 	public String toString() {
-		return "SuffixTrieNode [isKeyValueNode=" + isKeyValueNode + ", value=" + String.valueOf(value) + ", level=" + level + ", key=" + getKey() + ", char=" + c +"]";
+		return "SuffixTrieNode [isKeyValueNode=" + isKeyValueNode + ", value=" + value + ", level=" + level + ", key=" + getKey() + ", snippet=" + snippet +"]";
 	}
 
+	protected void addChild(TrieNode<V> child) {
+		int index = CHAR_TO_INDEX_MAP[child.snippet.charAt(0)];
+		children[index] = child;
+		addChildIndex(index);
+		child.parent = this;
+	}
+
+	public String getSnippet() {
+		return snippet;
+	}
 
 	/**
 	 * @param index : the child index to add; 

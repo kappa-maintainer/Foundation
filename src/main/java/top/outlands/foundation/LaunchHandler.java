@@ -149,7 +149,7 @@ public class LaunchHandler {
             final Class<?> clazz = Class.forName(launchTarget, false, classLoader);
             final Method mainMethod = clazz.getMethod("main", new Class[]{String[].class});
 
-            LOGGER.info("Launching wrapped minecraft {%s}", launchTarget);
+            LOGGER.info("Launching wrapped minecraft {}", launchTarget);
             mainMethod.invoke(null, (Object) argumentList.toArray(new String[0]));
         } catch (Exception e) {
             LOGGER.log(Level.ERROR, "Unable to launch", e);

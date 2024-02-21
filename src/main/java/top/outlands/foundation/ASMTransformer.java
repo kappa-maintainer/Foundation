@@ -6,16 +6,19 @@ import top.outlands.foundation.boot.Foundation;
 
 import java.io.ByteArrayInputStream;
 
+import static top.outlands.foundation.boot.Foundation.LOGGER;
+
 public class ASMTransformer implements IExplicitTransformer{
     private static final String CODE = 
                     """
                         if (api != 589824) {
                             this.api = 589824;
-                            top.outlands.Foundation.OUTDATED_VISITOR.add(this.getClass().getName());
+                            top.outlands.foundation.boot.Foundation.OUTDATED_VISITOR.add(this.getClass().getName());
                         }
                     """;
     @Override
     public byte[] transform(String transformedName, byte[] basicClass) {
+        LOGGER.info("Patching " + transformedName);
         try {
             CtClass cc = ClassPool.getDefault().makeClass(new ByteArrayInputStream(basicClass));
             var cotr = cc.getConstructor("(I)V");
@@ -27,9 +30,10 @@ public class ASMTransformer implements IExplicitTransformer{
                 default -> throw new IllegalStateException("Unexpected value: " + cc.getSimpleName());
             };
             cotr.insertAfter(CODE);
+            //cc.debugWriteFile("./dump");
             basicClass = cc.toBytecode();
         }catch (Throwable t) {
-            Foundation.LOGGER.error(t);
+            LOGGER.error(t);
         }
         return basicClass;
     }
