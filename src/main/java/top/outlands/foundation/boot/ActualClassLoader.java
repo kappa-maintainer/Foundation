@@ -16,6 +16,8 @@ import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.security.CodeSigner;
 import java.security.CodeSource;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -82,11 +84,8 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("javassist");
         addClassLoaderExclusion("com.google.");
         if (DEBUG_SAVE) {
-            int x = 1;
-            tempFolder = new File(Launch.minecraftHome, "CLASS_DUMP");
-            while (tempFolder.exists() && x <= 10) {
-                tempFolder = new File(Launch.minecraftHome, "CLASS_DUMP" + x++);
-            }
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm-MM-dd");
+            tempFolder = new File(Launch.minecraftHome, "CLASS_DUMP" + File.separator + dateTimeFormatter.format(LocalDateTime.now()));
 
             if (tempFolder.exists()) {
                 tempFolder = null;
