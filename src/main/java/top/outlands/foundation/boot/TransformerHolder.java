@@ -1,5 +1,7 @@
 package top.outlands.foundation.boot;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 import top.outlands.foundation.IExplicitTransformer;
@@ -17,16 +19,13 @@ import java.util.function.Function;
 
 
 
-public class TransformHandler {
+public class TransformerHolder {
     public static final PrefixTrie<Set<IExplicitTransformer>> explicitTransformers = new PrefixTrie<>();
-    public static final Map<String, IClassTransformer> transformers = new LinkedHashMap<>(20);
+    public static final Map<String, IClassTransformer> transformers = LinkedHashMap.newLinkedHashMap(20);
 
     public static IClassNameTransformer renameTransformer;
-    public static List<IClassTransformer> getTransformers() {
-        return transformers.values().stream().toList();
-    }
     public ExplicitTransformerFunction runExplicitTransformersFunction = ((s, bytes) -> bytes);
-    public TransformerFunction runTransformersFunction = ((name, transformedName, basicClass) -> basicClass);
+    public TransformerFunction runTransformersFunction = ((name, transformedName, basicClass, manifest) -> basicClass);
     public Consumer<String> registerTransformerFunction = s -> {};
     public Consumer<String> unRegisterTransformerFunction = s -> {};
     public BiConsumer<String[], String> registerExplicitTransformerFunction = (strings, s) -> {};

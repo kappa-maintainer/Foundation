@@ -54,7 +54,7 @@ public class ActualClassLoader extends URLClassLoader {
     public static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("foundation.debugFiner", "false"));
     private static final boolean DEBUG_SAVE = DEBUG && Boolean.parseBoolean(System.getProperty("foundation.debugSave", "false"));
     private static File tempFolder = null;
-    static TransformHandler transformHandler = new TransformHandler();
+    static TransformerHolder transformerHolder = new TransformerHolder();
     
     public ActualClassLoader(URL[] sources) {
         this(sources, null);
@@ -95,18 +95,18 @@ public class ActualClassLoader extends URLClassLoader {
         }
     }
 
-    public TransformHandler getTransformHandler() {
-        return transformHandler;
+    public TransformerHolder getTransformerHolder() {
+        return transformerHolder;
     }
 
     public void registerTransformer(String transformerClassName) {
         LOGGER.debug("Registering transformer: " + transformerClassName);
-        transformHandler.registerTransformerFunction.accept(transformerClassName);
+        transformerHolder.registerTransformerFunction.accept(transformerClassName);
     }
 
     public void unRegisterTransformer(String transformerClassName) {
         LOGGER.debug("Unregistering transformer: " + transformerClassName);
-        transformHandler.unRegisterTransformerFunction.accept(transformerClassName);
+        transformerHolder.unRegisterTransformerFunction.accept(transformerClassName);
     }
 
     /**
@@ -116,7 +116,7 @@ public class ActualClassLoader extends URLClassLoader {
      */
     public void registerExplicitTransformer(String[] targets, String className) {
         LOGGER.debug("Registering explicit transformer: " + className);
-        transformHandler.registerExplicitTransformerFunction.accept(targets, className);
+        transformerHolder.registerExplicitTransformerFunction.accept(targets, className);
     }
 
     @Override
@@ -150,13 +150,13 @@ public class ActualClassLoader extends URLClassLoader {
             URLConnection urlConnection = findCodeSourceConnectionFor(fileName);
 
             CodeSigner[] signers = null;
-
+            Manifest manifest = null;
             if (lastDot > -1 && !untransformedName.startsWith("net.minecraft.")) {
                 if (urlConnection instanceof JarURLConnection jarURLConnection) {
                     final JarFile jarFile = jarURLConnection.getJarFile();
 
                     if (jarFile != null && jarFile.getManifest() != null) {
-                        final Manifest manifest = jarFile.getManifest();
+                        manifest = jarFile.getManifest();
                         final JarEntry entry = jarFile.getJarEntry(fileName);
 
                         Package pkg = getPackage(packageName);
@@ -200,7 +200,7 @@ public class ActualClassLoader extends URLClassLoader {
             }
             
 
-            transformedClass = runExplicitTransformers(transformedName, runTransformers(untransformedName, transformedName, getClassBytes(untransformedName)));
+            transformedClass = runExplicitTransformers(transformedName, runTransformers(untransformedName, transformedName, getClassBytes(untransformedName), manifest));
             if (DEBUG_SAVE) {
                 saveTransformedClass(transformedClass, transformedName);
             }
@@ -253,12 +253,12 @@ public class ActualClassLoader extends URLClassLoader {
     }
 
     protected String unTransformName(String name) {
-        name = transformHandler.unTransformNameFunction.apply(name);
+        name = transformerHolder.unTransformNameFunction.apply(name);
         return name;
     }
 
     protected String transformName(String name) {
-        name = transformHandler.transformNameFunction.apply(name);
+        name = transformerHolder.transformNameFunction.apply(name);
         return name;
     }
 
@@ -291,13 +291,13 @@ public class ActualClassLoader extends URLClassLoader {
         return null;
     }
 
-    protected byte[] runTransformers(final String name, final String transformedName, byte[] basicClass) {
-        basicClass = transformHandler.runTransformersFunction.apply(name, transformedName, basicClass);
+    protected byte[] runTransformers(final String name, final String transformedName, byte[] basicClass, Manifest manifest) {
+        basicClass = transformerHolder.runTransformersFunction.apply(name, transformedName, basicClass, manifest);
         return basicClass;
     }
 
     protected byte[] runExplicitTransformers(final String transformedName, byte[] basicClass) {
-        basicClass = transformHandler.runExplicitTransformersFunction.apply(transformedName, basicClass);
+        basicClass = transformerHolder.runExplicitTransformersFunction.apply(transformedName, basicClass);
         return basicClass;
     }
 

@@ -3,14 +3,11 @@ package top.outlands.foundation;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import net.minecraft.launchwrapper.IClassNameTransformer;
-import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import top.outlands.foundation.boot.TransformHandler;
-import top.outlands.foundation.trie.TrieNode;
+import org.apache.logging.log4j.core.config.Configurator;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -21,16 +18,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static net.minecraft.launchwrapper.Launch.assetsDir;
 import static net.minecraft.launchwrapper.Launch.blackboard;
 import static net.minecraft.launchwrapper.Launch.classLoader;
 import static net.minecraft.launchwrapper.Launch.minecraftHome;
-import static top.outlands.foundation.boot.ActualClassLoader.DEBUG_FINER;
-import static top.outlands.foundation.boot.TransformHandler.explicitTransformers;
-import static top.outlands.foundation.boot.TransformHandler.renameTransformer;
-import static top.outlands.foundation.boot.TransformHandler.transformers;
+import static top.outlands.foundation.TransformerDelegate.fillTransformerHolder;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 
 public class LaunchHandler {
@@ -38,6 +31,7 @@ public class LaunchHandler {
 
     public void launch(String[] args) {
         LOGGER = LogManager.getLogger("Foundation");
+        Configurator.setLevel(LOGGER, Level.INFO);
         final OptionParser parser = new OptionParser();
         parser.allowsUnrecognizedOptions();
 
@@ -57,7 +51,7 @@ public class LaunchHandler {
         blackboard = new HashMap<>();
         classLoader = LaunchClassLoader.getInstance();
         Thread.currentThread().setContextClassLoader(classLoader);
-        fillTransformHandler(classLoader.getTransformHandler());
+        fillTransformerHolder(classLoader.getTransformerHolder());
         
         classLoader.registerExplicitTransformer(new String[]{
                 "org.objectweb.asm.FieldVisitor",
@@ -157,84 +151,5 @@ public class LaunchHandler {
         }
     }
     
-    private void fillTransformHandler(TransformHandler handler) {
-        handler.runTransformersFunction = (name, transformedName, basicClass) -> {
-            if (DEBUG_FINER) {
-                LOGGER.debug("Beginning transform of {%s (%s)} Start Length: %d", name, transformedName, (basicClass == null ? 0 : basicClass.length));
-                for (final IClassTransformer transformer : transformers.values()) {
-                    final String transName = transformer.getClass().getName();
-                    LOGGER.debug("Before Transformer {%s (%s)} %s: %d", name, transformedName, transName, (basicClass == null ? 0 : basicClass.length));
-                    basicClass = transformer.transform(name, transformedName, basicClass);
-                    LOGGER.debug("After  Transformer {%s (%s)} %s: %d", name, transformedName, transName, (basicClass == null ? 0 : basicClass.length));
-                }
-                LOGGER.debug("Ending transform of {%s (%s)} Start Length: %d", name, transformedName, (basicClass == null ? 0 : basicClass.length));
-            } else {
-                for (final IClassTransformer transformer : transformers.values()) {
-                    basicClass = transformer.transform(name, transformedName, basicClass);
-                }
-            }
-            return basicClass;
-        };
-        handler.registerTransformerFunction = s -> {
-            try {
-                IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(s).newInstance();
-                transformers.put(s, transformer);
-                if (transformer instanceof IClassNameTransformer && renameTransformer == null) {
-                    renameTransformer = (IClassNameTransformer) transformer;
-                }
-            } catch (Exception e) {
-                LOGGER.error("Error registering transformer class {}", s, e);
-            }
-        };
-        handler.unRegisterTransformerFunction = s -> {
-            try {
-                transformers.remove(s);
-            } catch (Exception e) {
-                LOGGER.error("Error removing transformer class {}", s, e);
-            }  
-        };
-        handler.runExplicitTransformersFunction = (name, basicClass) -> {
-            TrieNode<Set<IExplicitTransformer>> node = explicitTransformers.getKeyValueNode(name);
-            if (node != null) {
-                Set<IExplicitTransformer> set = node.getValue();
-                if (set != null) {
-                    for (var transformer : set) {
-                        basicClass = transformer.transform(name, basicClass);
-                    }
-                    set.clear(); // We are not doing hotswap, so classes only loaded once. Let's free their memory 
-                }
-            }
-            return basicClass;
-        };
-        handler.registerExplicitTransformerFunction = (strings, s) -> {
-            try {
-                IExplicitTransformer instance = (IExplicitTransformer) classLoader.loadClass(s).newInstance();
-                for (var target : strings) {
-                    TrieNode<Set<IExplicitTransformer>> node =  explicitTransformers.getKeyValueNode(target);
-                    if (node != null) {
-                        node.getValue().add(instance);
-                    } else {
-                        var transformerSet = new TreeSet<IExplicitTransformer>();
-                        transformerSet.add(instance);
-                        explicitTransformers.put(target, transformerSet);
-                    }
-                }
 
-            } catch (Exception e) {
-                LOGGER.error("Error registering explicit transformer class {}", s, e);
-            }
-        };
-        handler.transformNameFunction = s -> {
-            if (renameTransformer != null) {
-                return renameTransformer.remapClassName(s);
-            }
-            return s;
-        };
-        handler.unTransformNameFunction = s -> {
-            if (renameTransformer != null) {
-                return renameTransformer.unmapClassName(s);
-            }
-            return s;
-        };
-    }
 }
