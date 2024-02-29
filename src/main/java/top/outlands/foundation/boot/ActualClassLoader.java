@@ -14,8 +14,10 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.nio.ByteBuffer;
 import java.security.CodeSigner;
 import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -400,6 +402,14 @@ public class ActualClassLoader extends URLClassLoader {
 
     public Set<String> getInvalidClasses() {
         return invalidClasses;
+    }
+
+    public Class<?> defineClass(String name, ByteBuffer buffer) {
+        return defineClass(name, buffer, (ProtectionDomain) null);
+    }
+
+    public boolean isClassLoaded(String name) {
+        return findLoadedClass(name) != null;
     }
 
     protected static void closeSilently(Closeable closeable) {
