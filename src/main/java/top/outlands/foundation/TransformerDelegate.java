@@ -19,7 +19,7 @@ public class TransformerDelegate {
      * In case you want to control how the transformer is initialized
      * @param transformer The transformer
      */
-    public void registerTransformerInstance(IClassTransformer transformer) {
+    public static void registerTransformerInstance(IClassTransformer transformer) {
         transformers.put(transformer.getClass().getName(), transformer);
     }
 
@@ -27,9 +27,43 @@ public class TransformerDelegate {
         return transformers.values().stream().toList();
     }
 
-    public void registerRenameTransformer(IClassNameTransformer transformer) {
+    public static void registerRenameTransformer(IClassNameTransformer transformer) {
         if (renameTransformer == null) {
             renameTransformer = transformer;
+        }
+    }
+
+    /**
+     * Call this to register an explicit transformer.
+     * @param targets Target classes' name.
+     * @param className Class name of the transformer.
+     */
+    public static void registerExplicitTransformer(String[] targets, String className) {
+        LOGGER.debug("Registering explicit transformer: " + className);
+        try {
+            IExplicitTransformer instance = (IExplicitTransformer) classLoader.loadClass(className).newInstance();
+            for (var target : targets) {
+                TrieNode<Set<IExplicitTransformer>> node =  explicitTransformers.getKeyValueNode(target);
+                if (node != null) {
+                    node.getValue().add(instance);
+                } else {
+                    var transformerSet = new TreeSet<IExplicitTransformer>();
+                    transformerSet.add(instance);
+                    explicitTransformers.put(target, transformerSet);
+                }
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Error registering explicit transformer class {}", className, e);
+        }
+    }
+
+    public static void unRegisterTransformer(String transformerClassName) {
+        LOGGER.debug("Unregistering transformer: " + transformerClassName);
+        try {
+            transformers.remove(transformerClassName);
+        } catch (Exception e) {
+            LOGGER.error("Error removing transformer class {}", transformerClassName, e);
         }
     }
 
@@ -59,13 +93,6 @@ public class TransformerDelegate {
                 LOGGER.error("Error registering transformer class {}", s, e);
             }
         };
-        handler.unRegisterTransformerFunction = s -> {
-            try {
-                transformers.remove(s);
-            } catch (Exception e) {
-                LOGGER.error("Error removing transformer class {}", s, e);
-            }
-        };
         handler.runExplicitTransformersFunction = (name, basicClass) -> {
             TrieNode<Set<IExplicitTransformer>> node = explicitTransformers.getKeyValueNode(name);
             if (node != null) {
@@ -78,24 +105,6 @@ public class TransformerDelegate {
                 }
             }
             return basicClass;
-        };
-        handler.registerExplicitTransformerFunction = (strings, s) -> {
-            try {
-                IExplicitTransformer instance = (IExplicitTransformer) classLoader.loadClass(s).newInstance();
-                for (var target : strings) {
-                    TrieNode<Set<IExplicitTransformer>> node =  explicitTransformers.getKeyValueNode(target);
-                    if (node != null) {
-                        node.getValue().add(instance);
-                    } else {
-                        var transformerSet = new TreeSet<IExplicitTransformer>();
-                        transformerSet.add(instance);
-                        explicitTransformers.put(target, transformerSet);
-                    }
-                }
-
-            } catch (Exception e) {
-                LOGGER.error("Error registering explicit transformer class {}", s, e);
-            }
         };
         handler.transformNameFunction = s -> {
             if (renameTransformer != null) {

@@ -24,6 +24,7 @@ import static net.minecraft.launchwrapper.Launch.blackboard;
 import static net.minecraft.launchwrapper.Launch.classLoader;
 import static net.minecraft.launchwrapper.Launch.minecraftHome;
 import static top.outlands.foundation.TransformerDelegate.fillTransformerHolder;
+import static top.outlands.foundation.TransformerDelegate.registerExplicitTransformer;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 
 public class LaunchHandler {
@@ -53,7 +54,7 @@ public class LaunchHandler {
         Thread.currentThread().setContextClassLoader(classLoader);
         fillTransformerHolder(classLoader.getTransformerHolder());
         
-        classLoader.registerExplicitTransformer(new String[]{
+        registerExplicitTransformer(new String[]{
                 "org.objectweb.asm.FieldVisitor",
                 "org.objectweb.asm.ClassVisitor",
                 "org.objectweb.asm.MethodVisitor"

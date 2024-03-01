@@ -106,21 +106,6 @@ public class ActualClassLoader extends URLClassLoader {
         transformerHolder.registerTransformerFunction.accept(transformerClassName);
     }
 
-    public void unRegisterTransformer(String transformerClassName) {
-        LOGGER.debug("Unregistering transformer: " + transformerClassName);
-        transformerHolder.unRegisterTransformerFunction.accept(transformerClassName);
-    }
-
-    /**
-     * Call this to register an explicit transformer.
-     * @param targets Target classes' name. 
-     * @param className Class name of the transformer.
-     */
-    public void registerExplicitTransformer(String[] targets, String className) {
-        LOGGER.debug("Registering explicit transformer: " + className);
-        transformerHolder.registerExplicitTransformerFunction.accept(targets, className);
-    }
-
     @Override
     public Class<?> findClass(final String name) throws ClassNotFoundException {
         if (invalidClasses.contains(name)) {
