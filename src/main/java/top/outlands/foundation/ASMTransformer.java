@@ -11,7 +11,7 @@ import static top.outlands.foundation.boot.Foundation.LOGGER;
 public class ASMTransformer implements IExplicitTransformer{
     private static final String CODE = 
                     """
-                        if (api != 589824) {
+                        if (api < 589824) {
                             this.api = 589824;
                             top.outlands.foundation.boot.Foundation.OUTDATED_VISITOR.add(this.getClass().getName());
                         }

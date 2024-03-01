@@ -1,9 +1,7 @@
 package top.outlands.foundation.boot;
 
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.Configurator;
 import zone.rong.imaginebreaker.ImagineBreaker;
 
 import java.lang.reflect.Method;
@@ -17,7 +15,7 @@ public class Foundation {
     public static final Set<String> OUTDATED_VISITOR = new HashSet<>();
 
     public static void main(String[] args) {
-        Thread.setDefaultUncaughtExceptionHandler(new UCEHandler());
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Foundation.LOGGER.error(thread, throwable));
         try {
             breakModuleAndReflection();
             Object handler = DRIVER.allocateInstance(Class.forName("top.outlands.foundation.LaunchHandler", true, LaunchClassLoader.getInstance()));
