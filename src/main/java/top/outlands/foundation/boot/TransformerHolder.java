@@ -7,17 +7,18 @@ import top.outlands.foundation.function.ExplicitTransformerFunction;
 import top.outlands.foundation.function.TransformerFunction;
 import top.outlands.foundation.trie.PrefixTrie;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 
-
+/**
+ * Do not use. It's public because I am lazy
+ */
 public class TransformerHolder {
-    public static final PrefixTrie<PriorityQueue<IExplicitTransformer>> explicitTransformers = new PrefixTrie<>();
-    public static final Set<IClassTransformer> transformers = new ConcurrentSkipListSet<>(Comparator.comparingInt(IClassTransformer::getPriority));
+    public static PrefixTrie<PriorityQueue<IExplicitTransformer>> explicitTransformers = null;
+    public static Set<IClassTransformer> transformers = null;
 
     public static IClassNameTransformer renameTransformer;
     public ExplicitTransformerFunction runExplicitTransformersFunction = ((s, bytes) -> bytes);

@@ -3,11 +3,13 @@ package top.outlands.foundation;
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 import top.outlands.foundation.boot.TransformerHolder;
+import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import static net.minecraft.launchwrapper.Launch.classLoader;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
@@ -122,10 +124,12 @@ public class TransformerDelegate {
 
     /**
      * We use lambda trick to fill method implementations after the class loader ready
-     * @param handler The one and only handler
+     * @param holder The one and only handler
      */
-    static void fillTransformerHolder(TransformerHolder handler) {
-        handler.runTransformersFunction = (name, transformedName, basicClass, manifest) -> {
+    static void fillTransformerHolder(TransformerHolder holder) {
+        explicitTransformers = new PrefixTrie<>();
+        transformers = new ConcurrentSkipListSet<>(Comparator.comparingInt(IClassTransformer::getPriority));
+        holder.runTransformersFunction = (name, transformedName, basicClass, manifest) -> {
             for (final IClassTransformer transformer : transformers) {
                 final String transName = transformer.getClass().getName();
                 basicClass = transformer.transform(name, transformedName, basicClass, manifest);
@@ -136,7 +140,7 @@ public class TransformerDelegate {
             }
             return basicClass;
         };
-        handler.registerTransformerFunction = s -> {
+        holder.registerTransformerFunction = s -> {
             try {
                 IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(s).newInstance();
                 transformers.add(transformer);
@@ -144,7 +148,7 @@ public class TransformerDelegate {
                 LOGGER.error("Error registering transformer class {}", s, e);
             }
         };
-        handler.runExplicitTransformersFunction = (name, basicClass) -> {
+        holder.runExplicitTransformersFunction = (name, basicClass) -> {
             TrieNode<PriorityQueue<IExplicitTransformer>> node = explicitTransformers.getKeyValueNode(name);
             if (node != null) {
                 PriorityQueue<IExplicitTransformer> queue = node.getValue();
@@ -156,13 +160,13 @@ public class TransformerDelegate {
             }
             return basicClass;
         };
-        handler.transformNameFunction = s -> {
+        holder.transformNameFunction = s -> {
             if (renameTransformer != null) {
                 return renameTransformer.remapClassName(s);
             }
             return s;
         };
-        handler.unTransformNameFunction = s -> {
+        holder.unTransformNameFunction = s -> {
             if (renameTransformer != null) {
                 return renameTransformer.unmapClassName(s);
             }
