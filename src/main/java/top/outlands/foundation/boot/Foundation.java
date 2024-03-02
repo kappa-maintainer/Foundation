@@ -8,8 +8,6 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
-import static top.outlands.foundation.boot.JVMDriver.DRIVER;
-
 public class Foundation {
     public static Logger LOGGER = new EmptyLogger();
     public static final Set<String> OUTDATED_VISITOR = new HashSet<>();
@@ -18,7 +16,7 @@ public class Foundation {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Foundation.LOGGER.error(thread, throwable));
         try {
             breakModuleAndReflection();
-            Object handler = DRIVER.allocateInstance(Class.forName("top.outlands.foundation.LaunchHandler", true, LaunchClassLoader.getInstance()));
+            Object handler = Class.forName("top.outlands.foundation.LaunchHandler", true, LaunchClassLoader.getInstance()).newInstance();
             Method launch = handler.getClass().getMethod("launch", String[].class);
             launch.invoke(handler, (Object) args);
         } catch (Throwable e) {

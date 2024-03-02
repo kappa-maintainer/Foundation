@@ -7,17 +7,17 @@ import top.outlands.foundation.function.ExplicitTransformerFunction;
 import top.outlands.foundation.function.TransformerFunction;
 import top.outlands.foundation.trie.PrefixTrie;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 
 
 public class TransformerHolder {
-    public static final PrefixTrie<Set<IExplicitTransformer>> explicitTransformers = new PrefixTrie<>();
-    public static final Map<String, IClassTransformer> transformers = LinkedHashMap.newLinkedHashMap(20);
+    public static final PrefixTrie<PriorityQueue<IExplicitTransformer>> explicitTransformers = new PrefixTrie<>();
+    public static final Set<IClassTransformer> transformers = new ConcurrentSkipListSet<>(Comparator.comparingInt(IClassTransformer::getPriority));
 
     public static IClassNameTransformer renameTransformer;
     public ExplicitTransformerFunction runExplicitTransformersFunction = ((s, bytes) -> bytes);

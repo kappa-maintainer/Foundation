@@ -8,10 +8,10 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
+/**
+ * JNI-based unsafe, introduced for future unsafe removal. Use at your own risk
+ */
 public class JVMDriver {
-    /**
-     * The JVM Driver, native ver.
-     */
     public static Driver DRIVER = Driver.Factory.getNewNative().init();
     public static Field findField(Class<?> clazz, String name) throws NoSuchFieldException {
         Optional<Field> f = Arrays.stream(DRIVER.getDeclaredFields(clazz)).filter(field -> field.getName().equals(name)).findFirst();
@@ -22,15 +22,8 @@ public class JVMDriver {
         }
     }
 
-    /**
-     * Will only fetch the first matched method
-     * @param clazz Target class
-     * @param name Target method name
-     * @return The first method match the name
-     * @throws NoSuchMethodException
-     */
     public static Method findMethod(Class<?> clazz, String name) throws NoSuchMethodException {
-        
+
         Optional<Method> m = Arrays.stream(DRIVER.getDeclaredMethods(clazz)).filter(method -> method.getName().equals(name)).findFirst();
         if (m.isPresent()) {
             return m.get();

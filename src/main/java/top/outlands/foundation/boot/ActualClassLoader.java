@@ -83,7 +83,7 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("top.outlands.foundation.trie.");
         addClassLoaderExclusion("io.github.toolfactory.jvm.");
         addClassLoaderExclusion("org.burningwave.");
-        addClassLoaderExclusion("javassist");
+        addClassLoaderExclusion("javassist.");
         addClassLoaderExclusion("com.google.");
         if (DEBUG_SAVE) {
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm-MM-dd");
@@ -391,6 +391,10 @@ public class ActualClassLoader extends URLClassLoader {
 
     public Class<?> defineClass(String name, ByteBuffer buffer) {
         return defineClass(name, buffer, (ProtectionDomain) null);
+    }
+
+    public Class<?> defineClass(String name, byte[] buffer) {
+        return defineClass(name, buffer, 0, buffer.length);
     }
 
     public boolean isClassLoaded(String name) {
