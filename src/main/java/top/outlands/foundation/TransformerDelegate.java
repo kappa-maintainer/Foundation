@@ -17,13 +17,6 @@ import static top.outlands.foundation.boot.TransformerHolder.*;
  * A delegate to new and old transformer-related methods.
  */
 public class TransformerDelegate {
-    /**
-     * In case you want to control how the transformer is initialized, in which you could <b>new</b> it yourself.
-     * @param transformer The transformer
-     */
-    public static void registerTransformerByInstance(IClassTransformer transformer) {
-        transformers.add(transformer);
-    }
 
     /**
      * The original getTransformers() was in {@link net.minecraft.launchwrapper.LaunchClassLoader}, but that may cause unwanted classloading.
@@ -52,22 +45,30 @@ public class TransformerDelegate {
      * @param className Class name of the transformer.
      */
     public static void registerExplicitTransformer(String[] targets, String className) {
-        LOGGER.debug("Registering explicit transformer: " + className);
         try {
             IExplicitTransformer instance = (IExplicitTransformer) classLoader.loadClass(className).newInstance();
+            registerExplicitTransformerByInstance(targets, instance);
+        } catch (Exception e) {
+            LOGGER.error("Error registering explicit transformer class {}", className, e);
+        }
+    }
+
+    public static void registerExplicitTransformerByInstance(String[] targets, IExplicitTransformer transformer) {
+        LOGGER.debug("Registering explicit transformer: " + transformer.getClass().getSimpleName());
+        try {
             for (var target : targets) {
                 TrieNode<PriorityQueue<IExplicitTransformer>> node =  explicitTransformers.getKeyValueNode(target);
                 if (node != null) {
-                    node.getValue().add(instance);
+                    node.getValue().add(transformer);
                 } else {
                     var transformerSet = new PriorityQueue<>(Comparator.comparingInt(IExplicitTransformer::getPriority));
-                    transformerSet.add(instance);
+                    transformerSet.add(transformer);
                     explicitTransformers.put(target, transformerSet);
                 }
             }
 
         } catch (Exception e) {
-            LOGGER.error("Error registering explicit transformer class {}", className, e);
+            LOGGER.error("Error registering explicit transformer class {}", transformer.getClass().getSimpleName(), e);
         }
     }
 
@@ -83,6 +84,14 @@ public class TransformerDelegate {
         } catch (Exception e) {
             LOGGER.error("Error registering transformer class {}", transformerClassName, e);
         }
+    }
+
+    /**
+     * In case you want to control how the transformer is initialized, in which you could <b>new</b> it yourself.
+     * @param transformer The transformer
+     */
+    public static void registerTransformerByInstance(IClassTransformer transformer) {
+        transformers.add(transformer);
     }
 
     /**
