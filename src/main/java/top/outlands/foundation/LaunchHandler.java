@@ -32,7 +32,11 @@ public class LaunchHandler {
 
     public void launch(String[] args) {
         LOGGER = LogManager.getLogger("Foundation");
-        Configurator.setLevel(LOGGER, Level.INFO);
+        if (LaunchClassLoader.DEBUG) {
+            Configurator.setLevel(LOGGER, Level.DEBUG);
+        } else {
+            Configurator.setLevel(LOGGER, Level.INFO);
+        }
         final OptionParser parser = new OptionParser();
         parser.allowsUnrecognizedOptions();
 

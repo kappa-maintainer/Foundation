@@ -5,10 +5,11 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import top.outlands.foundation.boot.TransformerHolder;
 import top.outlands.foundation.trie.TrieNode;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
 
 import static net.minecraft.launchwrapper.Launch.classLoader;
-import static top.outlands.foundation.boot.ActualClassLoader.DEBUG_FINER;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 import static top.outlands.foundation.boot.TransformerHolder.*;
 
@@ -116,18 +117,12 @@ public class TransformerDelegate {
      */
     static void fillTransformerHolder(TransformerHolder handler) {
         handler.runTransformersFunction = (name, transformedName, basicClass, manifest) -> {
-            if (DEBUG_FINER) {
-                LOGGER.debug("Beginning transform of {%s (%s)} Start Length: %d", name, transformedName, (basicClass == null ? 0 : basicClass.length));
-                for (final IClassTransformer transformer : transformers) {
-                    final String transName = transformer.getClass().getName();
-                    LOGGER.debug("Before Transformer {%s (%s)} %s: %d", name, transformedName, transName, (basicClass == null ? 0 : basicClass.length));
-                    basicClass = transformer.transform(name, transformedName, basicClass, manifest);
-                    LOGGER.debug("After  Transformer {%s (%s)} %s: %d", name, transformedName, transName, (basicClass == null ? 0 : basicClass.length));
-                }
-                LOGGER.debug("Ending transform of {%s (%s)} Start Length: %d", name, transformedName, (basicClass == null ? 0 : basicClass.length));
-            } else {
-                for (final IClassTransformer transformer : transformers) {
-                    basicClass = transformer.transform(name, transformedName, basicClass, manifest);
+            for (final IClassTransformer transformer : transformers) {
+                final String transName = transformer.getClass().getName();
+                basicClass = transformer.transform(name, transformedName, basicClass, manifest);
+                LOGGER.debug("Transformed class {} with {}", transformedName, transName);
+                if (basicClass == null) {
+                    LOGGER.debug("And it was null!");
                 }
             }
             return basicClass;

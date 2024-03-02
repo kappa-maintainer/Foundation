@@ -52,8 +52,7 @@ public class ActualClassLoader extends URLClassLoader {
 
     private static final String[] RESERVED_NAMES = {"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"};
 
-    private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("foundation.debug", "false"));
-    public static final boolean DEBUG_FINER = DEBUG && Boolean.parseBoolean(System.getProperty("foundation.debugFiner", "false"));
+    public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("foundation.debug", "false"));
     private static final boolean DEBUG_SAVE = DEBUG && Boolean.parseBoolean(System.getProperty("foundation.debugSave", "false"));
     private static File tempFolder = null;
     static TransformerHolder transformerHolder = new TransformerHolder();
@@ -199,9 +198,7 @@ public class ActualClassLoader extends URLClassLoader {
             return clazz;
         } catch (Throwable e) {
                 invalidClasses.add(name);
-                if (DEBUG) {
-                    LOGGER.trace("Exception encountered attempting classloading of %s", name, e);
-                }
+                LOGGER.debug("Exception encountered attempting classloading of {}", name, e);
                 throw new ClassNotFoundException(name, e);
             
         }
@@ -366,13 +363,13 @@ public class ActualClassLoader extends URLClassLoader {
             final URL classResource = findResource(resourcePath);
 
             if (classResource == null) {
-                if (DEBUG) LOGGER.debug("Failed to find class resource %s", resourcePath);
+                LOGGER.debug("Failed to find class resource {}", resourcePath);
                 negativeResourceCache.add(name);
                 return null;
             }
             classStream = classResource.openStream();
 
-            if (DEBUG) LOGGER.debug("Loading class %s from resource %s", name, classResource.toString());
+            LOGGER.debug("Loading class {} from resource {}", name, classResource.toString());
             final byte[] data = readFully(classStream);
             resourceCache.put(name, data);
             return data;
