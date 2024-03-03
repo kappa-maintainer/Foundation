@@ -85,13 +85,6 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("org.burningwave.");
         addClassLoaderExclusion("javassist.");
         addClassLoaderExclusion("com.google.");
-        if (DEBUG_SAVE) {
-            dumpDir = new File(Launch.minecraftHome, "CLASS_DUMP");
-
-            if (!dumpDir.exists()) {
-                dumpDir.mkdirs();
-            }
-        }
     }
 
     public TransformerHolder getTransformerHolder() {
@@ -209,7 +202,11 @@ public class ActualClassLoader extends URLClassLoader {
 
     public void saveClassBytes(final byte[] data, final String transformedName) {
         if (dumpDir == null) {
-            return;
+            dumpDir = new File(Launch.minecraftHome, "CLASS_DUMP");
+
+            if (!dumpDir.exists()) {
+                dumpDir.mkdirs();
+            }
         }
         File dumpSubDir;
         int i = 0;
