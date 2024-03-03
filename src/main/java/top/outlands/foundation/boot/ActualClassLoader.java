@@ -54,7 +54,8 @@ public class ActualClassLoader extends URLClassLoader {
 
     public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("foundation.debug", "false"));
     private static final boolean DEBUG_SAVE = DEBUG && Boolean.parseBoolean(System.getProperty("foundation.debugSave", "false"));
-    private static File tempFolder = null;
+    private static File dumpDir = null;
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-dd");
     static TransformerHolder transformerHolder = new TransformerHolder();
     
     public ActualClassLoader(URL[] sources) {
@@ -85,13 +86,10 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("javassist.");
         addClassLoaderExclusion("com.google.");
         if (DEBUG_SAVE) {
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm-MM-dd");
-            tempFolder = new File(Launch.minecraftHome, "CLASS_DUMP" + File.separator + dateTimeFormatter.format(LocalDateTime.now()));
+            dumpDir = new File(Launch.minecraftHome, "CLASS_DUMP");
 
-            if (tempFolder.exists()) {
-                tempFolder = null;
-            } else {
-                tempFolder.mkdirs();
+            if (!dumpDir.exists()) {
+                dumpDir.mkdirs();
             }
         }
     }
@@ -176,7 +174,7 @@ public class ActualClassLoader extends URLClassLoader {
                     final Class<?> clazz = super.defineClass(name, transformedClass, 0, transformedClass.length, codeSource);
                     cachedClasses.put(name, clazz);
                     if (DEBUG_SAVE) {
-                        saveTransformedClass(transformedClass, transformedName);
+                        saveClassBytes(transformedClass, transformedName);
                     }
                     return clazz;
                 } catch (IOException e) {
@@ -188,7 +186,7 @@ public class ActualClassLoader extends URLClassLoader {
 
             transformedClass = runExplicitTransformers(transformedName, runTransformers(untransformedName, transformedName, getClassBytes(untransformedName), manifest));
             if (DEBUG_SAVE) {
-                saveTransformedClass(transformedClass, transformedName);
+                saveClassBytes(transformedClass, transformedName);
             }
 
             final CodeSource codeSource = urlConnection == null ? null : new CodeSource(urlConnection.getURL(), signers);
@@ -209,12 +207,18 @@ public class ActualClassLoader extends URLClassLoader {
         return findClass(name);
     }
 
-    protected void saveTransformedClass(final byte[] data, final String transformedName) {
-        if (tempFolder == null) {
+    public void saveClassBytes(final byte[] data, final String transformedName) {
+        if (dumpDir == null) {
             return;
         }
+        File dumpSubDir;
+        int i = 0;
+        do {
+            dumpSubDir = new File(dumpDir, dateTimeFormatter.format(LocalDateTime.now()) + i++);
+        } while (dumpSubDir.exists());
+        dumpSubDir.mkdirs();
 
-        final File outFile = new File(tempFolder, transformedName.replace('.', File.separatorChar) + ".class");
+        final File outFile = new File(dumpSubDir, transformedName.replace('.', File.separatorChar) + ".class");
         final File outDir = outFile.getParentFile();
 
         if (!outDir.exists()) {
