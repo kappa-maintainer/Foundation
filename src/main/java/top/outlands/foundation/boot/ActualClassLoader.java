@@ -55,7 +55,6 @@ public class ActualClassLoader extends URLClassLoader {
     public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("foundation.debug", "false"));
     private static final boolean DEBUG_SAVE = DEBUG && Boolean.parseBoolean(System.getProperty("foundation.debugSave", "false"));
     private static File dumpSubDir;
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-dd-");
     static TransformerHolder transformerHolder = new TransformerHolder();
     
     public ActualClassLoader(URL[] sources) {
@@ -94,7 +93,7 @@ public class ActualClassLoader extends URLClassLoader {
             int i = 0;
             do {
                 i++;
-                dumpSubDir = new File(dumpDir, dateTimeFormatter.format(LocalDateTime.now()) + i);
+                dumpSubDir = new File(dumpDir, String.format("%3d", i));
             } while (dumpSubDir.exists());
             dumpSubDir.mkdirs();
         }
