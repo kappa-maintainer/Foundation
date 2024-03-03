@@ -54,7 +54,7 @@ public class ActualClassLoader extends URLClassLoader {
 
     public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("foundation.debug", "false"));
     private static final boolean DEBUG_SAVE = DEBUG && Boolean.parseBoolean(System.getProperty("foundation.debugSave", "false"));
-    private static File dumpDir = null;
+    private static File dumpSubDir;
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM-dd-");
     static TransformerHolder transformerHolder = new TransformerHolder();
     
@@ -85,6 +85,19 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("org.burningwave.");
         addClassLoaderExclusion("javassist.");
         addClassLoaderExclusion("com.google.");
+        if (DEBUG_SAVE) {
+            File dumpDir = new File(Launch.minecraftHome, "CLASS_DUMP");
+
+            if (!dumpDir.exists()) {
+                dumpDir.mkdirs();
+            }
+            int i = 0;
+            do {
+                i++;
+                dumpSubDir = new File(dumpDir, dateTimeFormatter.format(LocalDateTime.now()) + i);
+            } while (dumpSubDir.exists());
+            dumpSubDir.mkdirs();
+        }
     }
 
     public TransformerHolder getTransformerHolder() {
@@ -201,21 +214,6 @@ public class ActualClassLoader extends URLClassLoader {
     }
 
     public void saveClassBytes(final byte[] data, final String transformedName) {
-        if (dumpDir == null) {
-            dumpDir = new File(Launch.minecraftHome, "CLASS_DUMP");
-
-            if (!dumpDir.exists()) {
-                dumpDir.mkdirs();
-            }
-        }
-        File dumpSubDir;
-        int i = 0;
-        do {
-            i++;
-            dumpSubDir = new File(dumpDir, dateTimeFormatter.format(LocalDateTime.now()) + i);
-        } while (dumpSubDir.exists());
-        dumpSubDir.mkdirs();
-
         final File outFile = new File(dumpSubDir, transformedName.replace('.', File.separatorChar) + ".class");
         final File outDir = outFile.getParentFile();
 
