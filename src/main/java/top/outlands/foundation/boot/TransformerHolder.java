@@ -7,6 +7,7 @@ import top.outlands.foundation.function.ExplicitTransformerFunction;
 import top.outlands.foundation.function.TransformerFunction;
 import top.outlands.foundation.trie.PrefixTrie;
 
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -18,7 +19,7 @@ import java.util.function.Function;
  */
 public class TransformerHolder {
     public static PrefixTrie<PriorityQueue<IExplicitTransformer>> explicitTransformers = null;
-    public static Set<IClassTransformer> transformers = null;
+    public static List<IClassTransformer> transformers = null;
 
     public static IClassNameTransformer renameTransformer;
     public ExplicitTransformerFunction runExplicitTransformersFunction = ((s, bytes) -> bytes);

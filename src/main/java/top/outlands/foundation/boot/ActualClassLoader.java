@@ -73,6 +73,7 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("jdk.");
         addClassLoaderExclusion("sun.");
         addClassLoaderExclusion("org.apache.");
+        addClassLoaderExclusion("org.slf4j.");
         addClassLoaderExclusion("org.burningwave.");
         addClassLoaderExclusion("com.sun.");
         addClassLoaderExclusion("net.minecraft.launchwrapper.LaunchClassLoader");
@@ -93,7 +94,7 @@ public class ActualClassLoader extends URLClassLoader {
             int i = 0;
             do {
                 i++;
-                dumpSubDir = new File(dumpDir, String.format("%3d", i));
+                dumpSubDir = new File(dumpDir, String.valueOf(i));
             } while (dumpSubDir.exists());
             dumpSubDir.mkdirs();
         }

@@ -7,9 +7,9 @@ import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
 
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import static net.minecraft.launchwrapper.Launch.classLoader;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
@@ -83,6 +83,7 @@ public class TransformerDelegate {
         try {
             IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(transformerClassName).newInstance();
             transformers.add(transformer);
+            transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
         } catch (Exception e) {
             LOGGER.error("Error registering transformer class {}", transformerClassName, e);
         }
@@ -104,6 +105,7 @@ public class TransformerDelegate {
         LOGGER.debug("Unregistering all transformers call: " + name);
         try {
             transformers.stream().filter(transformer -> transformer.getClass().getName().equals(name)).forEach(transformers::remove);
+            transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
         } catch (Exception e) {
             LOGGER.error("Error removing transformer class {}", name, e);
         }
@@ -117,6 +119,7 @@ public class TransformerDelegate {
         LOGGER.debug("Unregistering transformer: " + transformer.getClass().getSimpleName());
         try {
             transformers.remove(transformer);
+            transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
         } catch (Exception e) {
             LOGGER.error("Error removing transformer class {}", transformer, e);
         }
@@ -128,7 +131,7 @@ public class TransformerDelegate {
      */
     static void fillTransformerHolder(TransformerHolder holder) {
         explicitTransformers = new PrefixTrie<>();
-        transformers = new ConcurrentSkipListSet<>(Comparator.comparingInt(IClassTransformer::getPriority));
+        transformers = new LinkedList<>();
         holder.runTransformersFunction = (name, transformedName, basicClass, manifest) -> {
             for (final IClassTransformer transformer : transformers) {
                 final String transName = transformer.getClass().getName();
@@ -144,6 +147,7 @@ public class TransformerDelegate {
             try {
                 IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(s).newInstance();
                 transformers.add(transformer);
+                transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
             } catch (Exception e) {
                 LOGGER.error("Error registering transformer class {}", s, e);
             }
