@@ -8,6 +8,7 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configurator;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -24,6 +25,7 @@ public class LaunchHandler {
     public void launch(String[] args) {
         LOGGER = LogManager.getLogger("Foundation");
         if (LaunchClassLoader.DEBUG) {
+            Configurator.setLevel(LOGGER, Level.DEBUG);
             LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
             ctx.getConfiguration().getLoggerConfig(LOGGER.getName()).setLevel(Level.DEBUG);
             ctx.updateLoggers();
