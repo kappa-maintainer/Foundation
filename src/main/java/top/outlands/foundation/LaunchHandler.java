@@ -7,22 +7,13 @@ import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static net.minecraft.launchwrapper.Launch.assetsDir;
-import static net.minecraft.launchwrapper.Launch.blackboard;
-import static net.minecraft.launchwrapper.Launch.classLoader;
-import static net.minecraft.launchwrapper.Launch.minecraftHome;
+import static net.minecraft.launchwrapper.Launch.*;
 import static top.outlands.foundation.TransformerDelegate.fillTransformerHolder;
 import static top.outlands.foundation.TransformerDelegate.registerExplicitTransformer;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
@@ -33,9 +24,9 @@ public class LaunchHandler {
     public void launch(String[] args) {
         LOGGER = LogManager.getLogger("Foundation");
         if (LaunchClassLoader.DEBUG) {
-            Configurator.setLevel(LOGGER, Level.DEBUG);
-        } else {
-            Configurator.setLevel(LOGGER, Level.INFO);
+            LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+            ctx.getConfiguration().getLoggerConfig(LOGGER.getName()).setLevel(Level.DEBUG);
+            ctx.updateLoggers();
         }
         final OptionParser parser = new OptionParser();
         parser.allowsUnrecognizedOptions();
