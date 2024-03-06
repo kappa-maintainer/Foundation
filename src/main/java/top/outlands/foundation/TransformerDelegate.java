@@ -31,14 +31,15 @@ public class TransformerDelegate {
 
     /**
      * Checking this every registration is dumb, so let's make another method
+     * Do not use if you aren't Forge
      * @param transformer The name transformer instance
      */
     public static void registerRenameTransformer(IClassNameTransformer transformer) {
         LOGGER.debug("Registering rename transformer: " + transformer.getClass().getSimpleName());
         if (renameTransformer == null) {
             renameTransformer = transformer;
+            registerTransformerByInstance((IClassTransformer) transformer);
         }
-        registerTransformerByInstance((IClassTransformer) transformer);
     }
 
     /**
@@ -98,8 +99,8 @@ public class TransformerDelegate {
     }
 
     /**
-     * Call this with class name to remove your transformer.
-     * @param name The transformer you want to un-register
+     * Call this with class name to remove all transformers with target class name.
+     * @param name The transformer name you want to un-register
      */
     public static void unRegisterTransformer(String name) {
         LOGGER.debug("Unregistering all transformers call: " + name);
@@ -137,9 +138,6 @@ public class TransformerDelegate {
                 final String transName = transformer.getClass().getName();
                 basicClass = transformer.transform(name, transformedName, basicClass, manifest);
                 LOGGER.trace("Transformed class {} with {}", transformedName, transName);
-                if (basicClass == null) {
-                    LOGGER.debug("Class {} was null after transformed by {}!", transformedName, transName);
-                }
             }
             return basicClass;
         };

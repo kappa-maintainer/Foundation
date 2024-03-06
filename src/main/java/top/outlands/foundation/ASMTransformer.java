@@ -13,7 +13,7 @@ public class ASMTransformer implements IExplicitTransformer{
                     """
                         if (api < 589824) {
                             this.api = 589824;
-                            top.outlands.foundation.boot.Foundation.OUTDATED_VISITOR.add(this.getClass().getName());
+                            top.outlands.foundation.boot.Foundation.add(this.getClass().getName());
                         }
                     """;
     @Override

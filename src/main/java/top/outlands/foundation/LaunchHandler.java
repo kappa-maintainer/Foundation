@@ -138,7 +138,7 @@ public class LaunchHandler {
             LOGGER.info("Launching wrapped minecraft {}", launchTarget);
             mainMethod.invoke(null, (Object) argumentList.toArray(new String[0]));
         } catch (Exception e) {
-            LOGGER.log(Level.ERROR, "Unable to launch", e);
+            LOGGER.fatal("Unable to launch", e);
             System.exit(1);
         }
     }

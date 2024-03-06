@@ -175,6 +175,7 @@ public class ActualClassLoader extends URLClassLoader {
                     transformedClass = getClassBytes(name);
                     transformedClass = runExplicitTransformers(transformedName, transformedClass);
                     final CodeSource codeSource = urlConnection == null ? null : new CodeSource(urlConnection.getURL(), signers);
+                    if (transformedClass == null) throw new ClassNotFoundException(transformedName);
                     final Class<?> clazz = super.defineClass(name, transformedClass, 0, transformedClass.length, codeSource);
                     cachedClasses.put(name, clazz);
                     if (DEBUG_SAVE) {
@@ -194,13 +195,14 @@ public class ActualClassLoader extends URLClassLoader {
             }
 
             final CodeSource codeSource = urlConnection == null ? null : new CodeSource(urlConnection.getURL(), signers);
-            
+            if (transformedClass == null) throw new ClassNotFoundException(transformedName);
             final Class<?> clazz = defineClass(transformedName, transformedClass, 0, transformedClass.length, codeSource);
             cachedClasses.put(transformedName, clazz);
             return clazz;
         } catch (Throwable e) {
                 invalidClasses.add(name);
-                LOGGER.error("Exception encountered attempting classloading of {}", name, e);
+                LOGGER.error("Exception encountered attempting classloading of {}", name);
+                LOGGER.debug(e);
                 throw new ClassNotFoundException(name, e);
             
         }
@@ -361,7 +363,6 @@ public class ActualClassLoader extends URLClassLoader {
             final URL classResource = findResource(resourcePath);
 
             if (classResource == null) {
-                LOGGER.error("Failed to find class resource {}", resourcePath);
                 negativeResourceCache.add(name);
                 return null;
             }
@@ -369,6 +370,7 @@ public class ActualClassLoader extends URLClassLoader {
 
             LOGGER.trace("Loading class {} from resource {}", name, classResource.toString());
             final byte[] data = readFully(classStream);
+            if (data == null) throw new IOException("Can't read class file of " + name);
             resourceCache.put(name, data);
             return data;
         } finally {

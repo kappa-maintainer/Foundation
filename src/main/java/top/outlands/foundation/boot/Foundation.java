@@ -10,7 +10,18 @@ import java.util.Set;
 
 public class Foundation {
     public static Logger LOGGER = new EmptyLogger();
-    public static final Set<String> OUTDATED_VISITOR = new HashSet<>();
+    private static final Set<String> OUTDATED_VISITOR = new HashSet<>();
+
+    /**
+     * For ASM outdated visitor logging, <b>DO NOT USE<b/>
+     * @param name the name of visitor
+     */
+    public static void add(String name) {
+        if (!OUTDATED_VISITOR.contains(name)) {
+            LOGGER.warn(name + " can't handle Java 21 class, please update the mod!");
+            OUTDATED_VISITOR.add(name);
+        }
+    }
 
     public static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Foundation.LOGGER.error(thread, throwable));
