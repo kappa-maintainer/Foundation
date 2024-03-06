@@ -18,7 +18,7 @@ public class ASMTransformer implements IExplicitTransformer{
                     """;
     @Override
     public byte[] transform(String transformedName, byte[] basicClass) {
-        LOGGER.info("Patching " + transformedName);
+        LOGGER.debug("Patching " + transformedName);
         try {
             CtClass cc = ClassPool.getDefault().makeClass(new ByteArrayInputStream(basicClass));
             var cotr = cc.getConstructor("(I)V");

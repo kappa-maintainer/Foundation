@@ -24,12 +24,6 @@ public class LaunchHandler {
 
     public void launch(String[] args) {
         LOGGER = LogManager.getLogger("Foundation");
-        if (LaunchClassLoader.DEBUG) {
-            Configurator.setLevel(LOGGER, Level.DEBUG);
-            LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-            ctx.getConfiguration().getLoggerConfig(LOGGER.getName()).setLevel(Level.DEBUG);
-            ctx.updateLoggers();
-        }
         final OptionParser parser = new OptionParser();
         parser.allowsUnrecognizedOptions();
 

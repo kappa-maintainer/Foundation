@@ -51,9 +51,7 @@ public class ActualClassLoader extends URLClassLoader {
     private final ThreadLocal<byte[]> loadBuffer = new ThreadLocal<>();
 
     private static final String[] RESERVED_NAMES = {"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"};
-
-    public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("foundation.debug", "false"));
-    private static final boolean DEBUG_SAVE = DEBUG && Boolean.parseBoolean(System.getProperty("foundation.debugSave", "false"));
+    private static final boolean DEBUG_SAVE = Boolean.parseBoolean(System.getProperty("foundation.debugSave", "false"));
     private static File dumpSubDir;
     static TransformerHolder transformerHolder = new TransformerHolder();
     
@@ -202,7 +200,7 @@ public class ActualClassLoader extends URLClassLoader {
             return clazz;
         } catch (Throwable e) {
                 invalidClasses.add(name);
-                LOGGER.debug("Exception encountered attempting classloading of {}", name, e);
+                LOGGER.error("Exception encountered attempting classloading of {}", name, e);
                 throw new ClassNotFoundException(name, e);
             
         }
@@ -363,13 +361,13 @@ public class ActualClassLoader extends URLClassLoader {
             final URL classResource = findResource(resourcePath);
 
             if (classResource == null) {
-                LOGGER.debug("Failed to find class resource {}", resourcePath);
+                LOGGER.error("Failed to find class resource {}", resourcePath);
                 negativeResourceCache.add(name);
                 return null;
             }
             classStream = classResource.openStream();
 
-            LOGGER.debug("Loading class {} from resource {}", name, classResource.toString());
+            LOGGER.trace("Loading class {} from resource {}", name, classResource.toString());
             final byte[] data = readFully(classStream);
             resourceCache.put(name, data);
             return data;

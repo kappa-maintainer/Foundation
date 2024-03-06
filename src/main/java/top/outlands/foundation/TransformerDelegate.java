@@ -136,9 +136,9 @@ public class TransformerDelegate {
             for (final IClassTransformer transformer : transformers) {
                 final String transName = transformer.getClass().getName();
                 basicClass = transformer.transform(name, transformedName, basicClass, manifest);
-                LOGGER.debug("Transformed class {} with {}", transformedName, transName);
+                LOGGER.trace("Transformed class {} with {}", transformedName, transName);
                 if (basicClass == null) {
-                    LOGGER.debug("And it was null!");
+                    LOGGER.debug("Class {} was null after transformed by {}!", transformedName, transName);
                 }
             }
             return basicClass;
