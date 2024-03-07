@@ -226,8 +226,6 @@ public class ActualClassLoader extends URLClassLoader {
         }
 
         try {
-            LOGGER.debug("Saving transformed class \"%s\" to \"%s\"", transformedName, outFile.getAbsolutePath().replace('\\', '/'));
-
             final OutputStream output = new FileOutputStream(outFile);
             output.write(data);
             output.close();
