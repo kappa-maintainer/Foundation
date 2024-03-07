@@ -390,12 +390,36 @@ public class ActualClassLoader extends URLClassLoader {
         return defineClass(name, buffer, (ProtectionDomain) null);
     }
 
+    /**
+     * Wrapper of defineClass()
+     * @param name class name
+     * @param buffer class byte array
+     * @return the defined class
+     */
     public Class<?> defineClass(String name, byte[] buffer) {
         return defineClass(name, buffer, 0, buffer.length);
     }
 
+    /**
+     * Check is a class loaded in this class loader without actually loading it
+     * @param name class name
+     * @return if the class loaded
+     */
     public boolean isClassLoaded(String name) {
         return findLoadedClass(name) != null;
+    }
+
+    /**
+     * Check is a class exists without actually loading/defining it
+     * @param name class name
+     * @return if the class exists
+     */
+    public boolean isClassExist(String name) {
+        try {
+            return getClassBytes(name) != null;
+        } catch (Throwable e) {
+            return false;
+        }
     }
 
     protected static void closeSilently(Closeable closeable) {
