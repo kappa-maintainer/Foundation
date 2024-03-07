@@ -15,7 +15,7 @@ repositories {
 
 group = 'top.outlands'
 archivesBaseName = 'foundation'
-version = '0.7.1'
+version = '0.7.2'
 java.targetCompatibility(JavaVersion.VERSION_21)
 
 dependencies {
@@ -34,7 +34,8 @@ dependencies {
 
 compileJava {
     options.compilerArgs += [
-            '--add-exports=java.base/jdk.internal.reflect=ALL-UNNAMED'
+            '--add-exports=java.base/jdk.internal.reflect=ALL-UNNAMED',
+            '--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED'
     ]
 }
 

@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * JNI-based unsafe, introduced for future unsafe removal. Use at your own risk
  */
-public class JVMDriver {
+public class JVMDriverHolder {
     public static Driver DRIVER = Driver.Factory.getNewNative().init();
     public static Field findField(Class<?> clazz, String name) throws NoSuchFieldException {
         Optional<Field> f = Arrays.stream(DRIVER.getDeclaredFields(clazz)).filter(field -> field.getName().equals(name)).findFirst();
