@@ -18,7 +18,7 @@ public class TrieNode<V> {
 	/**
 	 * the default characters; 
 	 */
-	private static final String DEFAULT_CHARS_STRING = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-+._";
+	private static final String DEFAULT_CHARS_STRING = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-+._$";
 	public static final int CHAR_LENGTH = DEFAULT_CHARS_STRING.length();
 	
 	static {
