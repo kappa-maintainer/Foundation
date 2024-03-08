@@ -156,7 +156,7 @@ public class TransformerDelegate {
                 PriorityQueue<IExplicitTransformer> queue = node.getValue();
                 if (queue != null) {
                     while (!queue.isEmpty()) {
-                        basicClass = queue.poll().transform(name, basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
+                        basicClass = queue.poll().transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
                     }
                 }
             }

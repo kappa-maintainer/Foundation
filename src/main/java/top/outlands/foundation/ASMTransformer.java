@@ -2,7 +2,6 @@ package top.outlands.foundation;
 
 import javassist.ClassPool;
 import javassist.CtClass;
-import top.outlands.foundation.boot.Foundation;
 
 import java.io.ByteArrayInputStream;
 
@@ -17,10 +16,10 @@ public class ASMTransformer implements IExplicitTransformer{
                         }
                     """;
     @Override
-    public byte[] transform(String transformedName, byte[] basicClass) {
-        LOGGER.debug("Patching " + transformedName);
+    public byte[] transform(byte[] basicClass) {
         try {
             CtClass cc = ClassPool.getDefault().makeClass(new ByteArrayInputStream(basicClass));
+            LOGGER.debug("Patching " + cc.getName());
             var cotr = cc.getConstructor("(I)V");
             cotr.insertAfter(CODE);
             cotr = switch (cc.getSimpleName()) {

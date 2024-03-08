@@ -7,12 +7,18 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.jar.Manifest;
 
 public class LaunchClassLoader extends ActualClassLoader {
     public static LaunchClassLoader getInstance() {
         return instance;
     }
     private static LaunchClassLoader instance;
+    /**
+     * FoamFix is still cleaning this even it has long gone from upstream
+     */
+    private Map<Package, Manifest> packageManifests = null;
     public LaunchClassLoader(URL[] sources) {
         super(sources, LaunchClassLoader.class.getClassLoader());
         instance = this;
