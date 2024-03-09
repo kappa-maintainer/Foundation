@@ -13,7 +13,9 @@ public interface IClassTransformer {
      * @param basicClass Class bytes.
      * @return Transformed class bytes.
      */
-    byte[] transform(String name, String transformedName, byte[] basicClass);
+    default byte[] transform(String name, String transformedName, byte[] basicClass) {
+        return basicClass;
+    }
 
     /**
      * The new transform method with manifest. Transformers could use this data to determine transformation action.
