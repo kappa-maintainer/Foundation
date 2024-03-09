@@ -49,7 +49,7 @@ public class TransformerDelegate {
      */
     public static void registerExplicitTransformer(String[] targets, String className) {
         try {
-            IExplicitTransformer instance = (IExplicitTransformer) classLoader.loadClass(className).newInstance();
+            IExplicitTransformer instance = (IExplicitTransformer) classLoader.loadClass(className).getConstructor().newInstance();
             registerExplicitTransformerByInstance(targets, instance);
         } catch (Exception e) {
             LOGGER.error("Error registering explicit transformer class {}", className, e);
@@ -82,7 +82,7 @@ public class TransformerDelegate {
     public static void registerTransformer(String transformerClassName) {
         LOGGER.debug("Registering transformer: " + transformerClassName);
         try {
-            IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(transformerClassName).newInstance();
+            IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(transformerClassName).getConstructor().newInstance();
             transformers.add(transformer);
             transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
         } catch (Exception e) {
@@ -143,7 +143,7 @@ public class TransformerDelegate {
         };
         holder.registerTransformerFunction = s -> {
             try {
-                IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(s).newInstance();
+                IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(s).getConstructor().newInstance();
                 transformers.add(transformer);
                 transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
             } catch (Exception e) {
@@ -158,6 +158,7 @@ public class TransformerDelegate {
                     while (!queue.isEmpty()) {
                         basicClass = queue.poll().transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
                     }
+                    node.setValue(null); // GC
                 }
             }
             return basicClass;
