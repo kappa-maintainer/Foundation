@@ -7,16 +7,15 @@ import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configurator;
+import top.outlands.foundation.transformer.ASMClassWriterTransformer;
+import top.outlands.foundation.transformer.ASMVisitorTransformer;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.*;
 
 import static net.minecraft.launchwrapper.Launch.*;
-import static top.outlands.foundation.TransformerDelegate.fillTransformerHolder;
-import static top.outlands.foundation.TransformerDelegate.registerExplicitTransformer;
+import static top.outlands.foundation.TransformerDelegate.*;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 
 public class LaunchHandler {
@@ -45,15 +44,19 @@ public class LaunchHandler {
         Thread.currentThread().setContextClassLoader(classLoader);
         fillTransformerHolder(classLoader.getTransformerHolder());
         
-        registerExplicitTransformer(new String[]{
+        registerExplicitTransformerByInstance(new String[]{
                 "org.objectweb.asm.FieldVisitor",
                 "org.objectweb.asm.ClassVisitor",
-                "org.objectweb.asm.MethodVisitor"
-        }, "top.outlands.foundation.ASMTransformer");
+                "org.objectweb.asm.MethodVisitor",
+        }, new ASMVisitorTransformer());
+        registerExplicitTransformerByInstance(new String[]{
+                "org.objectweb.asm.ClassWriter",
+        }, new ASMClassWriterTransformer());
         try {
             classLoader.findClass("org.objectweb.asm.FieldVisitor");
             classLoader.findClass("org.objectweb.asm.ClassVisitor");
             classLoader.findClass("org.objectweb.asm.MethodVisitor");
+            classLoader.findClass("org.objectweb.asm.ClassWriter");
         } catch (ClassNotFoundException e) {
             LOGGER.error("Can't find ASM", e);
         }
@@ -93,7 +96,7 @@ public class LaunchHandler {
 
                 for (final Iterator<ITweaker> it = tweakers.iterator(); it.hasNext(); ) {
                     final ITweaker tweaker = it.next();
-                    LOGGER.log(Level.INFO, "Calling tweak class {}", tweaker.getClass().getName());
+                    LOGGER.log(Level.INFO, "Calling tweak class {}", tweaker.toString());
                     tweaker.acceptOptions(options.valuesOf(nonOption), minecraftHome, assetsDir, profileName);
                     tweaker.injectIntoClassLoader(classLoader);
                     allTweakers.add(tweaker);

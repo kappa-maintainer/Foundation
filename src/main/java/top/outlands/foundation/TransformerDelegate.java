@@ -6,10 +6,7 @@ import top.outlands.foundation.boot.TransformerHolder;
 import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
 
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 import static net.minecraft.launchwrapper.Launch.classLoader;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
@@ -26,7 +23,7 @@ public class TransformerDelegate {
      * @return list of transformers.
      */
     public static List<IClassTransformer> getTransformers() {
-        return transformers.stream().toList();
+        return Collections.unmodifiableList(transformers);
     }
 
     /**
@@ -135,9 +132,8 @@ public class TransformerDelegate {
         transformers = new LinkedList<>();
         holder.runTransformersFunction = (name, transformedName, basicClass, manifest) -> {
             for (final IClassTransformer transformer : transformers) {
-                final String transName = transformer.getClass().getName();
+                LOGGER.trace("Transforming class {} with {}", transformedName, transformer);
                 basicClass = transformer.transform(name, transformedName, basicClass, manifest);
-                LOGGER.trace("Transformed class {} with {}", transformedName, transName);
             }
             return basicClass;
         };

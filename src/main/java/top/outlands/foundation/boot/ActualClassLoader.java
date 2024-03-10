@@ -4,12 +4,7 @@ import net.minecraft.launchwrapper.Launch;
 import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -18,15 +13,7 @@ import java.nio.ByteBuffer;
 import java.security.CodeSigner;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -366,7 +353,6 @@ public class ActualClassLoader extends URLClassLoader {
             }
             classStream = classResource.openStream();
 
-            LOGGER.trace("Loading class {} from resource {}", name, classResource.toString());
             final byte[] data = readFully(classStream);
             if (data == null) throw new IOException("Can't read class file of " + name);
             resourceCache.put(name, data);

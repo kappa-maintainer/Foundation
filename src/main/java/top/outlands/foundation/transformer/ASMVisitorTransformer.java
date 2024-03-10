@@ -1,13 +1,14 @@
-package top.outlands.foundation;
+package top.outlands.foundation.transformer;
 
 import javassist.ClassPool;
 import javassist.CtClass;
+import top.outlands.foundation.IExplicitTransformer;
 
 import java.io.ByteArrayInputStream;
 
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 
-public class ASMTransformer implements IExplicitTransformer{
+public class ASMVisitorTransformer implements IExplicitTransformer {
     private static final String CODE = 
                     """
                         if (api < 589824) {

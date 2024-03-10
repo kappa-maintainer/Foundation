@@ -79,10 +79,14 @@ public class TrieTest {
         for (var s: keys) {
             trie.put(s, "");
         }
+        for (var s: new String[]{"openmods.asm.", "openmods.include.", "openmods.core.", "openmods.injector.", "openmods.Log"}) {
+            trie.put(s, "");
+        }
         for (var s: keys) {
-            log.info(trie.getKeyValueNode(s).isKeyValueNode());
+            Assertions.assertTrue(trie.getKeyValueNode(s).isKeyValueNode());
             Assertions.assertNotNull(trie.getNode(s));
         }
+        trie.getRoot().getKeyValueNodes().forEach(node -> log.info(node.getKey()));
         log.info(UnsafeHolder.UNSAFE);
     }
     

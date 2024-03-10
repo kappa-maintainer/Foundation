@@ -27,7 +27,7 @@ public class Foundation {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Foundation.LOGGER.error(thread, throwable));
         try {
             breakModuleAndReflection();
-            Object handler = Class.forName("top.outlands.foundation.LaunchHandler", true, LaunchClassLoader.getInstance()).newInstance();
+            Object handler = Class.forName("top.outlands.foundation.LaunchHandler", true, LaunchClassLoader.getInstance()).getConstructor().newInstance();
             Method launch = handler.getClass().getMethod("launch", String[].class);
             launch.invoke(handler, (Object) args);
         } catch (Throwable e) {

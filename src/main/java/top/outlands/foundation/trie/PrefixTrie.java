@@ -87,7 +87,7 @@ public class PrefixTrie<V> extends AbstractTrie<V> {
 					}
 				}
 			}
-			if (i == 0) {
+			if (node == root) {
 				temp = node.children[charToIndex(chars[0])];
 				if (temp == null) {
 					node.addChild(genValueNode(key, value, key.length()));
