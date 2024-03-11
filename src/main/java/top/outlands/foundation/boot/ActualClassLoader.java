@@ -55,6 +55,8 @@ public class ActualClassLoader extends URLClassLoader {
 
         addClassLoaderExclusion("java.");
         addClassLoaderExclusion("javax.");
+        addClassLoaderExclusion("org.w3c.dom.");
+        addClassLoaderExclusion("org.xml.sax.");
         addClassLoaderExclusion("jdk.");
         addClassLoaderExclusion("sun.");
         addClassLoaderExclusion("org.apache.");
@@ -69,7 +71,9 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("io.github.toolfactory.jvm.");
         addClassLoaderExclusion("org.burningwave.");
         addClassLoaderExclusion("javassist.");
-        addClassLoaderExclusion("com.google.");
+        addClassLoaderExclusion("com.google.gson.");
+        addClassLoaderExclusion("com.google.common.");
+        addClassLoaderExclusion("com.google.thirdparty.publicsuffix.");
         if (DEBUG_SAVE) {
             File dumpDir = new File(Launch.minecraftHome, "CLASS_DUMP");
 
@@ -141,9 +145,9 @@ public class ActualClassLoader extends URLClassLoader {
                             definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
                         } else {
                             if (pkg.isSealed() && !pkg.isSealed(jarURLConnection.getJarFileURL())) {
-                                LOGGER.warn("The jar file %s is trying to seal already secured path %s", jarFile.getName(), packageName);
+                                LOGGER.warn("The jar file {} is trying to seal already secured path {}", jarFile.getName(), packageName);
                             } else if (isSealed(packageName, manifest)) {
-                                LOGGER.warn("The jar file %s has a security seal for path %s, but that path is defined and not secure", jarFile.getName(), packageName);
+                                LOGGER.warn("The jar file {} has a security seal for path {}, but that path is defined and not secure", jarFile.getName(), packageName);
                             }
                         }
                     }
@@ -151,8 +155,8 @@ public class ActualClassLoader extends URLClassLoader {
                     Package pkg = getPackage(packageName);
                     if (pkg == null) {
                         definePackage(packageName, null, null, null, null, null, null, null);
-                    } else if (pkg.isSealed()) {
-                        LOGGER.warn("The URL %s is defining elements for sealed path %s", urlConnection.getURL(), packageName);
+                    } else if (pkg.isSealed() && urlConnection != null) {
+                        LOGGER.warn("The URL {} is defining elements for sealed path {}", urlConnection.getURL(), packageName);
                     }
                 }
             }
@@ -176,7 +180,7 @@ public class ActualClassLoader extends URLClassLoader {
             }
             
 
-            transformedClass = runExplicitTransformers(transformedName, runTransformers(untransformedName, transformedName, getClassBytes(untransformedName), manifest));
+            transformedClass = runExplicitTransformers(transformedName, runTransformers(untransformedName, transformedName, getClassBytes(untransformedName)));
             if (DEBUG_SAVE) {
                 saveClassBytes(transformedClass, transformedName);
             }
@@ -260,8 +264,8 @@ public class ActualClassLoader extends URLClassLoader {
         return null;
     }
 
-    protected byte[] runTransformers(final String name, final String transformedName, byte[] basicClass, Manifest manifest) {
-        basicClass = transformerHolder.runTransformersFunction.apply(name, transformedName, basicClass, manifest);
+    protected byte[] runTransformers(final String name, final String transformedName, byte[] basicClass) {
+        basicClass = transformerHolder.runTransformersFunction.apply(name, transformedName, basicClass);
         return basicClass;
     }
 

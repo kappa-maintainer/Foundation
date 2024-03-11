@@ -133,7 +133,7 @@ public class TransformerDelegate {
         holder.runTransformersFunction = (name, transformedName, basicClass, manifest) -> {
             for (final IClassTransformer transformer : transformers) {
                 LOGGER.trace("Transforming class {} with {}", transformedName, transformer);
-                basicClass = transformer.transform(name, transformedName, basicClass, manifest);
+                basicClass = transformer.transform(name, transformedName, basicClass);
             }
             return basicClass;
         };

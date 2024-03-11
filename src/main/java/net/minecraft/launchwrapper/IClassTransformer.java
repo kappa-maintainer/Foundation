@@ -13,21 +13,7 @@ public interface IClassTransformer {
      * @param basicClass Class bytes.
      * @return Transformed class bytes.
      */
-    default byte[] transform(String name, String transformedName, byte[] basicClass) {
-        return basicClass;
-    }
-
-    /**
-     * The new transform method with manifest. Transformers could use this data to determine transformation action.
-     * @param name Untransformed class name. Kept for compatibility. Do not use.
-     * @param transformedName Transformed class name.
-     * @param basicClass Class bytes.
-     * @param manifest Jar manifest.
-     * @return Transformed class bytes.
-     */
-    default byte[] transform(String name, String transformedName, byte[] basicClass, Manifest manifest) {
-        return transform(name, transformedName, basicClass);
-    }
+    byte[] transform(String name, String transformedName, byte[] basicClass);
 
     /**
      * Override this to set your transformer's priority.

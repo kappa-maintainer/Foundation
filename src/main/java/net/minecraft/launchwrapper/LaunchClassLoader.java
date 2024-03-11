@@ -5,9 +5,7 @@ import top.outlands.foundation.boot.ActualClassLoader;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.Manifest;
 
 public class LaunchClassLoader extends ActualClassLoader {
@@ -15,6 +13,8 @@ public class LaunchClassLoader extends ActualClassLoader {
         return instance;
     }
     private static LaunchClassLoader instance;
+    private Set<String> classLoaderExceptions = new HashSet<String>();
+    private Set<String> transformerExceptions = new HashSet<String>();
     /**
      * FoamFix is still cleaning this even it has long gone from upstream
      */
@@ -40,6 +40,13 @@ public class LaunchClassLoader extends ActualClassLoader {
             throw new RuntimeException(e);
         }
         return urls.toArray(new URL[0]);
+    }
+
+    /**
+     * CCL is calling this
+     */
+    public byte[] runTransformers(final String name, final String transformedName, byte[] basicClass) {
+        return super.runTransformers(name, transformedName, basicClass);
     }
     
 }
