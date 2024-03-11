@@ -130,7 +130,7 @@ public class TransformerDelegate {
     static void fillTransformerHolder(TransformerHolder holder) {
         explicitTransformers = new PrefixTrie<>();
         transformers = new LinkedList<>();
-        holder.runTransformersFunction = (name, transformedName, basicClass, manifest) -> {
+        holder.runTransformersFunction = (name, transformedName, basicClass) -> {
             for (final IClassTransformer transformer : transformers) {
                 LOGGER.trace("Transforming class {} with {}", transformedName, transformer);
                 basicClass = transformer.transform(name, transformedName, basicClass);
