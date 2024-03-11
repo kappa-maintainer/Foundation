@@ -62,6 +62,9 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("org.apache.");
         addClassLoaderExclusion("org.slf4j.");
         addClassLoaderExclusion("org.burningwave.");
+        addClassLoaderExclusion("org.ietf.jgss.");
+        addClassLoaderExclusion("org.jcp.xml.dsig.internal.");
+        addClassLoaderExclusion("netscape.javascript.");
         addClassLoaderExclusion("com.sun.");
         addClassLoaderExclusion("net.minecraft.launchwrapper.LaunchClassLoader");
         addClassLoaderExclusion("net.minecraft.launchwrapper.Launch");
