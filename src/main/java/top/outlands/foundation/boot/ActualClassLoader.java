@@ -1,6 +1,5 @@
 package top.outlands.foundation.boot;
 
-import com.sun.jdi.ClassNotLoadedException;
 import net.minecraft.launchwrapper.Launch;
 import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
@@ -20,7 +19,6 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 
@@ -126,7 +124,7 @@ public class ActualClassLoader extends URLClassLoader {
                 return cachedClasses.get(transformedName);
             }
 
-            final String untransformedName = unTransformName(name);
+            final String untransformedName = untransformName(name);
 
             final int lastDot = untransformedName.lastIndexOf('.');
             final String packageName = lastDot == -1 ? "" : untransformedName.substring(0, lastDot);
@@ -227,12 +225,12 @@ public class ActualClassLoader extends URLClassLoader {
         }
     }
 
-    protected String unTransformName(String name) {
+    public String untransformName(String name) {
         name = transformerHolder.unTransformNameFunction.apply(name);
         return name;
     }
 
-    protected String transformName(String name) {
+    public String transformName(String name) {
         name = transformerHolder.transformNameFunction.apply(name);
         return name;
     }
