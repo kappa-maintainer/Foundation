@@ -132,7 +132,6 @@ public class TransformerDelegate {
         transformers = new LinkedList<>();
         holder.runTransformersFunction = (name, transformedName, basicClass) -> {
             for (final IClassTransformer transformer : transformers) {
-                LOGGER.trace("Transforming class {} with {}", transformedName, transformer);
                 basicClass = transformer.transform(name, transformedName, basicClass);
             }
             return basicClass;

@@ -1,5 +1,6 @@
 package top.outlands.foundation.boot;
 
+import com.sun.jdi.ClassNotLoadedException;
 import net.minecraft.launchwrapper.Launch;
 import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
@@ -19,6 +20,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 
@@ -132,13 +134,12 @@ public class ActualClassLoader extends URLClassLoader {
             URLConnection urlConnection = findCodeSourceConnectionFor(fileName);
 
             CodeSigner[] signers = null;
-            Manifest manifest = null;
             if (lastDot > -1 && !untransformedName.startsWith("net.minecraft.")) {
                 if (urlConnection instanceof JarURLConnection jarURLConnection) {
                     final JarFile jarFile = jarURLConnection.getJarFile();
 
                     if (jarFile != null && jarFile.getManifest() != null) {
-                        manifest = jarFile.getManifest();
+                        Manifest manifest = jarFile.getManifest();
                         final JarEntry entry = jarFile.getJarEntry(fileName);
 
                         Package pkg = getPackage(packageName);
@@ -181,7 +182,6 @@ public class ActualClassLoader extends URLClassLoader {
                 }
                 
             }
-            
 
             transformedClass = runExplicitTransformers(transformedName, runTransformers(untransformedName, transformedName, getClassBytes(untransformedName)));
             if (DEBUG_SAVE) {
@@ -189,14 +189,13 @@ public class ActualClassLoader extends URLClassLoader {
             }
 
             final CodeSource codeSource = urlConnection == null ? null : new CodeSource(urlConnection.getURL(), signers);
-            if (transformedClass == null) throw new ClassNotFoundException(transformedName);
+            if (transformedClass == null) throw new ClassNotFoundException("Can't get " + transformedName);
             final Class<?> clazz = defineClass(transformedName, transformedClass, 0, transformedClass.length, codeSource);
             cachedClasses.put(transformedName, clazz);
             return clazz;
         } catch (Throwable e) {
                 invalidClasses.add(name);
-                LOGGER.error("Exception encountered attempting classloading of {}", name);
-                LOGGER.debug(e);
+                LOGGER.warn("Exception encountered attempting classloading of {}: {}", name, e);
                 throw new ClassNotFoundException(name, e);
             
         }
@@ -361,7 +360,6 @@ public class ActualClassLoader extends URLClassLoader {
             classStream = classResource.openStream();
 
             final byte[] data = readFully(classStream);
-            if (data == null) throw new IOException("Can't read class file of " + name);
             resourceCache.put(name, data);
             return data;
         } finally {

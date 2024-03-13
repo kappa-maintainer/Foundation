@@ -9,10 +9,6 @@ import java.util.*;
 import java.util.jar.Manifest;
 
 public class LaunchClassLoader extends ActualClassLoader {
-    public static LaunchClassLoader getInstance() {
-        return instance;
-    }
-    private static LaunchClassLoader instance;
     private Set<String> classLoaderExceptions = new HashSet<String>();
     private Set<String> transformerExceptions = new HashSet<String>();
     /**
@@ -21,12 +17,12 @@ public class LaunchClassLoader extends ActualClassLoader {
     private Map<Package, Manifest> packageManifests = null;
     public LaunchClassLoader(URL[] sources) {
         super(sources, LaunchClassLoader.class.getClassLoader());
-        instance = this;
+        Launch.classLoader = this;
     }
     
     public LaunchClassLoader(ClassLoader loader) {
         super(getUCP(), loader);
-        instance = this;
+        Launch.classLoader = this;
     }
     
     private static URL[] getUCP(){

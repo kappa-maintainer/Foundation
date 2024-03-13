@@ -1,6 +1,8 @@
 package top.outlands.foundation.boot;
 
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import zone.rong.imaginebreaker.ImagineBreaker;
 
@@ -9,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Foundation {
-    public static Logger LOGGER = new EmptyLogger();
+    public static Logger LOGGER = System.getProperty("java.system.class.loader") == null ? LogManager.getLogger("Foundation") : new EmptyLogger();
     private static final Set<String> OUTDATED_VISITOR = new HashSet<>();
 
     /**
@@ -27,7 +29,14 @@ public class Foundation {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Foundation.LOGGER.error(thread, throwable));
         try {
             breakModuleAndReflection();
-            Object handler = Class.forName("top.outlands.foundation.LaunchHandler", true, LaunchClassLoader.getInstance()).getConstructor().newInstance();
+            if (Launch.classLoader == null) {
+                Launch.classLoader = new LaunchClassLoader(ClassLoader.getSystemClassLoader());
+                LOGGER.info("System ClassLoader is AppCL");
+            } else {
+                LOGGER = LogManager.getLogger("Foundation");
+                LOGGER.info("System ClassLoader is LCL");
+            }
+            Object handler = Class.forName("top.outlands.foundation.LaunchHandler", true, Launch.classLoader).getConstructor().newInstance();
             Method launch = handler.getClass().getMethod("launch", String[].class);
             launch.invoke(handler, (Object) args);
         } catch (Throwable e) {

@@ -22,7 +22,7 @@ public class LaunchHandler {
 
 
     public void launch(String[] args) {
-        LOGGER = LogManager.getLogger("Foundation");
+
         final OptionParser parser = new OptionParser();
         parser.allowsUnrecognizedOptions();
 
@@ -40,7 +40,6 @@ public class LaunchHandler {
 
         final List<String> argumentList = new ArrayList<>();
         blackboard = new HashMap<>();
-        classLoader = LaunchClassLoader.getInstance();
         Thread.currentThread().setContextClassLoader(classLoader);
         fillTransformerHolder(classLoader.getTransformerHolder());
         
