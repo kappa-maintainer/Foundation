@@ -331,6 +331,16 @@ public class ActualClassLoader extends URLClassLoader {
         transformerExceptions.put(toExclude, true);
     }
 
+    public void removeTransformerExclusion(String toExclude) {
+        LOGGER.debug("Removing transformer exclusion " + toExclude);
+        TrieNode<Boolean> node = transformerExceptions.getKeyValueNode(toExclude);
+        if (node != null) {
+            node.setValue(false);
+        } else {
+            transformerExceptions.put(toExclude, false);
+        }
+    }
+
     public byte[] getClassBytes(String name) throws IOException {
         if (negativeResourceCache.contains(name)) {
             return null;
