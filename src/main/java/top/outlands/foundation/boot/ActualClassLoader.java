@@ -59,7 +59,10 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("org.xml.sax.");
         addClassLoaderExclusion("jdk.");
         addClassLoaderExclusion("sun.");
-        addClassLoaderExclusion("org.apache.");
+        addClassLoaderExclusion("org.apache.logging.");
+        addClassLoaderExclusion("org.apache.commons.");
+        addClassLoaderExclusion("org.apache.http.");
+        addClassLoaderExclusion("org.apache.maven.");
         addClassLoaderExclusion("org.slf4j.");
         addClassLoaderExclusion("org.burningwave.");
         addClassLoaderExclusion("org.ietf.jgss.");
