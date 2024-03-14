@@ -23,7 +23,7 @@ public class TransformerDelegate {
      * @return list of transformers.
      */
     public static List<IClassTransformer> getTransformers() {
-        return Collections.unmodifiableList(transformers);
+        return transformers;
     }
 
     /**
