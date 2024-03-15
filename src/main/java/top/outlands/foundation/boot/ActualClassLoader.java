@@ -57,14 +57,20 @@ public class ActualClassLoader extends URLClassLoader {
 
         addClassLoaderExclusion("java.");
         addClassLoaderExclusion("javax.");
+        addClassLoaderExclusion("jakarta.");
+        addClassLoaderExclusion("it.unimi.dsi.fastutil.");
         addClassLoaderExclusion("org.w3c.dom.");
         addClassLoaderExclusion("org.xml.sax.");
         addClassLoaderExclusion("jdk.");
         addClassLoaderExclusion("sun.");
+        addClassLoaderExclusion("oshi.");
         addClassLoaderExclusion("org.apache.logging.");
         addClassLoaderExclusion("org.apache.commons.");
         addClassLoaderExclusion("org.apache.http.");
         addClassLoaderExclusion("org.apache.maven.");
+        addClassLoaderExclusion("org.openjdk.nashorn.");
+        addClassLoaderExclusion("org.omg.");
+        addClassLoaderExclusion("org.lwjgl");
         addClassLoaderExclusion("org.slf4j.");
         addClassLoaderExclusion("org.burningwave.");
         addClassLoaderExclusion("org.ietf.jgss.");
@@ -76,12 +82,15 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("top.outlands.foundation.boot.");
         addClassLoaderExclusion("top.outlands.foundation.function.");
         addClassLoaderExclusion("top.outlands.foundation.trie.");
-        addClassLoaderExclusion("io.github.toolfactory.jvm.");
+        addClassLoaderExclusion("io.github.toolfactory.");
         addClassLoaderExclusion("org.burningwave.");
         addClassLoaderExclusion("javassist.");
         addClassLoaderExclusion("com.google.gson.");
         addClassLoaderExclusion("com.google.common.");
         addClassLoaderExclusion("com.google.thirdparty.publicsuffix.");
+        addClassLoaderExclusion("com.mojang.");
+        addClassLoaderExclusion("paulscode.sound.");
+        addClassLoaderExclusion("com.jcraft.");
         if (DEBUG_SAVE) {
             File dumpDir = new File(Launch.minecraftHome, "CLASS_DUMP");
 
