@@ -15,7 +15,7 @@ repositories {
 
 group = 'top.outlands'
 archivesBaseName = 'foundation'
-version = '0.11.1'
+version = '0.11.2'
 java.targetCompatibility(JavaVersion.VERSION_21)
 
 dependencies {
