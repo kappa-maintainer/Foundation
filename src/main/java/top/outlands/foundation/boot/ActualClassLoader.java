@@ -210,6 +210,7 @@ public class ActualClassLoader extends URLClassLoader {
     }
 
     public void saveClassBytes(final byte[] data, final String transformedName) {
+        if (data == null) return;
         final File outFile = new File(dumpSubDir, transformedName.replace('.', File.separatorChar) + ".class");
         final File outDir = outFile.getParentFile();
 
