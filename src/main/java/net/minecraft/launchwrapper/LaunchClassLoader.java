@@ -9,15 +9,22 @@ import java.lang.invoke.VarHandle;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.Manifest;
 
 public class LaunchClassLoader extends ActualClassLoader {
     private Set<String> classLoaderExceptions = new HashSet<String>();
     private Set<String> transformerExceptions = new HashSet<String>();
     /**
-     * FoamFix is still cleaning this even it has long gone from upstream
+     * FoamFix (and many other mods) are still using these even some of them have long gone from upstream
      */
     private Map<Package, Manifest> packageManifests = null;
+    private static Manifest EMPTY = new Manifest();
+    private final Map<String, Class<?>> cachedClasses = new ConcurrentHashMap<>();
+    private final Set<String> invalidClasses = new HashSet<>(0);
+
+    private final Map<String,byte[]> resourceCache = new ConcurrentHashMap<>(0);
+    private final Set<String> negativeResourceCache = ConcurrentHashMap.newKeySet();
     public LaunchClassLoader(URL[] sources) {
         super(sources, LaunchClassLoader.class.getClassLoader());
         Launch.classLoader = this;

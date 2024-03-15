@@ -41,6 +41,8 @@ public class ActualClassLoader extends URLClassLoader {
     private static final boolean DEBUG_SAVE = Boolean.parseBoolean(System.getProperty("foundation.debugSave", "false"));
     private static File dumpSubDir;
     static TransformerHolder transformerHolder = new TransformerHolder();
+    private Map<Package, Manifest> packageManifests = null;
+    private static Manifest EMPTY = new Manifest();
     
     public ActualClassLoader(URL[] sources) {
         this(sources, null);
