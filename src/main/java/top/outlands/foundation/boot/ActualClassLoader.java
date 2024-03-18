@@ -5,6 +5,12 @@ import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
 
 import java.io.*;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.invoke.VarHandle;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -15,12 +21,14 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import static top.outlands.foundation.boot.Foundation.LOGGER;
+import static top.outlands.foundation.boot.JVMDriverHolder.DRIVER;
 
 public class ActualClassLoader extends URLClassLoader {
     
@@ -43,6 +51,35 @@ public class ActualClassLoader extends URLClassLoader {
     static TransformerHolder transformerHolder = new TransformerHolder();
     private Map<Package, Manifest> packageManifests = null;
     private static Manifest EMPTY = new Manifest();
+    private static Consumer<URL> addURL;
+    static {
+        try {
+            Class<?> loader = MethodHandles.lookup().findClass("jdk.internal.loader.BuiltinClassLoader");
+            Class<?> ucp = MethodHandles.lookup().findClass("jdk.internal.loader.URLClassPath");
+            VarHandle ucpField = MethodHandles.privateLookupIn(loader, MethodHandles.lookup())
+                    .findVarHandle(loader, "ucp", ucp);
+            MethodHandle add = MethodHandles.lookup().findVirtual(ucp, "addURL", MethodType.methodType(URL.class));
+            add.bindTo(ucpField.get(Launch.appClassLoader));
+            addURL = url -> {
+                try {
+                    add.invoke(url);
+                } catch (Throwable e) {
+                    LOGGER.error(e);
+                }
+            };
+        } catch (Throwable t1) {
+            try {
+                Class<?> loader = DRIVER.getBuiltinClassLoaderClass();
+                Class<?> ucp = DRIVER.getClassByName("jdk.internal.loader.URLClassPath", false, Launch.appClassLoader, loader);
+                Field ucpField = JVMDriverHolder.findField(loader, "ucp");
+                Method add = JVMDriverHolder.findMethod(ucp, "addURL");
+                addURL = url -> DRIVER.invoke(DRIVER.getFieldValue(Launch.appClassLoader, ucpField), add, new Object[]{url});
+            } catch (Throwable t2) {
+                LOGGER.fatal("Can't get parent class ucp");
+            }
+        }
+    }
+
     
     public ActualClassLoader(URL[] sources) {
         this(sources, null);
@@ -293,6 +330,7 @@ public class ActualClassLoader extends URLClassLoader {
     public void addURL(final URL url) {
         super.addURL(url);
         sources.add(url);
+        addURL.accept(url);
     }
 
     public List<URL> getSources() {
