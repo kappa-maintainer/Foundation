@@ -94,13 +94,11 @@ public class ActualClassLoader extends URLClassLoader {
 
         addClassLoaderExclusion("java.");
         addClassLoaderExclusion("javax.");
-        addClassLoaderExclusion("jakarta.");
         addClassLoaderExclusion("it.unimi.dsi.fastutil.");
         addClassLoaderExclusion("org.w3c.dom.");
         addClassLoaderExclusion("org.xml.sax.");
         addClassLoaderExclusion("jdk.");
         addClassLoaderExclusion("sun.");
-        addClassLoaderExclusion("oshi.");
         addClassLoaderExclusion("org.apache.logging.");
         addClassLoaderExclusion("org.apache.commons.");
         addClassLoaderExclusion("org.apache.http.");
@@ -125,9 +123,12 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion("com.google.gson.");
         addClassLoaderExclusion("com.google.common.");
         addClassLoaderExclusion("com.google.thirdparty.publicsuffix.");
-        addClassLoaderExclusion("com.mojang.");
         addClassLoaderExclusion("paulscode.sound.");
         addClassLoaderExclusion("com.jcraft.");
+        addTransformerExclusion("org.spongepowered.asm.");
+        addTransformerExclusion("org.spongepowered.include.com.google.");
+        addTransformerExclusion("org.spongepowered.tools.");
+        addTransformerExclusion("com.llamalad7.mixinextras.");
         if (DEBUG_SAVE) {
             File dumpDir = new File(Launch.minecraftHome, "CLASS_DUMP");
 

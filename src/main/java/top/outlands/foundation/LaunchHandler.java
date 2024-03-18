@@ -7,6 +7,7 @@ import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 import top.outlands.foundation.transformer.ASMClassWriterTransformer;
 import top.outlands.foundation.transformer.ASMVisitorTransformer;
 
@@ -106,6 +107,7 @@ public class LaunchHandler {
             for (final ITweaker tweaker : allTweakers) {
                 argumentList.addAll(Arrays.asList(tweaker.getLaunchArguments()));
             }
+            MixinEnvironment.gotoPhase(MixinEnvironment.Phase.DEFAULT);
 
             final String launchTarget = primaryTweaker.getLaunchTarget();
             final Class<?> clazz = Class.forName(launchTarget, false, classLoader);
