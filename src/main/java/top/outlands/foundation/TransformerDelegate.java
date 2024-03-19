@@ -45,6 +45,9 @@ public class TransformerDelegate {
      * @param className Class name of the transformer.
      */
     public static void registerExplicitTransformer(String[] targets, String className) {
+        if (!className.contains(".")) {
+            className = className.replace('/', '.');
+        }
         try {
             IExplicitTransformer instance = (IExplicitTransformer) classLoader.loadClass(className).getConstructor().newInstance();
             registerExplicitTransformerByInstance(targets, instance);
@@ -77,6 +80,9 @@ public class TransformerDelegate {
      * @param transformerClassName class name
      */
     public static void registerTransformer(String transformerClassName) {
+        if (!transformerClassName.contains(".")) {
+            transformerClassName = transformerClassName.replace('/', '.');
+        }
         LOGGER.debug("Registering transformer: " + transformerClassName);
         try {
             IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(transformerClassName).getConstructor().newInstance();
@@ -137,6 +143,9 @@ public class TransformerDelegate {
             return basicClass;
         };
         holder.registerTransformerFunction = s -> {
+            if (!s.contains(".")) {
+                s = s.replace('/', '.');
+            }
             try {
                 IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(s).getConstructor().newInstance();
                 transformers.add(transformer);
