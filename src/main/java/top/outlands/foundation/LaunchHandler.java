@@ -75,13 +75,13 @@ public class LaunchHandler {
                 for (final Iterator<String> it = tweakClassNames.iterator(); it.hasNext(); ) {
                     final String tweakName = it.next();
                     if (allTweakerNames.contains(tweakName)) {
-                        LOGGER.log(Level.WARN, "Tweak class name {} has already been visited -- skipping", tweakName);
+                        LOGGER.log(Level.WARN, "Tweak name {} has already been visited -- skipping", tweakName);
                         it.remove();
                         continue;
                     } else {
                         allTweakerNames.add(tweakName);
                     }
-                    LOGGER.log(Level.INFO, "Loading tweak class name {}", tweakName);
+                    LOGGER.log(Level.INFO, "Loading tweak name {}", tweakName);
 
                     classLoader.addTransformerExclusion(tweakName.substring(0,tweakName.lastIndexOf('.')));
                     final ITweaker tweaker = (ITweaker) Class.forName(tweakName, true, classLoader).getConstructor().newInstance();
@@ -89,14 +89,14 @@ public class LaunchHandler {
 
                     it.remove();
                     if (primaryTweaker == null) {
-                        LOGGER.log(Level.INFO, "Using primary tweak class name {}", tweakName);
+                        LOGGER.log(Level.INFO, "Using primary tweak name {}", tweakName);
                         primaryTweaker = tweaker;
                     }
                 }
 
                 for (final Iterator<ITweaker> it = tweakers.iterator(); it.hasNext(); ) {
                     final ITweaker tweaker = it.next();
-                    LOGGER.log(Level.INFO, "Calling tweak class {}", tweaker.toString());
+                    LOGGER.log(Level.INFO, "Calling tweak {}", tweaker.toString());
                     tweaker.acceptOptions(options.valuesOf(nonOption), minecraftHome, assetsDir, profileName);
                     tweaker.injectIntoClassLoader(classLoader);
                     allTweakers.add(tweaker);

@@ -92,39 +92,38 @@ public class ActualClassLoader extends URLClassLoader {
         }
         this.sources = new ArrayList<>(Arrays.asList(sources));
 
-        addClassLoaderExclusion("java.");
-        addClassLoaderExclusion("javax.");
-        addClassLoaderExclusion("it.unimi.dsi.fastutil.");
-        addClassLoaderExclusion("org.w3c.dom.");
-        addClassLoaderExclusion("org.xml.sax.");
-        addClassLoaderExclusion("jdk.");
-        addClassLoaderExclusion("sun.");
-        addClassLoaderExclusion("org.apache.logging.");
-        addClassLoaderExclusion("org.apache.commons.");
-        addClassLoaderExclusion("org.apache.http.");
-        addClassLoaderExclusion("org.apache.maven.");
-        addClassLoaderExclusion("org.openjdk.nashorn.");
-        addClassLoaderExclusion("org.omg.");
-        addClassLoaderExclusion("org.lwjgl");
-        addClassLoaderExclusion("org.slf4j.");
-        addClassLoaderExclusion("org.burningwave.");
-        addClassLoaderExclusion("org.ietf.jgss.");
-        addClassLoaderExclusion("org.jcp.xml.dsig.internal.");
-        addClassLoaderExclusion("netscape.javascript.");
-        addClassLoaderExclusion("com.sun.");
-        addClassLoaderExclusion("net.minecraft.launchwrapper.LaunchClassLoader");
-        addClassLoaderExclusion("net.minecraft.launchwrapper.Launch");
-        addClassLoaderExclusion("top.outlands.foundation.boot.");
-        addClassLoaderExclusion("top.outlands.foundation.function.");
-        addClassLoaderExclusion("top.outlands.foundation.trie.");
-        addClassLoaderExclusion("io.github.toolfactory.");
-        addClassLoaderExclusion("org.burningwave.");
-        addClassLoaderExclusion("javassist.");
-        addClassLoaderExclusion("com.google.gson.");
-        addClassLoaderExclusion("com.google.common.");
-        addClassLoaderExclusion("com.google.thirdparty.publicsuffix.");
-        addClassLoaderExclusion("paulscode.sound.");
-        addClassLoaderExclusion("com.jcraft.");
+        addClassLoaderExclusion0("java.");
+        addClassLoaderExclusion0("javax.");
+        addClassLoaderExclusion0("org.w3c.dom.");
+        addClassLoaderExclusion0("org.xml.sax.");
+        addClassLoaderExclusion0("jdk.");
+        addClassLoaderExclusion0("sun.");
+        addClassLoaderExclusion0("org.apache.logging.");
+        addClassLoaderExclusion0("org.apache.commons.");
+        addClassLoaderExclusion0("org.apache.http.");
+        addClassLoaderExclusion0("org.apache.maven.");
+        addClassLoaderExclusion0("org.openjdk.nashorn.");
+        addClassLoaderExclusion0("org.omg.");
+        addClassLoaderExclusion0("org.lwjgl");
+        addClassLoaderExclusion0("org.slf4j.");
+        addClassLoaderExclusion0("org.burningwave.");
+        addClassLoaderExclusion0("org.ietf.jgss.");
+        addClassLoaderExclusion0("org.jcp.xml.dsig.internal.");
+        addClassLoaderExclusion0("netscape.javascript.");
+        addClassLoaderExclusion0("com.sun.");
+        addClassLoaderExclusion0("net.minecraft.launchwrapper.LaunchClassLoader");
+        addClassLoaderExclusion0("net.minecraft.launchwrapper.Launch");
+        addClassLoaderExclusion0("top.outlands.foundation.boot.");
+        addClassLoaderExclusion0("top.outlands.foundation.function.");
+        addClassLoaderExclusion0("top.outlands.foundation.trie.");
+        addClassLoaderExclusion0("io.github.toolfactory.");
+        addClassLoaderExclusion0("org.burningwave.");
+        addClassLoaderExclusion0("javassist.");
+        addClassLoaderExclusion0("com.google.gson.");
+        addClassLoaderExclusion0("com.google.common.");
+        addClassLoaderExclusion0("com.google.thirdparty.publicsuffix.");
+        addClassLoaderExclusion0("paulscode.sound.");
+        addClassLoaderExclusion0("com.jcraft.");
         addTransformerExclusion("org.spongepowered.asm.");
         addTransformerExclusion("org.spongepowered.include.com.google.");
         addTransformerExclusion("org.spongepowered.tools.");
@@ -372,11 +371,13 @@ public class ActualClassLoader extends URLClassLoader {
         }
         return buffer;
     }
-    public void addClassLoaderExclusion(String toExclude) {
+    private void addClassLoaderExclusion0(String toExclude) {
         LOGGER.debug("Adding classloader exclusion " + toExclude);
         classLoaderExceptions.put(toExclude, true);
     }
-
+    public void addClassLoaderExclusion(String toExclude) {
+        addTransformerExclusion(toExclude);
+    }
     public void addTransformerExclusion(String toExclude) {
         LOGGER.debug("Adding transformer exclusion " + toExclude);
         transformerExceptions.put(toExclude, true);
