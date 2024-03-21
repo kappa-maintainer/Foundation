@@ -7,6 +7,7 @@ import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.minecraft.launchwrapper.Launch.classLoader;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
@@ -179,5 +180,6 @@ public class TransformerDelegate {
             }
             return s;
         };
+        holder.debugPrinter = () -> "\n" + getTransformers().stream().map(t -> t.toString() + " : " + t.getPriority()).collect(Collectors.joining("\n"));
     }
 }

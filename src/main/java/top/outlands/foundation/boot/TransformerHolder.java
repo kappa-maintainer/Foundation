@@ -12,6 +12,7 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 /**
@@ -27,5 +28,6 @@ public class TransformerHolder {
     public Consumer<String> registerTransformerFunction = s -> {};
     public Function<String, String> transformNameFunction = s -> s;
     public Function<String, String> unTransformNameFunction = s -> s;
+    public Supplier<String> debugPrinter = () -> "";
 
 }

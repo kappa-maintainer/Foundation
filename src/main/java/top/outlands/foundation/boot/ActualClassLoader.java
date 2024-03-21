@@ -1,6 +1,8 @@
 package top.outlands.foundation.boot;
 
 import net.minecraft.launchwrapper.Launch;
+import org.apache.logging.log4j.Level;
+import top.outlands.foundation.TransformerDelegate;
 import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
 
@@ -26,6 +28,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 import static top.outlands.foundation.boot.JVMDriverHolder.DRIVER;
@@ -238,13 +241,15 @@ public class ActualClassLoader extends URLClassLoader {
             }
 
             final CodeSource codeSource = urlConnection == null ? null : new CodeSource(urlConnection.getURL(), signers);
-            if (transformedClass == null) throw new ClassNotFoundException("Can't get " + transformedName);
+            if (transformedClass == null) throw new ClassNotFoundException();
             final Class<?> clazz = defineClass(transformedName, transformedClass, 0, transformedClass.length, codeSource);
             cachedClasses.put(transformedName, clazz);
             return clazz;
         } catch (Throwable e) {
                 invalidClasses.add(name);
                 LOGGER.warn("Exception encountered attempting classloading of {}: {}", name, e);
+                if (LOGGER.getLevel().intLevel() > Level.INFO.intLevel())
+                    LOGGER.info(transformerHolder.debugPrinter.get());
                 throw new ClassNotFoundException(name, e);
             
         }
