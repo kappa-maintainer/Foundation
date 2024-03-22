@@ -2,9 +2,8 @@ package top.outlands.foundation;
 
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.Launch;
 import top.outlands.foundation.boot.TransformerHolder;
-import top.outlands.foundation.trie.PrefixTrie;
-import top.outlands.foundation.trie.TrieNode;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,25 +44,26 @@ public class TransformerDelegate {
      * @param targets Target classes' name.
      * @param className Class name of the transformer.
      */
-    public static void registerExplicitTransformer(String[] targets, String className) {
+    public static void registerExplicitTransformer(String className, String... targets) {
+        if (targets.length == 0) return;
         if (!className.contains(".")) {
             className = className.replace('/', '.');
         }
         try {
             IExplicitTransformer instance = (IExplicitTransformer) classLoader.loadClass(className).getConstructor().newInstance();
-            registerExplicitTransformerByInstance(targets, instance);
+            registerExplicitTransformerByInstance(instance, targets);
         } catch (Exception e) {
             LOGGER.error("Error registering explicit transformer class {}", className, e);
         }
     }
 
-    public static void registerExplicitTransformerByInstance(String[] targets, IExplicitTransformer transformer) {
+    public static void registerExplicitTransformerByInstance(IExplicitTransformer transformer, String... targets) {
         LOGGER.debug("Registering explicit transformer: " + transformer.getClass().getSimpleName());
+        if (targets.length == 0) return;
         try {
             for (var target : targets) {
-                TrieNode<PriorityQueue<IExplicitTransformer>> node =  explicitTransformers.getKeyValueNode(target);
-                if (node != null) {
-                    node.getValue().add(transformer);
+                if (explicitTransformers.containsKey(target)) {
+                    explicitTransformers.get(target).add(transformer);
                 } else {
                     var transformerSet = new PriorityQueue<>(Comparator.comparingInt(IExplicitTransformer::getPriority));
                     transformerSet.add(transformer);
@@ -135,7 +135,7 @@ public class TransformerDelegate {
      * @param holder The one and only handler
      */
     static void fillTransformerHolder(TransformerHolder holder) {
-        explicitTransformers = new PrefixTrie<>();
+        explicitTransformers = new HashMap<>(20);
         transformers = new LinkedList<>();
         holder.runTransformersFunction = (name, transformedName, basicClass) -> {
             for (final IClassTransformer transformer : transformers) {
@@ -156,14 +156,13 @@ public class TransformerDelegate {
             }
         };
         holder.runExplicitTransformersFunction = (name, basicClass) -> {
-            TrieNode<PriorityQueue<IExplicitTransformer>> node = explicitTransformers.getKeyValueNode(name);
-            if (node != null) {
-                PriorityQueue<IExplicitTransformer> queue = node.getValue();
+            if (explicitTransformers.containsKey(name)) {
+                PriorityQueue<IExplicitTransformer> queue = explicitTransformers.get(name);
                 if (queue != null) {
                     while (!queue.isEmpty()) {
                         basicClass = queue.poll().transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
                     }
-                    node.setValue(null); // GC
+                    explicitTransformers.remove(name); // GC
                 }
             }
             return basicClass;
@@ -180,6 +179,9 @@ public class TransformerDelegate {
             }
             return s;
         };
-        holder.debugPrinter = () -> "\n" + getTransformers().stream().map(t -> t.toString() + " : " + t.getPriority()).collect(Collectors.joining("\n"));
+        holder.debugPrinter = () -> {
+            LOGGER.info("Running transformers: ");
+            getTransformers().stream().map(t -> t.toString() + " : " + t.getPriority()).forEach(s -> LOGGER.info(s));
+        };
     }
 }

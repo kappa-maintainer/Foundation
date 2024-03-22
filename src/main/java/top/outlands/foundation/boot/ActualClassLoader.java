@@ -2,7 +2,7 @@ package top.outlands.foundation.boot;
 
 import net.minecraft.launchwrapper.Launch;
 import org.apache.logging.log4j.Level;
-import top.outlands.foundation.TransformerDelegate;
+import org.apache.logging.log4j.LogManager;
 import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
 
@@ -28,7 +28,6 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 import static top.outlands.foundation.boot.JVMDriverHolder.DRIVER;
@@ -49,7 +48,8 @@ public class ActualClassLoader extends URLClassLoader {
     private final ThreadLocal<byte[]> loadBuffer = new ThreadLocal<>();
 
     private static final String[] RESERVED_NAMES = {"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"};
-    private static final boolean DEBUG_SAVE = Boolean.parseBoolean(System.getProperty("foundation.debugSave", "false"));
+    private static final boolean DUMP = Boolean.parseBoolean(System.getProperty("foundation.dump", "false"));
+    private static final boolean VERBOSE = Boolean.parseBoolean(System.getProperty("foundation.verbose", "false"));
     private static File dumpSubDir;
     static TransformerHolder transformerHolder = new TransformerHolder();
     private Map<Package, Manifest> packageManifests = null;
@@ -131,7 +131,7 @@ public class ActualClassLoader extends URLClassLoader {
         addTransformerExclusion("org.spongepowered.include.com.google.");
         addTransformerExclusion("org.spongepowered.tools.");
         addTransformerExclusion("com.llamalad7.mixinextras.");
-        if (DEBUG_SAVE) {
+        if (DUMP) {
             File dumpDir = new File(Launch.minecraftHome, "CLASS_DUMP");
 
             if (!dumpDir.exists()) {
@@ -225,7 +225,7 @@ public class ActualClassLoader extends URLClassLoader {
                     if (transformedClass == null) throw new ClassNotFoundException(transformedName);
                     final Class<?> clazz = super.defineClass(name, transformedClass, 0, transformedClass.length, codeSource);
                     cachedClasses.put(name, clazz);
-                    if (DEBUG_SAVE) {
+                    if (DUMP) {
                         saveClassBytes(transformedClass, transformedName);
                     }
                     return clazz;
@@ -236,7 +236,7 @@ public class ActualClassLoader extends URLClassLoader {
             }
 
             transformedClass = runExplicitTransformers(transformedName, runTransformers(untransformedName, transformedName, getClassBytes(untransformedName)));
-            if (DEBUG_SAVE) {
+            if (DUMP) {
                 saveClassBytes(transformedClass, transformedName);
             }
 
@@ -248,8 +248,8 @@ public class ActualClassLoader extends URLClassLoader {
         } catch (Throwable e) {
                 invalidClasses.add(name);
                 LOGGER.warn("Exception encountered attempting classloading of {}: {}", name, e);
-                if (LOGGER.getLevel().intLevel() > Level.INFO.intLevel())
-                    LOGGER.info(transformerHolder.debugPrinter.get());
+                if (VERBOSE)
+                    transformerHolder.debugPrinter.run();
                 throw new ClassNotFoundException(name, e);
             
         }
