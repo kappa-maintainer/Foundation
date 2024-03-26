@@ -333,9 +333,11 @@ public class ActualClassLoader extends URLClassLoader {
 
     @Override
     public void addURL(final URL url) {
-        super.addURL(url);
-        sources.add(url);
-        addURL.accept(url);
+        if (url != null) {
+            super.addURL(url);
+            sources.add(url);
+            addURL.accept(url);
+        }
     }
 
     public List<URL> getSources() {
