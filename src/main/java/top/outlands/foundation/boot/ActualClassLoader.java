@@ -235,7 +235,7 @@ public class ActualClassLoader extends URLClassLoader {
                 
             }
 
-            transformedClass = runExplicitTransformers(transformedName, runTransformers(untransformedName, transformedName, getClassBytes(untransformedName)));
+            transformedClass = runExplicitTransformers(transformedName, this.runTransformers(untransformedName, transformedName, getClassBytes(untransformedName)));
             if (DUMP) {
                 saveClassBytes(transformedClass, transformedName);
             }
@@ -334,9 +334,11 @@ public class ActualClassLoader extends URLClassLoader {
     @Override
     public void addURL(final URL url) {
         if (url != null) {
-            super.addURL(url);
-            sources.add(url);
-            addURL.accept(url);
+            if (!sources.contains(url)) {
+                super.addURL(url);
+                sources.add(url);
+                addURL.accept(url);
+            }
         }
     }
 
