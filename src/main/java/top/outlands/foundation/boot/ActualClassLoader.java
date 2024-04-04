@@ -28,6 +28,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 import static top.outlands.foundation.boot.JVMDriverHolder.DRIVER;
@@ -122,11 +123,11 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("io.github.toolfactory.");
         addClassLoaderExclusion0("org.burningwave.");
         addClassLoaderExclusion0("javassist.");
-        addClassLoaderExclusion0("com.google.gson.");
-        addClassLoaderExclusion0("com.google.common.");
-        addClassLoaderExclusion0("com.google.thirdparty.publicsuffix.");
         addClassLoaderExclusion0("paulscode.sound.");
         addClassLoaderExclusion0("com.jcraft.");
+        addTransformerExclusion("com.google.gson.");
+        addTransformerExclusion("com.google.common.");
+        addTransformerExclusion("com.google.thirdparty.publicsuffix.");
         addTransformerExclusion("org.spongepowered.asm.");
         addTransformerExclusion("org.spongepowered.include.com.google.");
         addTransformerExclusion("org.spongepowered.tools.");
