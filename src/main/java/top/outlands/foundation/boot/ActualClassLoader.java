@@ -1,8 +1,6 @@
 package top.outlands.foundation.boot;
 
 import net.minecraft.launchwrapper.Launch;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
 
@@ -25,7 +23,6 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 import static top.outlands.foundation.boot.JVMDriverHolder.DRIVER;
@@ -34,7 +31,6 @@ public class ActualClassLoader extends URLClassLoader {
     
     public static final int BUFFER_SIZE = 1 << 12;
     private final List<URL> sources;
-    private final Set<File> sourceFiles = new HashSet<>();
     private ClassLoader parent = getClass().getClassLoader();
     public static final PrefixTrie<Boolean> classLoaderExceptions = new PrefixTrie<>();
     public static final PrefixTrie<Boolean> transformerExceptions = new PrefixTrie<>();
@@ -123,9 +119,9 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("javassist.");
         addClassLoaderExclusion0("paulscode.sound.");
         addClassLoaderExclusion0("com.jcraft.");
-        addTransformerExclusion("com.google.gson.");
-        addTransformerExclusion("com.google.common.");
-        addTransformerExclusion("com.google.thirdparty.publicsuffix.");
+        addClassLoaderExclusion0("com.google.gson.");
+        addClassLoaderExclusion0("com.google.common.");
+        addClassLoaderExclusion0("com.google.thirdparty.publicsuffix.");
         addTransformerExclusion("org.spongepowered.asm.");
         addTransformerExclusion("org.spongepowered.include.com.google.");
         addTransformerExclusion("org.spongepowered.tools.");
@@ -333,15 +329,14 @@ public class ActualClassLoader extends URLClassLoader {
     @Override
     public void addURL(final URL url) {
         if (url != null) {
-            try {
-                File file = new File(url.toURI());
-                if (!sourceFiles.contains(file)) {
-                    super.addURL(url);
-                    sourceFiles.add(file);
-                    sources.add(url);
-                    addURL.accept(url);
+            for (URL u : sources) {
+                if (url.sameFile(u)) {
+                    return;
                 }
-            } catch (URISyntaxException ignored) {}
+            }
+            super.addURL(url);
+            sources.add(url);
+            addURL.accept(url);
         }
     }
 
@@ -497,5 +492,9 @@ public class ActualClassLoader extends URLClassLoader {
 
     public void clearNegativeEntries(Set<String> entriesToClear) {
         negativeResourceCache.removeAll(entriesToClear);
+    }
+
+    public List<String> getTransformerExclusions() {
+        return transformerExceptions.getRoot().getKeyValueNodes().stream().map(TrieNode::getKey).toList();
     }
 }

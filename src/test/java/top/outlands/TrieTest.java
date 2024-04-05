@@ -1,6 +1,7 @@
 package top.outlands;
 
 
+import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.junit.jupiter.api.Assertions;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 public class TrieTest {
     private final Logger log = (Logger) LogManager.getLogger("test");
     @Test
-    public void TestGenericTrie() {
+    public void TestGenericTrie() throws ClassNotFoundException {
         log.info("start testing");
         PrefixTrie<String> trie = new PrefixTrie<>();
         String[] keys = new String[]{"net.minecraft", "net.minecraftforge", "com.sun", "net.ibm", "net."};
@@ -67,7 +68,11 @@ public class TrieTest {
         trie.put("com.google.common.", "");
         trie.put("org.objectweb.asm.", "");
         trie.put("LZMA.", "");
-        log.info(trie.getRoot().getKeyValueNodes().stream().map(TrieNode::getKey).toList());;
+        trie.put("com.google.gson.", "");
+        trie.put("com.google.common.", "");
+        trie.put("com.google.thirdparty.publicsuffix.", "");
+        log.info(trie.getRoot().getKeyValueNodes().stream().map(TrieNode::getKey).toList());
+        log.info(trie.getFirstKeyValueNode("com.google.common.collect.RegularImmutableBiMap$Inverse$InverseEntrySet"));
         Assertions.assertNotNull(trie.getKeyValueNode("net.minecraftforge.fml.repackage."));
 
         trie = new PrefixTrie<>();

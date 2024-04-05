@@ -182,6 +182,8 @@ public class TransformerDelegate {
         holder.debugPrinter = () -> {
             LOGGER.info("Running transformers: ");
             getTransformers().stream().map(t -> t.toString() + " : " + t.getPriority()).forEach(s -> LOGGER.info(s));
+            LOGGER.info("Transformer Exclusions: ");
+            classLoader.getTransformerExclusions().forEach(s -> LOGGER.info(s));
         };
     }
 }

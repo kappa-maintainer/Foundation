@@ -18,7 +18,7 @@ repositories {
 
 group = 'top.outlands'
 archivesBaseName = 'foundation'
-version = '0.12.4'
+version = '0.12.7'
 java.targetCompatibility(JavaVersion.VERSION_21)
 
 dependencies {
@@ -33,6 +33,7 @@ dependencies {
     implementation 'com.cleanroommc:sponge-mixin:0.18.0+mixin.0.8.5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+    testImplementation 'com.google.guava:guava:33.1.0-jre'
 
 }
 
