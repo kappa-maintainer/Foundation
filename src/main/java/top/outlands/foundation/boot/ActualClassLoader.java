@@ -13,10 +13,7 @@ import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLConnection;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.security.CodeSigner;
 import java.security.CodeSource;
@@ -37,6 +34,7 @@ public class ActualClassLoader extends URLClassLoader {
     
     public static final int BUFFER_SIZE = 1 << 12;
     private final List<URL> sources;
+    private final Set<File> sourceFiles = new HashSet<>();
     private ClassLoader parent = getClass().getClassLoader();
     public static final PrefixTrie<Boolean> classLoaderExceptions = new PrefixTrie<>();
     public static final PrefixTrie<Boolean> transformerExceptions = new PrefixTrie<>();
@@ -335,11 +333,15 @@ public class ActualClassLoader extends URLClassLoader {
     @Override
     public void addURL(final URL url) {
         if (url != null) {
-            if (!sources.contains(url)) {
-                super.addURL(url);
-                sources.add(url);
-                addURL.accept(url);
-            }
+            try {
+                File file = new File(url.toURI());
+                if (!sourceFiles.contains(file)) {
+                    super.addURL(url);
+                    sourceFiles.add(file);
+                    sources.add(url);
+                    addURL.accept(url);
+                }
+            } catch (URISyntaxException ignored) {}
         }
     }
 
