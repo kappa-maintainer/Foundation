@@ -13,12 +13,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.security.CodeSigner;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -31,6 +33,7 @@ public class ActualClassLoader extends URLClassLoader {
     
     public static final int BUFFER_SIZE = 1 << 12;
     private final List<URL> sources;
+    private final Set<String> jarNames = new HashSet<>();
     private ClassLoader parent = getClass().getClassLoader();
     public static final PrefixTrie<Boolean> classLoaderExceptions = new PrefixTrie<>();
     public static final PrefixTrie<Boolean> transformerExceptions = new PrefixTrie<>();
@@ -56,7 +59,7 @@ public class ActualClassLoader extends URLClassLoader {
             Class<?> ucp = MethodHandles.lookup().findClass("jdk.internal.loader.URLClassPath");
             VarHandle ucpField = MethodHandles.privateLookupIn(loader, MethodHandles.lookup())
                     .findVarHandle(loader, "ucp", ucp);
-            MethodHandle add = MethodHandles.lookup().findVirtual(ucp, "addURL", MethodType.methodType(URL.class));
+            MethodHandle add = MethodHandles.lookup().findVirtual(ucp, "addURL", MethodType.methodType(Void.class, URL.class));
             add.bindTo(ucpField.get(Launch.appClassLoader));
             addURL = url -> {
                 try {

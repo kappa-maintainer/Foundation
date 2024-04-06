@@ -184,6 +184,8 @@ public class TransformerDelegate {
             getTransformers().stream().map(t -> t.toString() + " : " + t.getPriority()).forEach(s -> LOGGER.info(s));
             LOGGER.info("Transformer Exclusions: ");
             classLoader.getTransformerExclusions().forEach(s -> LOGGER.info(s));
+            LOGGER.info("Class Paths: ");
+            Arrays.stream(classLoader.getURLs()).forEach(s -> LOGGER.info(s));
         };
     }
 }
