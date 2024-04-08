@@ -13,13 +13,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
 import java.security.CodeSigner;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -29,6 +29,7 @@ import java.util.jar.Manifest;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 import static top.outlands.foundation.boot.JVMDriverHolder.DRIVER;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class ActualClassLoader extends URLClassLoader {
     
     public static final int BUFFER_SIZE = 1 << 12;
@@ -52,14 +53,18 @@ public class ActualClassLoader extends URLClassLoader {
     static TransformerHolder transformerHolder = new TransformerHolder();
     private Map<Package, Manifest> packageManifests = null;
     private static Manifest EMPTY = new Manifest();
+    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
     private static Consumer<URL> addURL;
+    private ArrayList<URL> ucpURLs = null;
+    private ArrayList ucpLoaders = null;
+    private static Function<Object, URL> getLoaderURL;
     static {
         try {
-            Class<?> loader = MethodHandles.lookup().findClass("jdk.internal.loader.BuiltinClassLoader");
-            Class<?> ucp = MethodHandles.lookup().findClass("jdk.internal.loader.URLClassPath");
-            VarHandle ucpField = MethodHandles.privateLookupIn(loader, MethodHandles.lookup())
+            Class<?> loader = LOOKUP.findClass("jdk.internal.loader.BuiltinClassLoader");
+            Class<?> ucp = LOOKUP.findClass("jdk.internal.loader.URLClassPath");
+            VarHandle ucpField = MethodHandles.privateLookupIn(loader, LOOKUP)
                     .findVarHandle(loader, "ucp", ucp);
-            MethodHandle add = MethodHandles.lookup().findVirtual(ucp, "addURL", MethodType.methodType(Void.class, URL.class));
+            MethodHandle add = LOOKUP.findVirtual(ucp, "addURL", MethodType.methodType(Void.TYPE, URL.class));
             add.bindTo(ucpField.get(Launch.appClassLoader));
             addURL = url -> {
                 try {
@@ -68,14 +73,30 @@ public class ActualClassLoader extends URLClassLoader {
                     LOGGER.error(e);
                 }
             };
+            Class<?> ucpLoader = LOOKUP.findClass("jdk.internal.loader.URLClassPath$Loader");
+            MethodHandle getURL = LOOKUP.findVirtual(ucpLoader, "getBaseURL", MethodType.methodType(URL.class));
+            getLoaderURL = o -> {
+                getURL.bindTo(o);
+                try {
+                    return (URL) getURL.invoke();
+                } catch (Throwable e) {
+                    LOGGER.error(e);
+                    return null;
+                }
+            };
         } catch (Throwable t1) {
+            LOGGER.warn(t1);
             try {
                 Class<?> loader = DRIVER.getBuiltinClassLoaderClass();
                 Class<?> ucp = DRIVER.getClassByName("jdk.internal.loader.URLClassPath", false, Launch.appClassLoader, loader);
                 Field ucpField = JVMDriverHolder.findField(loader, "ucp");
                 Method add = JVMDriverHolder.findMethod(ucp, "addURL");
                 addURL = url -> DRIVER.invoke(DRIVER.getFieldValue(Launch.appClassLoader, ucpField), add, new Object[]{url});
+                Class<?> ucpLoader = DRIVER.getClassByName("jdk.internal.loader.URLClassPath$Loader", false, Launch.appClassLoader, loader);
+                Method getURL = JVMDriverHolder.findMethod(ucpLoader, "getBaseURL");
+                getLoaderURL = o -> DRIVER.invoke(o, getURL, null);
             } catch (Throwable t2) {
+                LOGGER.warn(t2);
                 LOGGER.fatal("Can't get parent class ucp");
             }
         }
@@ -92,7 +113,27 @@ public class ActualClassLoader extends URLClassLoader {
             parent = loader;
         }
         this.sources = new ArrayList<>(Arrays.asList(sources));
-
+        try {
+            Class<?> cp = Class.forName("jdk.internal.loader.URLClassPath");
+            VarHandle ucp = MethodHandles.privateLookupIn(URLClassLoader.class, LOOKUP).findVarHandle(URLClassLoader.class, "ucp", cp);
+            VarHandle path = MethodHandles.privateLookupIn(cp, LOOKUP).findVarHandle(cp, "path", ArrayList.class);
+            this.ucpURLs = (ArrayList<URL>) path.get(ucp.get(this));
+            VarHandle loaderField = MethodHandles.privateLookupIn(cp, LOOKUP)
+                    .findVarHandle(cp, "loaders", ArrayList.class);
+            this.ucpLoaders = (ArrayList) loaderField.get(ucp.get(this));
+        } catch (Throwable t) {
+            LOGGER.warn("Failed to set getPath by VarHandle: {}", t);
+            try {
+                Class<?> cp = DRIVER.getClassByName("jdk.internal.loader.URLClassPath", false, Launch.appClassLoader, DRIVER.getBuiltinClassLoaderClass());
+                Field ucp = JVMDriverHolder.findField(URLClassLoader.class, "ucp");
+                Field path = JVMDriverHolder.findField(cp, "path");
+                this.ucpURLs = DRIVER.getFieldValue(DRIVER.getFieldValue(this, ucp), path);
+                Field loaderField = JVMDriverHolder.findField(cp, "loaders");
+                this.ucpLoaders = DRIVER.getFieldValue(DRIVER.getFieldValue(this, ucp), loaderField);
+            } catch (Throwable t2) {
+                LOGGER.fatal("Failed to set getPath by JVMDriver: {}", t2);
+            }
+        }
         addClassLoaderExclusion0("java.");
         addClassLoaderExclusion0("javax.");
         addClassLoaderExclusion0("org.w3c.dom.");
@@ -341,6 +382,29 @@ public class ActualClassLoader extends URLClassLoader {
             sources.add(url);
             addURL.accept(url);
         }
+    }
+
+    public void sortBy(List<URL> urls) {
+        ucpURLs.removeIf(url -> urls.stream().anyMatch(url::sameFile));
+        Set<URL> set = new LinkedHashSet<>(urls);
+        ucpURLs.addAll(new ArrayList<>(set));
+        ucpLoaders.sort((Comparator<Object>) (o1, o2) -> getIndex(getLoaderURL.apply(o1), ucpURLs) - getIndex(getLoaderURL.apply(o2), ucpURLs));
+        ucpURLs.forEach(u -> LOGGER.info(u));
+        ucpLoaders.forEach(l -> LOGGER.info(getLoaderURL.apply(l)));
+    }
+
+
+    private static int getIndex(URL url, ArrayList<URL> urls) {
+        String[] split = url.toString().split(File.pathSeparator);
+        String name = split[split.length - 1].substring(0, split[split.length - 1].length() - 2);
+        for (var u: urls) {
+            var split2 = u.toString().split(File.pathSeparator);
+            String name2 = split2[split2.length - 1].substring(0, split2[split2.length - 1].length() - 2);
+            if (name.equals(name2)) {
+                return urls.indexOf(u);
+            }
+        }
+        return -1;
     }
 
     public List<URL> getSources() {
