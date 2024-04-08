@@ -20,7 +20,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -68,20 +67,9 @@ public class ActualClassLoader extends URLClassLoader {
             add.bindTo(ucpField.get(Launch.appClassLoader));
             addURL = url -> {
                 try {
-                    add.invoke(url);
+                    add.invokeWithArguments(ucpField.get(Launch.appClassLoader), url);
                 } catch (Throwable e) {
                     LOGGER.error(e);
-                }
-            };
-            Class<?> ucpLoader = LOOKUP.findClass("jdk.internal.loader.URLClassPath$Loader");
-            MethodHandle getURL = LOOKUP.findVirtual(ucpLoader, "getBaseURL", MethodType.methodType(URL.class));
-            getLoaderURL = o -> {
-                getURL.bindTo(o);
-                try {
-                    return (URL) getURL.invoke();
-                } catch (Throwable e) {
-                    LOGGER.error(e);
-                    return null;
                 }
             };
         } catch (Throwable t1) {
@@ -92,9 +80,6 @@ public class ActualClassLoader extends URLClassLoader {
                 Field ucpField = JVMDriverHolder.findField(loader, "ucp");
                 Method add = JVMDriverHolder.findMethod(ucp, "addURL");
                 addURL = url -> DRIVER.invoke(DRIVER.getFieldValue(Launch.appClassLoader, ucpField), add, new Object[]{url});
-                Class<?> ucpLoader = DRIVER.getClassByName("jdk.internal.loader.URLClassPath$Loader", false, Launch.appClassLoader, loader);
-                Method getURL = JVMDriverHolder.findMethod(ucpLoader, "getBaseURL");
-                getLoaderURL = o -> DRIVER.invoke(o, getURL, null);
             } catch (Throwable t2) {
                 LOGGER.warn(t2);
                 LOGGER.fatal("Can't get parent class ucp");
@@ -382,29 +367,6 @@ public class ActualClassLoader extends URLClassLoader {
             sources.add(url);
             addURL.accept(url);
         }
-    }
-
-    public void sortBy(List<URL> urls) {
-        ucpURLs.removeIf(url -> urls.stream().anyMatch(url::sameFile));
-        Set<URL> set = new LinkedHashSet<>(urls);
-        ucpURLs.addAll(new ArrayList<>(set));
-        ucpLoaders.sort((Comparator<Object>) (o1, o2) -> getIndex(getLoaderURL.apply(o1), ucpURLs) - getIndex(getLoaderURL.apply(o2), ucpURLs));
-        ucpURLs.forEach(u -> LOGGER.info(u));
-        ucpLoaders.forEach(l -> LOGGER.info(getLoaderURL.apply(l)));
-    }
-
-
-    private static int getIndex(URL url, ArrayList<URL> urls) {
-        String[] split = url.toString().split(File.pathSeparator);
-        String name = split[split.length - 1].substring(0, split[split.length - 1].length() - 2);
-        for (var u: urls) {
-            var split2 = u.toString().split(File.pathSeparator);
-            String name2 = split2[split2.length - 1].substring(0, split2[split2.length - 1].length() - 2);
-            if (name.equals(name2)) {
-                return urls.indexOf(u);
-            }
-        }
-        return -1;
     }
 
     public List<URL> getSources() {
