@@ -271,7 +271,7 @@ public class ActualClassLoader extends URLClassLoader {
             return clazz;
         } catch (Throwable e) {
                 invalidClasses.add(name);
-                LOGGER.warn("Exception encountered attempting classloading of {}: {}", name, e);
+                LOGGER.info("Failed to load class {}, caused by {}", name, e);
                 if (VERBOSE)
                     transformerHolder.debugPrinter.run();
                 throw new ClassNotFoundException(name, e);

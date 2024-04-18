@@ -20,7 +20,6 @@ import java.util.function.Supplier;
 public class TransformerHolder {
     public static Map<String, PriorityQueue<IExplicitTransformer>> explicitTransformers = null;
     public static List<IClassTransformer> transformers = null;
-
     public static IClassNameTransformer renameTransformer;
     public ExplicitTransformerFunction runExplicitTransformersFunction = ((s, bytes) -> bytes);
     public TransformerFunction runTransformersFunction = ((name, transformedName, basicClass) -> basicClass);
