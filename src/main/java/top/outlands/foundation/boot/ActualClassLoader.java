@@ -151,7 +151,13 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("com.google.gson.");
         addClassLoaderExclusion0("com.google.common.");
         addClassLoaderExclusion0("com.google.thirdparty.publicsuffix.");
-        addTransformerExclusion("org.spongepowered.asm.");
+        addTransformerExclusion("org.spongepowered.asm.launch.");
+        addTransformerExclusion("org.spongepowered.asm.logging.");
+        addTransformerExclusion("org.spongepowered.asm.mixin.");
+        addTransformerExclusion("org.spongepowered.asm.obfuscation.");
+        addTransformerExclusion("org.spongepowered.asm.service.");
+        addTransformerExclusion("org.spongepowered.asm.transformers.");
+        addTransformerExclusion("org.spongepowered.asm.util.");
         addTransformerExclusion("org.spongepowered.include.com.google.");
         addTransformerExclusion("org.spongepowered.tools.");
         addTransformerExclusion("com.llamalad7.mixinextras.");
