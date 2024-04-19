@@ -131,7 +131,6 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("org.apache.maven.");
         addClassLoaderExclusion0("org.openjdk.nashorn.");
         addClassLoaderExclusion0("org.omg.");
-        addClassLoaderExclusion0("org.lwjgl");
         addClassLoaderExclusion0("org.slf4j.");
         addClassLoaderExclusion0("org.burningwave.");
         addClassLoaderExclusion0("org.ietf.jgss.");
