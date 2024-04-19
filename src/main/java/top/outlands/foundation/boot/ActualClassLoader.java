@@ -146,7 +146,6 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("io.github.toolfactory.");
         addClassLoaderExclusion0("org.burningwave.");
         addClassLoaderExclusion0("javassist.");
-        addClassLoaderExclusion0("paulscode.sound.");
         addClassLoaderExclusion0("com.jcraft.");
         addClassLoaderExclusion0("com.google.gson.");
         addClassLoaderExclusion0("com.google.common.");
