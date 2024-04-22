@@ -3,6 +3,7 @@ package top.outlands.foundation.boot;
 import net.minecraft.launchwrapper.Launch;
 import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
+import zone.rong.imaginebreaker.ImagineBreaker;
 
 import java.io.*;
 import java.lang.invoke.MethodHandle;
@@ -19,7 +20,6 @@ import java.security.ProtectionDomain;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -28,7 +28,7 @@ import java.util.jar.Manifest;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 import static top.outlands.foundation.boot.JVMDriverHolder.DRIVER;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"unchecked", "deprecation", "rawtypes"})
 public class ActualClassLoader extends URLClassLoader {
     
     public static final int BUFFER_SIZE = 1 << 12;
@@ -52,11 +52,8 @@ public class ActualClassLoader extends URLClassLoader {
     static TransformerHolder transformerHolder = new TransformerHolder();
     private Map<Package, Manifest> packageManifests = null;
     private static Manifest EMPTY = new Manifest();
-    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
+    private static final MethodHandles.Lookup LOOKUP = ImagineBreaker.lookup();
     private static Consumer<URL> addURL;
-    private ArrayList<URL> ucpURLs = null;
-    private ArrayList ucpLoaders = null;
-    private static Function<Object, URL> getLoaderURL;
     static {
         try {
             Class<?> loader = LOOKUP.findClass("jdk.internal.loader.BuiltinClassLoader");
@@ -98,27 +95,6 @@ public class ActualClassLoader extends URLClassLoader {
             parent = loader;
         }
         this.sources = new ArrayList<>(Arrays.asList(sources));
-        try {
-            Class<?> cp = Class.forName("jdk.internal.loader.URLClassPath");
-            VarHandle ucp = MethodHandles.privateLookupIn(URLClassLoader.class, LOOKUP).findVarHandle(URLClassLoader.class, "ucp", cp);
-            VarHandle path = MethodHandles.privateLookupIn(cp, LOOKUP).findVarHandle(cp, "path", ArrayList.class);
-            this.ucpURLs = (ArrayList<URL>) path.get(ucp.get(this));
-            VarHandle loaderField = MethodHandles.privateLookupIn(cp, LOOKUP)
-                    .findVarHandle(cp, "loaders", ArrayList.class);
-            this.ucpLoaders = (ArrayList) loaderField.get(ucp.get(this));
-        } catch (Throwable t) {
-            LOGGER.warn("Failed to set getPath by VarHandle: {}", t);
-            try {
-                Class<?> cp = DRIVER.getClassByName("jdk.internal.loader.URLClassPath", false, Launch.appClassLoader, DRIVER.getBuiltinClassLoaderClass());
-                Field ucp = JVMDriverHolder.findField(URLClassLoader.class, "ucp");
-                Field path = JVMDriverHolder.findField(cp, "path");
-                this.ucpURLs = DRIVER.getFieldValue(DRIVER.getFieldValue(this, ucp), path);
-                Field loaderField = JVMDriverHolder.findField(cp, "loaders");
-                this.ucpLoaders = DRIVER.getFieldValue(DRIVER.getFieldValue(this, ucp), loaderField);
-            } catch (Throwable t2) {
-                LOGGER.fatal("Failed to set getPath by JVMDriver: {}", t2);
-            }
-        }
         addClassLoaderExclusion0("java.");
         addClassLoaderExclusion0("javax.");
         addClassLoaderExclusion0("org.w3c.dom.");
@@ -274,11 +250,11 @@ public class ActualClassLoader extends URLClassLoader {
             cachedClasses.put(transformedName, clazz);
             return clazz;
         } catch (Throwable e) {
-                invalidClasses.add(name);
-                LOGGER.info("Failed to load class {}, caused by {}", name, e);
-                if (VERBOSE)
-                    transformerHolder.debugPrinter.run();
-                throw new ClassNotFoundException(name, e);
+            invalidClasses.add(name);
+            LOGGER.info("Failed to load class {}, caused by {}", name, e);
+            if (VERBOSE)
+                Arrays.stream(e.getStackTrace()).forEach(LOGGER::trace);
+            throw new ClassNotFoundException(name, e);
             
         }
     }
@@ -470,6 +446,10 @@ public class ActualClassLoader extends URLClassLoader {
         }
     }
 
+    public void printDebugMessage() {
+        transformerHolder.debugPrinter.run();
+    }
+
     public Map<String, Class<?>> getCachedClasses() {
         return cachedClasses;
     }
@@ -490,6 +470,10 @@ public class ActualClassLoader extends URLClassLoader {
      */
     public Class<?> defineClass(String name, byte[] buffer) {
         return defineClass(name, buffer, 0, buffer.length);
+    }
+
+    public Class<?> defineClass(String name, byte[] buffer, CodeSource codeSource) {
+        return defineClass(name, buffer, 0, buffer.length, codeSource);
     }
 
     /**
