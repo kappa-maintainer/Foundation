@@ -2,11 +2,9 @@ package top.outlands.foundation;
 
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
-import net.minecraft.launchwrapper.Launch;
 import top.outlands.foundation.boot.TransformerHolder;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static net.minecraft.launchwrapper.Launch.classLoader;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
@@ -24,6 +22,14 @@ public class TransformerDelegate {
      */
     public static List<IClassTransformer> getTransformers() {
         return transformers;
+    }
+
+    /**
+     * Get explicit transformers map. It's exact same map in used, you can modify it at will.
+     * @return the map
+     */
+    public static Map<String, PriorityQueue<IExplicitTransformer>> getExplicitTransformers() {
+        return explicitTransformers;
     }
 
     /**
