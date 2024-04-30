@@ -251,9 +251,10 @@ public class ActualClassLoader extends URLClassLoader {
             return clazz;
         } catch (Throwable e) {
             invalidClasses.add(name);
-            LOGGER.info("Failed to load class {}, caused by {}", name, e);
-            if (VERBOSE)
-                Arrays.stream(e.getStackTrace()).forEach(LOGGER::trace);
+            if (VERBOSE) {
+                LOGGER.debug("Failed to load class {}, caused by {}", name, e);
+                Arrays.stream(e.getStackTrace()).forEach(LOGGER::debug);
+            }
             throw new ClassNotFoundException(name, e);
             
         }
