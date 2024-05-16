@@ -52,6 +52,7 @@ public class ActualClassLoader extends URLClassLoader {
     static TransformerHolder transformerHolder = new TransformerHolder();
     private Map<Package, Manifest> packageManifests = null;
     private static Manifest EMPTY = new Manifest();
+    private static Set<String> packages = ConcurrentHashMap.newKeySet();
     private static final MethodHandles.Lookup LOOKUP = ImagineBreaker.lookup();
     private static Consumer<URL> addURL;
     static {
@@ -198,11 +199,12 @@ public class ActualClassLoader extends URLClassLoader {
                         Manifest manifest = jarFile.getManifest();
                         final JarEntry entry = jarFile.getJarEntry(fileName);
 
-                        Package pkg = getPackage(packageName);
+                        Package pkg = getDefinedPackage(packageName);
                         getClassBytes(untransformedName);
                         signers = entry.getCodeSigners();
-                        if (pkg == null) {
+                        if (pkg == null && !packages.contains(packageName)) {
                             definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
+                            packages.add(packageName);
                         } else {
                             if (pkg.isSealed() && !pkg.isSealed(jarURLConnection.getJarFileURL())) {
                                 LOGGER.warn("The jar file {} is trying to seal already secured path {}", jarFile.getName(), packageName);
@@ -459,10 +461,6 @@ public class ActualClassLoader extends URLClassLoader {
         return invalidClasses;
     }
 
-    public Class<?> defineClass(String name, ByteBuffer buffer) {
-        return defineClass(name, buffer, (ProtectionDomain) null);
-    }
-
     /**
      * Wrapper of defineClass()
      * @param name class name
@@ -470,11 +468,15 @@ public class ActualClassLoader extends URLClassLoader {
      * @return the defined class
      */
     public Class<?> defineClass(String name, byte[] buffer) {
-        return defineClass(name, buffer, 0, buffer.length);
+        Class<?> clazz = defineClass(name, buffer, 0, buffer.length);
+        cachedClasses.put(name, clazz);
+        return clazz;
     }
 
     public Class<?> defineClass(String name, byte[] buffer, CodeSource codeSource) {
-        return defineClass(name, buffer, 0, buffer.length, codeSource);
+        Class<?> clazz = defineClass(name, buffer, 0, buffer.length, codeSource);
+        cachedClasses.put(name, clazz);
+        return clazz;
     }
 
     /**
