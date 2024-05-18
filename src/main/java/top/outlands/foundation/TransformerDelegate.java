@@ -144,7 +144,7 @@ public class TransformerDelegate {
         explicitTransformers = new HashMap<>(20);
         transformers = new LinkedList<>();
         holder.runTransformersFunction = (name, transformedName, basicClass) -> {
-            for (final IClassTransformer transformer : transformers) {
+            for (final IClassTransformer transformer : Collections.unmodifiableList(transformers)) {
                 basicClass = transformer.transform(name, transformedName, basicClass);
             }
             return basicClass;
