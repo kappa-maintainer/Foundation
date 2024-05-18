@@ -202,9 +202,11 @@ public class ActualClassLoader extends URLClassLoader {
                         Package pkg = getDefinedPackage(packageName);
                         getClassBytes(untransformedName);
                         signers = entry.getCodeSigners();
-                        if (pkg == null && !packages.contains(packageName)) {
-                            definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
-                            packages.add(packageName);
+                        if (pkg == null) {
+                            if (!packages.contains(packageName)) {
+                                definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
+                                packages.add(packageName);
+                            }
                         } else {
                             if (pkg.isSealed() && !pkg.isSealed(jarURLConnection.getJarFileURL())) {
                                 LOGGER.warn("The jar file {} is trying to seal already secured path {}", jarFile.getName(), packageName);
