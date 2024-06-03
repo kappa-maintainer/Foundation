@@ -126,6 +126,7 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("com.google.gson.");
         addClassLoaderExclusion0("com.google.common.");
         addClassLoaderExclusion0("com.google.thirdparty.publicsuffix.");
+        addClassLoaderExclusion0("io.netty.");
         addTransformerExclusion("org.spongepowered.asm.launch.");
         addTransformerExclusion("org.spongepowered.asm.logging.");
         addTransformerExclusion("org.spongepowered.asm.mixin.");
