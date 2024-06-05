@@ -15,6 +15,7 @@ import static top.outlands.foundation.boot.TransformerHolder.*;
  */
 public class TransformerDelegate {
 
+    private static final boolean VERBOSE = Boolean.parseBoolean(System.getProperty("foundation.verbose", "false"));
     /**
      * The original getTransformers() was in {@link net.minecraft.launchwrapper.LaunchClassLoader}, but that may cause unwanted classloading.
      * The list itself is a skip list set now, so you can't change it by modifying the return value here.
@@ -145,6 +146,7 @@ public class TransformerDelegate {
         transformers = new LinkedList<>();
         holder.runTransformersFunction = (name, transformedName, basicClass) -> {
             for (final IClassTransformer transformer : Collections.unmodifiableList(transformers)) {
+                if (VERBOSE) LOGGER.trace("Transforming {} with {}", transformer.getClass().getSimpleName(), name);
                 basicClass = transformer.transform(name, transformedName, basicClass);
             }
             return basicClass;
