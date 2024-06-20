@@ -52,7 +52,6 @@ public class ActualClassLoader extends URLClassLoader {
     static TransformerHolder transformerHolder = new TransformerHolder();
     private Map<Package, Manifest> packageManifests = null;
     private static Manifest EMPTY = new Manifest();
-    private static Set<String> packages = ConcurrentHashMap.newKeySet();
     private static final MethodHandles.Lookup LOOKUP = ImagineBreaker.lookup();
     private static Consumer<URL> addURL;
     static {
@@ -204,10 +203,7 @@ public class ActualClassLoader extends URLClassLoader {
                         getClassBytes(untransformedName);
                         signers = entry.getCodeSigners();
                         if (pkg == null) {
-                            if (!packages.contains(packageName)) {
-                                definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
-                                packages.add(packageName);
-                            }
+                            definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
                         } else {
                             if (pkg.isSealed() && !pkg.isSealed(jarURLConnection.getJarFileURL())) {
                                 LOGGER.warn("The jar file {} is trying to seal already secured path {}", jarFile.getName(), packageName);
