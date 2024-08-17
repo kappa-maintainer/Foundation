@@ -448,6 +448,38 @@ public class ActualClassLoader extends URLClassLoader {
         }
     }
 
+    public byte[] testGetClassBytes(String name) throws IOException {
+        if (resourceCache.containsKey(name)) {
+            return resourceCache.get(name);
+        }
+        if (name.indexOf('.') == -1) {
+            for (final String reservedName : RESERVED_NAMES) {
+                if (name.toUpperCase(Locale.ENGLISH).startsWith(reservedName)) {
+                    final byte[] data = getClassBytes("_" + name);
+                    if (data != null) {
+                        resourceCache.put(name, data);
+                        return data;
+                    }
+                }
+            }
+        }
+
+        InputStream classStream = null;
+        try {
+            final String resourcePath = name.replace('.', '/').concat(".class");
+            final URL classResource = findResource(resourcePath);
+
+            if (classResource == null) {
+                return null;
+            }
+            classStream = classResource.openStream();
+
+            return readFully(classStream);
+        } finally {
+            closeSilently(classStream);
+        }
+    }
+
     public void printDebugMessage() {
         transformerHolder.debugPrinter.run();
     }
@@ -494,7 +526,7 @@ public class ActualClassLoader extends URLClassLoader {
      */
     public boolean isClassExist(String name) {
         try {
-            return getClassBytes(name) != null;
+            return testGetClassBytes(name) != null;
         } catch (Throwable e) {
             return false;
         }
