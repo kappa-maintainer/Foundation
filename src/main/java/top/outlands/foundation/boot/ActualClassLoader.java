@@ -13,10 +13,8 @@ import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.security.CodeSigner;
 import java.security.CodeSource;
-import java.security.ProtectionDomain;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -126,6 +124,7 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("com.google.common.");
         addClassLoaderExclusion0("com.google.thirdparty.publicsuffix.");
         addClassLoaderExclusion0("io.netty.");
+        addClassLoaderExclusion0("org.jline.");
         addTransformerExclusion("org.spongepowered.asm.launch.");
         addTransformerExclusion("org.spongepowered.asm.logging.");
         addTransformerExclusion("org.spongepowered.asm.mixin.");
@@ -530,6 +529,10 @@ public class ActualClassLoader extends URLClassLoader {
         } catch (Throwable e) {
             return false;
         }
+    }
+
+    public Package definePackage(String name) {
+        return definePackage(name, null, null);
     }
 
     protected static void closeSilently(Closeable closeable) {
