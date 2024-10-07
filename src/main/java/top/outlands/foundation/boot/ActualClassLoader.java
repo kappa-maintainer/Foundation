@@ -125,6 +125,8 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("com.google.thirdparty.publicsuffix.");
         addClassLoaderExclusion0("io.netty.");
         addClassLoaderExclusion0("org.jline.");
+        addClassLoaderExclusion0("com.mojang.util.QueueLogAppender");
+        addClassLoaderExclusion0("net.minecraftforge.server.terminalconsole.");
         addTransformerExclusion("org.spongepowered.asm.launch.");
         addTransformerExclusion("org.spongepowered.asm.logging.");
         addTransformerExclusion("org.spongepowered.asm.mixin.");
