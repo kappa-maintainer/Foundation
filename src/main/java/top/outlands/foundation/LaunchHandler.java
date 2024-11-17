@@ -55,6 +55,9 @@ public class LaunchHandler {
                 "org.objectweb.asm.ClassWriter"
         );
         try {
+            classLoader.findClass("net.minecraft.launchwrapper.IClassTransformer");
+            classLoader.findClass("net.minecraft.launchwrapper.ITweaker");
+            classLoader.findClass("net.minecraft.launchwrapper.IClassNameTransformer");
             classLoader.findClass("org.objectweb.asm.FieldVisitor");
             classLoader.findClass("org.objectweb.asm.ClassVisitor");
             classLoader.findClass("org.objectweb.asm.MethodVisitor");
