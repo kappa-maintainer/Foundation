@@ -42,7 +42,7 @@ public class TransformerDelegate {
         LOGGER.debug("Registering rename transformer: " + transformer.getClass().getSimpleName());
         if (renameTransformer == null) {
             renameTransformer = transformer;
-            registerTransformerByInstance((IClassTransformer) transformer);
+            registerTransformer((IClassTransformer) transformer);
         }
     }
 
@@ -58,13 +58,13 @@ public class TransformerDelegate {
         }
         try {
             IExplicitTransformer instance = (IExplicitTransformer) classLoader.loadClass(className).getConstructor().newInstance();
-            registerExplicitTransformerByInstance(instance, targets);
+            registerExplicitTransformer(instance, targets);
         } catch (Exception e) {
             LOGGER.error("Error registering explicit transformer class {}", className, e);
         }
     }
 
-    public static void registerExplicitTransformerByInstance(IExplicitTransformer transformer, String... targets) {
+    public static void registerExplicitTransformer(IExplicitTransformer transformer, String... targets) {
         LOGGER.debug("Registering explicit transformer: " + transformer.getClass().getSimpleName());
         if (targets.length == 0) return;
         try {
@@ -105,7 +105,7 @@ public class TransformerDelegate {
      * In case you want to control how the transformer is initialized, in which you could <b>new</b> it yourself.
      * @param transformer The transformer
      */
-    public static void registerTransformerByInstance(IClassTransformer transformer) {
+    public static void registerTransformer(IClassTransformer transformer) {
         transformers.add(transformer);
     }
 
@@ -127,7 +127,7 @@ public class TransformerDelegate {
      * Call this to remove your transformer, you need to keep track of the instances yourself.
      * @param transformer The transformer you want to un-register
      */
-    public static void unRegisterTransformerByInstance(IClassTransformer transformer) {
+    public static void unRegisterTransformer(IClassTransformer transformer) {
         LOGGER.debug("Unregistering transformer: " + transformer.getClass().getSimpleName());
         try {
             transformers.remove(transformer);

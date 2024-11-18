@@ -4,9 +4,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.minecraft.launchwrapper.ITweaker;
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import top.outlands.foundation.transformer.ASMClassWriterTransformer;
 import top.outlands.foundation.transformer.ASMVisitorTransformer;
@@ -44,13 +41,13 @@ public class LaunchHandler {
         Thread.currentThread().setContextClassLoader(classLoader);
         fillTransformerHolder(classLoader.getTransformerHolder());
         
-        registerExplicitTransformerByInstance(
+        TransformerDelegate.registerExplicitTransformer(
                 new ASMVisitorTransformer(),
                 "org.objectweb.asm.FieldVisitor",
                 "org.objectweb.asm.ClassVisitor",
                 "org.objectweb.asm.MethodVisitor"
         );
-        registerExplicitTransformerByInstance(
+        TransformerDelegate.registerExplicitTransformer(
                 new ASMClassWriterTransformer(),
                 "org.objectweb.asm.ClassWriter"
         );
