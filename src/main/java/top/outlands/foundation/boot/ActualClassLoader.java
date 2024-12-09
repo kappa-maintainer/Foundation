@@ -164,7 +164,7 @@ public class ActualClassLoader extends URLClassLoader {
     @Override
     public Class<?> findClass(final String name) throws ClassNotFoundException {
         if (invalidClasses.contains(name)) {
-            throw new ClassNotFoundException(name);
+            throw new ClassNotFoundException("Found " + name + " in invalid classes.");
         }
         TrieNode<Boolean> node = classLoaderExceptions.getFirstKeyValueNode(name);
         if (node != null && node.getValue()) {
