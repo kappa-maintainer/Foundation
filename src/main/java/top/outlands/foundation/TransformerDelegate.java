@@ -146,7 +146,7 @@ public class TransformerDelegate {
         transformers = new LinkedList<>();
         holder.runTransformersFunction = (name, transformedName, basicClass) -> {
             for (final IClassTransformer transformer : Collections.unmodifiableList(transformers)) {
-                if (VERBOSE) LOGGER.trace("Transforming {} with {}", transformer.getClass().getSimpleName(), name);
+                if (VERBOSE) LOGGER.trace("Transforming {} with {}", name, transformer.getClass().getSimpleName());
                 basicClass = transformer.transform(name, transformedName, basicClass);
             }
             return basicClass;

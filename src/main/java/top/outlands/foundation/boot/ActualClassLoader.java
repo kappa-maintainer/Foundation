@@ -26,7 +26,7 @@ import java.util.jar.Manifest;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 import static top.outlands.foundation.boot.JVMDriverHolder.DRIVER;
 
-@SuppressWarnings({"unchecked", "deprecation", "rawtypes"})
+@SuppressWarnings({"deprecation"})
 public class ActualClassLoader extends URLClassLoader {
     
     public static final int BUFFER_SIZE = 1 << 12;
