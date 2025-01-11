@@ -27,41 +27,7 @@ public class ASMClassWriterTransformer implements IExplicitTransformer {
         return basicClass;
     }
     public static String getCommonSuperClass(final String type1, final String type2) {
-        ClassLoader classLoader = Launch.appClassLoader;
-        Class<?> class1;
-        try {
-            class1 = Class.forName(type1.replace('/', '.'), false, classLoader);
-        } catch (ClassNotFoundException e) {
-            try {
-                class1 = Class.forName(type1.replace('/', '.'), false, Launch.classLoader);
-            } catch (ClassNotFoundException e1) {
-                throw new TypeNotPresentException(type1, e1);
-            }
-        }
-        Class<?> class2;
-        try {
-            class2 = Class.forName(type2.replace('/', '.'), false, classLoader);
-        } catch (ClassNotFoundException e) {
-            try {
-                class2 = Class.forName(type2.replace('/', '.'), false, Launch.classLoader);
-            } catch (ClassNotFoundException e2) {
-                throw new TypeNotPresentException(type2, e2);
-            }
-        }
-        if (class1.isAssignableFrom(class2)) {
-            return type1;
-        }
-        if (class2.isAssignableFrom(class1)) {
-            return type2;
-        }
-        if (class1.isInterface() || class2.isInterface()) {
-            return "java/lang/Object";
-        } else {
-            do {
-                class1 = class1.getSuperclass();
-            } while (!class1.isAssignableFrom(class2));
-            return class1.getName().replace('.', '/');
-        }
+        return top.outlands.foundation.asm.LaunchClassWriter.getCommonSuperClass0(type1, type2);
     }
 
 }

@@ -2,6 +2,7 @@ package top.outlands.foundation;
 
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
+import top.outlands.foundation.asm.ITargetedTransformer;
 import top.outlands.foundation.boot.TransformerHolder;
 
 import java.util.*;
@@ -48,12 +49,12 @@ public class TransformerDelegate {
 
     /**
      * Call this to register an explicit transformer.
-     * @param targets Target classes' name.
+     * @param targets Target classes' name. Transformed Name.
      * @param className Class name of the transformer.
      */
     public static void registerExplicitTransformer(String className, String... targets) {
         if (targets.length == 0) return;
-        if (!className.contains(".")) {
+        if (className.indexOf('/') != -1) {
             className = className.replace('/', '.');
         }
         try {
@@ -64,6 +65,11 @@ public class TransformerDelegate {
         }
     }
 
+    /**
+     * Call this to register an explicit transformer.
+     * @param targets Target classes' name. Transformed Name.
+     * @param transformer transformer
+     */
     public static void registerExplicitTransformer(IExplicitTransformer transformer, String... targets) {
         LOGGER.debug("Registering explicit transformer: " + transformer.getClass().getSimpleName());
         if (targets.length == 0) return;
@@ -81,6 +87,31 @@ public class TransformerDelegate {
         } catch (Exception e) {
             LOGGER.error("Error registering explicit transformer class {}", transformer.getClass().getSimpleName(), e);
         }
+    }
+
+    /**
+     * Call this to register an explicit transformer.
+     * @param className Class name of the transformer.
+     */
+    public static void registerExplicitTransformer(String className) {
+        if (className.indexOf('/') != -1) {
+            className = className.replace('/', '.');
+        }
+        try {
+            if (Launch.classLoader.loadClass(className).getConstructor().newInstance() instanceof ITargetedTransformer targeted) {
+                TransformerDelegate.registerExplicitTransformer(targeted.getTransformer(), targeted.getTargets());
+            }
+        } catch (Exception e) {
+            Foundation.LOGGER.error("Error registering explicit transformer class {}", className, e);
+        }
+    }
+
+    /**
+     * Call this to register an explicit transformer.
+     * @param transformer transformer
+     */
+    public static void registerExplicitTransformer(ITargetedTransformer transformer) {
+        TransformerDelegate.registerExplicitTransformer(transformer.getTransformer(), transformer.getTargets());
     }
 
     /**
