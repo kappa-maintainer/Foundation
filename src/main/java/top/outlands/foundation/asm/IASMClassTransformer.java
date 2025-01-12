@@ -22,16 +22,8 @@ public interface IASMClassTransformer extends IExplicitTransformer{
         ClassReader classReader = new ClassReader(bytes);
         ClassNode classNode = new ClassNode();
         classReader.accept(classNode, 0);
-        ClassWriter classWriter = createClassWriter(this.transform(classNode));
+        ClassWriter classWriter = new ClassWriter(this.transform(classNode));
         classNode.accept(classWriter);
         return classWriter.toByteArray();
-    }
-
-    /**
-     * @param flags the flags
-     * @return the created class writer. e.g. {@link LaunchClassWriter} or {@link NonLoadingClassWriter}
-     */
-    default ClassWriter createClassWriter(int flags){
-        return new LaunchClassWriter(flags);
     }
 }
