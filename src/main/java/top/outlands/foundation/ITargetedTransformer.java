@@ -1,4 +1,4 @@
-package top.outlands.foundation.asm;
+package top.outlands.foundation;
 
 import top.outlands.foundation.IExplicitTransformer;
 
@@ -9,7 +9,7 @@ import top.outlands.foundation.IExplicitTransformer;
  * This class can only be implemented by {@link top.outlands.foundation.IExplicitTransformer}.
  * You must not provide any additional targets when registering, otherwise the return value of this method will be invalid.
  */
-public interface ITargetedTransformer extends IExplicitTransformer {
+public interface ITargetedTransformer{
     /**
      * @return the target classes, transformed names
      */

@@ -17,7 +17,7 @@ public class ASMClassWriterTransformer implements IExplicitTransformer {
             CtClass cc = cp.makeClass(new ByteArrayInputStream(basicClass));
             LOGGER.debug("Patching " + cc.getName());
             var method = cc.getDeclaredMethod("getCommonSuperClass");
-            method.setBody("{return top.outlands.foundation.transformer.ASMClassWriterTransformer.getCommonSuperClass($$);}");
+            method.setBody("{return top.outlands.foundation.asm.LaunchClassWriter.getCommonSuperClass0($$);}");
 
             //cc.debugWriteFile("./dump");
             basicClass = cc.toBytecode();
@@ -25,9 +25,6 @@ public class ASMClassWriterTransformer implements IExplicitTransformer {
             LOGGER.error(t);
         }
         return basicClass;
-    }
-    public static String getCommonSuperClass(final String type1, final String type2) {
-        return top.outlands.foundation.asm.LaunchClassWriter.getCommonSuperClass0(type1, type2);
     }
 
 }

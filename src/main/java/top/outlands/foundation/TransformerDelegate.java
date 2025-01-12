@@ -2,7 +2,6 @@ package top.outlands.foundation;
 
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
-import top.outlands.foundation.asm.ITargetedTransformer;
 import top.outlands.foundation.boot.TransformerHolder;
 
 import java.util.*;
