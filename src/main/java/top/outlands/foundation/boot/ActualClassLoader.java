@@ -26,7 +26,7 @@ import java.util.jar.Manifest;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 import static top.outlands.foundation.boot.JVMDriverHolder.DRIVER;
 
-@SuppressWarnings({"deprecation"})
+@SuppressWarnings({"deprecation", "unused"})
 public class ActualClassLoader extends URLClassLoader {
     
     public static final int BUFFER_SIZE = 1 << 12;
@@ -127,6 +127,7 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("org.jline.");
         addClassLoaderExclusion0("com.mojang.util.QueueLogAppender");
         addClassLoaderExclusion0("net.minecraftforge.server.terminalconsole.");
+        addClassLoaderExclusion0("com.yourkit.");
         addTransformerExclusion("org.spongepowered.asm.launch.");
         addTransformerExclusion("org.spongepowered.asm.logging.");
         addTransformerExclusion("org.spongepowered.asm.mixin.");
@@ -391,14 +392,14 @@ public class ActualClassLoader extends URLClassLoader {
         return buffer;
     }
     private void addClassLoaderExclusion0(String toExclude) {
-        LOGGER.debug("Adding classloader exclusion " + toExclude);
+        LOGGER.debug("Adding classloader exclusion {}", toExclude);
         classLoaderExceptions.put(toExclude, true);
     }
     public void addClassLoaderExclusion(String toExclude) {
         addTransformerExclusion(toExclude);
     }
     public void addTransformerExclusion(String toExclude) {
-        LOGGER.debug("Adding transformer exclusion " + toExclude);
+        LOGGER.debug("Adding transformer exclusion {}", toExclude);
         transformerExceptions.put(toExclude, true);
     }
 
