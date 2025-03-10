@@ -46,6 +46,7 @@ public class ActualClassLoader extends URLClassLoader {
     private static final String[] RESERVED_NAMES = {"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"};
     private static final boolean DUMP = Boolean.parseBoolean(System.getProperty("foundation.dump", "false"));
     private static final boolean VERBOSE = Boolean.parseBoolean(System.getProperty("foundation.verbose", "false"));
+    private static final String TARGET = System.getProperty("foundation.target", "");
     private static File dumpSubDir;
     static TransformerHolder transformerHolder = new TransformerHolder();
     private Map<Package, Manifest> packageManifests = null;
@@ -166,6 +167,9 @@ public class ActualClassLoader extends URLClassLoader {
     public Class<?> findClass(final String name) throws ClassNotFoundException {
         if (invalidClasses.contains(name)) {
             throw new ClassNotFoundException("Found " + name + " in invalid classes.");
+        }
+        if (VERBOSE && !TARGET.isEmpty()) {
+            Arrays.stream(Thread.currentThread().getStackTrace()).forEach(LOGGER::debug);
         }
         TrieNode<Boolean> node = classLoaderExceptions.getFirstKeyValueNode(name);
         if (node != null && node.getValue()) {
