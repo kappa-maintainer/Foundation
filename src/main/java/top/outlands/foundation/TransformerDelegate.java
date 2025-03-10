@@ -39,7 +39,7 @@ public class TransformerDelegate {
      * @param transformer The name transformer instance
      */
     public static void registerRenameTransformer(IClassNameTransformer transformer) {
-        LOGGER.debug("Registering rename transformer: " + transformer.getClass().getSimpleName());
+        LOGGER.debug("Registering rename transformer: {}", transformer.getClass().getSimpleName());
         if (renameTransformer == null) {
             renameTransformer = transformer;
             registerTransformer((IClassTransformer) transformer);
@@ -53,6 +53,7 @@ public class TransformerDelegate {
      */
     public static void registerExplicitTransformer(String className, String... targets) {
         if (targets.length == 0) return;
+        LOGGER.debug("Registering explicit transformer: {}", className);
         if (!className.contains(".")) {
             className = className.replace('/', '.');
         }
@@ -65,8 +66,8 @@ public class TransformerDelegate {
     }
 
     public static void registerExplicitTransformer(IExplicitTransformer transformer, String... targets) {
-        LOGGER.debug("Registering explicit transformer: " + transformer.getClass().getSimpleName());
         if (targets.length == 0) return;
+        LOGGER.debug("Registering explicit transformer instance: {}", transformer.getClass().getSimpleName());
         try {
             for (var target : targets) {
                 if (explicitTransformers.containsKey(target)) {
@@ -91,7 +92,7 @@ public class TransformerDelegate {
         if (!transformerClassName.contains(".")) {
             transformerClassName = transformerClassName.replace('/', '.');
         }
-        LOGGER.debug("Registering transformer: " + transformerClassName);
+        LOGGER.debug("Registering transformer: {}", transformerClassName);
         try {
             IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(transformerClassName).getConstructor().newInstance();
             transformers.add(transformer);
@@ -106,6 +107,7 @@ public class TransformerDelegate {
      * @param transformer The transformer
      */
     public static void registerTransformer(IClassTransformer transformer) {
+        LOGGER.debug("Registering transformer instance: {}", transformer.getClass().getName());
         transformers.add(transformer);
     }
 
@@ -114,7 +116,7 @@ public class TransformerDelegate {
      * @param name The transformer name you want to un-register
      */
     public static void unRegisterTransformer(String name) {
-        LOGGER.debug("Unregistering all transformers call: " + name);
+        LOGGER.debug("Unregistering all transformers call: {}", name);
         try {
             transformers.stream().filter(transformer -> transformer.getClass().getName().equals(name)).forEach(transformers::remove);
             transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
@@ -128,7 +130,7 @@ public class TransformerDelegate {
      * @param transformer The transformer you want to un-register
      */
     public static void unRegisterTransformer(IClassTransformer transformer) {
-        LOGGER.debug("Unregistering transformer: " + transformer.getClass().getSimpleName());
+        LOGGER.debug("Unregistering transformer: {}", transformer.getClass().getSimpleName());
         try {
             transformers.remove(transformer);
             transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
@@ -146,7 +148,6 @@ public class TransformerDelegate {
         transformers = new LinkedList<>();
         holder.runTransformersFunction = (name, transformedName, basicClass) -> {
             for (final IClassTransformer transformer : Collections.unmodifiableList(transformers)) {
-                if (VERBOSE) LOGGER.trace("Transforming {} with {}", name, transformer.getClass().getSimpleName());
                 basicClass = transformer.transform(name, transformedName, basicClass);
             }
             return basicClass;

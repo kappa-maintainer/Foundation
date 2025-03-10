@@ -152,6 +152,9 @@ public class ActualClassLoader extends URLClassLoader {
             } while (dumpSubDir.exists());
             dumpSubDir.mkdirs();
         }
+        if (VERBOSE && !TARGET.isEmpty()) {
+            LOGGER.info("Target class found, will print stacktrace when this class is loading: {}", TARGET);
+        }
     }
 
     public TransformerHolder getTransformerHolder() {
@@ -182,9 +185,11 @@ public class ActualClassLoader extends URLClassLoader {
 
         try {
             final String transformedName = transformName(name);
-            if (VERBOSE && !TARGET.isEmpty()) {
-                if (transformedName.equals(TARGET)) {
-                    Arrays.stream(Thread.currentThread().getStackTrace()).forEach(LOGGER::debug);
+            if (VERBOSE) {
+                LOGGER.debug("Loading class: {}", transformedName);
+                if (!TARGET.isEmpty() && transformedName.equals(TARGET)) {
+                    LOGGER.info("Target found");
+                    Arrays.stream(Thread.currentThread().getStackTrace()).forEach(LOGGER::info);
                 }
             }
             if (cachedClasses.containsKey(transformedName)) {
