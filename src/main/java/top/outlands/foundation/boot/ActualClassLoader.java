@@ -159,7 +159,7 @@ public class ActualClassLoader extends URLClassLoader {
     }
 
     public void registerTransformer(String transformerClassName) {
-        LOGGER.debug("Registering transformer: " + transformerClassName);
+        LOGGER.debug("Registering transformer: {}", transformerClassName);
         transformerHolder.registerTransformerFunction.accept(transformerClassName);
     }
 
@@ -167,9 +167,6 @@ public class ActualClassLoader extends URLClassLoader {
     public Class<?> findClass(final String name) throws ClassNotFoundException {
         if (invalidClasses.contains(name)) {
             throw new ClassNotFoundException("Found " + name + " in invalid classes.");
-        }
-        if (VERBOSE && !TARGET.isEmpty()) {
-            Arrays.stream(Thread.currentThread().getStackTrace()).forEach(LOGGER::debug);
         }
         TrieNode<Boolean> node = classLoaderExceptions.getFirstKeyValueNode(name);
         if (node != null && node.getValue()) {
@@ -185,6 +182,11 @@ public class ActualClassLoader extends URLClassLoader {
 
         try {
             final String transformedName = transformName(name);
+            if (VERBOSE && !TARGET.isEmpty()) {
+                if (transformedName.equals(TARGET)) {
+                    Arrays.stream(Thread.currentThread().getStackTrace()).forEach(LOGGER::debug);
+                }
+            }
             if (cachedClasses.containsKey(transformedName)) {
                 return cachedClasses.get(transformedName);
             }
