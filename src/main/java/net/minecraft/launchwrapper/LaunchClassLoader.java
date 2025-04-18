@@ -95,4 +95,9 @@ public class LaunchClassLoader extends ActualClassLoader {
     public void addTransformerExclusion(final String toExclude) {
         super.addTransformerExclusion(toExclude);
     }
+
+    @Override
+    public void clearNegativeEntries(Set<String> entriesToClear) {
+        super.clearNegativeEntries(entriesToClear);
+    }
 }
