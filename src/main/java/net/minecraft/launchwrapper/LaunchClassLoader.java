@@ -2,8 +2,10 @@ package net.minecraft.launchwrapper;
 
 import top.outlands.foundation.boot.ActualClassLoader;
 import top.outlands.foundation.boot.Foundation;
+import top.outlands.foundation.boot.TransformerHolder;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.net.MalformedURLException;
@@ -61,11 +63,36 @@ public class LaunchClassLoader extends ActualClassLoader {
         }
     }
 
+    /// binary compat:
+
     /**
      * CCL is calling this
      */
     public byte[] runTransformers(final String name, final String transformedName, byte[] basicClass) {
         return super.runTransformers(name, transformedName, basicClass);
     }
-    
+
+    @Override
+    public void registerTransformer(final String transformerClassName) {
+        super.registerTransformer(transformerClassName);
+    }
+
+    public List<IClassTransformer> getTransformers() {
+        return Collections.unmodifiableList(TransformerHolder.transformers);
+    }
+
+    @Override
+    public byte[] getClassBytes(final String name) throws IOException {
+        return super.getClassBytes(name);
+    }
+
+    @Override
+    public void addClassLoaderExclusion(final String toExclude) {
+        super.addClassLoaderExclusion(toExclude);
+    }
+
+    @Override
+    public void addTransformerExclusion(final String toExclude) {
+        super.addTransformerExclusion(toExclude);
+    }
 }
