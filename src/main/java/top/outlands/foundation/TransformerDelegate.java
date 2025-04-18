@@ -17,8 +17,6 @@ public class TransformerDelegate {
 
     private static final boolean VERBOSE = Boolean.parseBoolean(System.getProperty("foundation.verbose", "false"));
     /**
-     * The original getTransformers() was in {@link net.minecraft.launchwrapper.LaunchClassLoader}, but that may cause unwanted classloading.
-     * The list itself is a skip list set now, so you can't change it by modifying the return value here.
      * @return list of transformers.
      */
     public static List<IClassTransformer> getTransformers() {

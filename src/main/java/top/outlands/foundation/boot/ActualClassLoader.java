@@ -1,5 +1,6 @@
 package top.outlands.foundation.boot;
 
+import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.Launch;
 import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
@@ -25,6 +26,7 @@ import java.util.jar.Manifest;
 
 import static top.outlands.foundation.boot.Foundation.LOGGER;
 import static top.outlands.foundation.boot.JVMDriverHolder.DRIVER;
+import static top.outlands.foundation.boot.TransformerHolder.transformers;
 
 @SuppressWarnings({"deprecation", "unused"})
 public class ActualClassLoader extends URLClassLoader {
@@ -348,6 +350,10 @@ public class ActualClassLoader extends URLClassLoader {
     protected byte[] runExplicitTransformers(final String transformedName, byte[] basicClass) {
         basicClass = transformerHolder.runExplicitTransformersFunction.apply(transformedName, basicClass);
         return basicClass;
+    }
+
+    public static List<IClassTransformer> getTransformers() {
+        return transformers;
     }
 
     @Override
