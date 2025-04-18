@@ -512,12 +512,18 @@ public class ActualClassLoader extends URLClassLoader {
      * @return the defined class
      */
     public Class<?> defineClass(String name, byte[] buffer) {
+        if (DUMP) {
+            saveClassBytes(name, buffer);
+        }
         Class<?> clazz = defineClass(name, buffer, 0, buffer.length);
         cachedClasses.put(name, clazz);
         return clazz;
     }
 
     public Class<?> defineClass(String name, byte[] buffer, CodeSource codeSource) {
+        if (DUMP) {
+            saveClassBytes(name, buffer);
+        }
         Class<?> clazz = defineClass(name, buffer, 0, buffer.length, codeSource);
         cachedClasses.put(name, clazz);
         return clazz;
