@@ -31,8 +31,8 @@ public class LaunchHandler {
         final OptionSpec<String> nonOption = parser.nonOptions();
 
         final OptionSet options = parser.parse(args);
-        minecraftHome = options.valueOf(gameDirOption);
-        assetsDir = options.valueOf(assetsDirOption);
+        minecraftHome = options.valueOf(gameDirOption).getAbsoluteFile();
+        assetsDir = options.valueOf(assetsDirOption).getAbsoluteFile();
         final String profileName = options.valueOf(profileOption);
         final List<String> tweakClassNames = new ArrayList<>(options.valuesOf(tweakClassOption));
 
