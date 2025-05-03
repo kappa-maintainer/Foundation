@@ -184,6 +184,7 @@ public class ActualClassLoader extends URLClassLoader {
             Class<?> fc = findLoadedClass(name);
             if (fc != null) {
                 cachedClasses.put(name, fc);
+                return fc;
             }
         }
 
