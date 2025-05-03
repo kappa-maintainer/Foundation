@@ -180,6 +180,12 @@ public class ActualClassLoader extends URLClassLoader {
 
         if (cachedClasses.containsKey(name)) {
             return cachedClasses.get(name);
+        } else { // What if a class doesn't get cached?
+            Class<?> fc = findLoadedClass(name);
+            if (fc != null) {
+                cachedClasses.put(name, fc);
+                return fc;
+            }
         }
 
         byte[] transformedClass;
@@ -551,7 +557,7 @@ public class ActualClassLoader extends URLClassLoader {
      */
     public boolean isClassExist(String name) {
         try {
-            return testGetClassBytes(name) != null;
+            return testGetClassBytes(name) != null || isClassLoaded(name);
         } catch (Throwable e) {
             return false;
         }
