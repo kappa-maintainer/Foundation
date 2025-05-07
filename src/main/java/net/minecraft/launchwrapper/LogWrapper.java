@@ -17,43 +17,43 @@ public class LogWrapper {
     public static void retarget(Logger to) {
     }
     public static void log(String logChannel, Level level, String format, Object... data) {
-        LOGGER.log(level, format, data);
+        LOGGER.log(level, "[{}] {}", logChannel, String.format(String.format(format, data)));
     }
 
     public static void log(Level level, String format, Object... data) {
-        LOGGER.log(level, format, data);
+        LOGGER.log(level, String.format(format, data));
     }
 
     public static void log(String logChannel, Level level, Throwable ex, String format, Object... data) {
-        LOGGER.log(level, format + " {}", data, ex);
+        LOGGER.log(level, "[{}] {}", logChannel, String.format(String.format(format, data)), ex);
     }
 
     public static void log(Level level, Throwable ex, String format, Object... data) {
-        LOGGER.log(level, format + " {}", data);
+        LOGGER.log(level, String.format(format, data));
     }
 
     public static void severe(String format, Object... data) {
-        LOGGER.error(format, data);
+        LOGGER.error(String.format(format, data));
     }
 
     public static void warning(String format, Object... data) {
-        LOGGER.warn(format, data);
+        LOGGER.warn(String.format(format, data));
     }
 
     public static void info(String format, Object... data) {
-        LOGGER.info(format, data);
+        LOGGER.info(String.format(format, data));
     }
 
     public static void fine(String format, Object... data) {
-        LOGGER.debug(format, data);
+        LOGGER.debug(String.format(format, data));
     }
 
     public static void finer(String format, Object... data) {
-        LOGGER.trace(format, data);
+        LOGGER.trace(String.format(format, data));
     }
 
     public static void finest(String format, Object... data) {
-        LOGGER.trace(format, data);
+        LOGGER.trace(String.format(format, data));
     }
 
     public static void makeLog(String logChannel) {

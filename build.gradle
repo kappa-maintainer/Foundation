@@ -18,7 +18,7 @@ repositories {
 
 group = 'top.outlands'
 archivesBaseName = 'foundation'
-version = '0.14.12'
+version = '0.14.13'
 java.targetCompatibility(JavaVersion.VERSION_21)
 
 dependencies {
@@ -29,7 +29,7 @@ dependencies {
     implementation 'com.google.guava:guava:33.0.0-jre'
     implementation 'org.burningwave:jvm-driver:8.15.0'
     implementation 'zone.rong:imaginebreaker:2.1'
-    implementation 'org.ow2.asm:asm:9.7.1'
+    implementation 'org.ow2.asm:asm:9.8'
     implementation 'com.cleanroommc:sponge-mixin:0.18.0+mixin.0.8.5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
@@ -67,8 +67,8 @@ artifacts {
 publishing {
     repositories {
         maven {
-            name = "outlands"
-            url = "https://maven.outlands.top/releases"
+            name = "cleanroom"
+            url = "https://repo.cleanroommc.com/releases"
             credentials(PasswordCredentials)
             authentication {
                 basic(BasicAuthentication)
