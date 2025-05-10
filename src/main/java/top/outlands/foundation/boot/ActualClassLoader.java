@@ -159,7 +159,7 @@ public class ActualClassLoader extends URLClassLoader {
         }
     }
 
-    public TransformerHolder getTransformerHolder() {
+    public static TransformerHolder getTransformerHolder() {
         return transformerHolder;
     }
 
