@@ -1,5 +1,8 @@
 package top.outlands.foundation.boot;
 
+import net.lenni0451.reflect.Classes;
+import net.lenni0451.reflect.Fields;
+import net.lenni0451.reflect.Methods;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.Launch;
 import top.outlands.foundation.trie.PrefixTrie;
@@ -25,7 +28,6 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import static top.outlands.foundation.boot.Foundation.LOGGER;
-import static top.outlands.foundation.boot.JVMDriverHolder.DRIVER;
 import static top.outlands.foundation.boot.TransformerHolder.transformers;
 
 @SuppressWarnings({"deprecation", "unused"})
@@ -73,11 +75,11 @@ public class ActualClassLoader extends URLClassLoader {
         } catch (Throwable t1) {
             LOGGER.warn(t1);
             try {
-                Class<?> loader = DRIVER.getBuiltinClassLoaderClass();
-                Class<?> ucp = DRIVER.getClassByName("jdk.internal.loader.URLClassPath", false, Launch.appClassLoader, loader);
-                Field ucpField = JVMDriverHolder.findField(loader, "ucp");
-                Method add = JVMDriverHolder.findMethod(ucp, "addURL");
-                addURL = url -> DRIVER.invoke(DRIVER.getFieldValue(Launch.appClassLoader, ucpField), add, new Object[]{url});
+                Class<?> loader = Classes.forName("jdk.internal.loader.BuiltinClassLoader");
+                Class<?> ucp = Classes.forName("jdk.internal.loader.URLClassPath", false, Launch.appClassLoader);
+                Field ucpField = Fields.getDeclaredField(loader, "ucp");
+                Method add = Methods.getDeclaredMethod(ucp, "addURL");
+                addURL = url -> Methods.invoke(Fields.getObject(Launch.appClassLoader, ucpField), add, new Object[]{url});
             } catch (Throwable t2) {
                 LOGGER.warn(t2);
                 LOGGER.fatal("Can't get parent class ucp");

@@ -18,7 +18,7 @@ repositories {
 
 group = 'top.outlands'
 archivesBaseName = 'foundation'
-version = '0.14.14'
+version = '0.15.0'
 java.targetCompatibility(JavaVersion.VERSION_21)
 
 dependencies {
@@ -26,14 +26,14 @@ dependencies {
     implementation 'org.javassist:javassist:3.30.2-GA'
     implementation 'org.apache.logging.log4j:log4j-core:2.23.0'
     implementation 'org.apache.logging.log4j:log4j-api:2.23.0'
-    implementation 'com.google.guava:guava:33.0.0-jre'
-    implementation 'org.burningwave:jvm-driver:8.15.0'
+    implementation 'com.google.guava:guava:33.4.8-jre'
     implementation 'zone.rong:imaginebreaker:2.1'
     implementation 'org.ow2.asm:asm:9.8'
-    implementation 'com.cleanroommc:sponge-mixin:0.18.0+mixin.0.8.5'
+    implementation 'com.cleanroommc:sponge-mixin:0.20.10+mixin.0.8.7'
+    implementation "net.lenni0451:Reflect:1.5.0"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
-    testImplementation 'com.google.guava:guava:33.1.0-jre'
+    testImplementation 'com.google.guava:guava:33.4.8-jre'
 
 }
 
@@ -49,13 +49,19 @@ tasks.register('sourcesJar', Jar) {
     from sourceSets.main.allSource
 }
 
-tasks.named('test', Test) {
+tasks.register('testTools', Test) {
+    group = 'verification'
+
     useJUnitPlatform()
 
     maxHeapSize = '1G'
 
     testLogging {
         events "passed"
+    }
+
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 

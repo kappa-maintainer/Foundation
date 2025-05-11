@@ -1,5 +1,6 @@
 package top.outlands.foundation.boot;
 
+import net.lenni0451.reflect.Fields;
 import sun.misc.Unsafe;
 
 import java.lang.invoke.MethodHandles;
@@ -10,9 +11,8 @@ public class UnsafeHolder {
     public static Unsafe UNSAFE;
     static {
         try {
-            Field unsafe = JVMDriverHolder.findField(Unsafe.class, "theUnsafe");
-            JVMDriverHolder.DRIVER.setAccessible(unsafe, true);
-            UNSAFE = (Unsafe) unsafe.get(null);
+            Field unsafe = Fields.getDeclaredField(Unsafe.class, "theUnsafe");
+            UNSAFE = Fields.getObject(null, unsafe);
         } catch (Throwable t) {
             Foundation.LOGGER.debug(t);
             Foundation.LOGGER.warn("Can't get unsafe from JVM Driver, trying VarHandle");

@@ -92,7 +92,6 @@ public class TrieTest {
             Assertions.assertNotNull(trie.getNode(s));
         }
         trie.getRoot().getKeyValueNodes().forEach(node -> log.info(node.getKey()));
-        log.info(UnsafeHolder.UNSAFE);
     }
     
 }
