@@ -132,6 +132,7 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("org.jline.");
         addClassLoaderExclusion0("com.mojang.util.QueueLogAppender");
         addClassLoaderExclusion0("net.minecraftforge.server.terminalconsole.");
+        addClassLoaderExclusion0("net.lenni0451.reflect.");
         addClassLoaderExclusion0("com.yourkit.");
         addTransformerExclusion("org.spongepowered.asm.launch.");
         addTransformerExclusion("org.spongepowered.asm.logging.");
