@@ -258,7 +258,7 @@ public class ActualClassLoader extends URLClassLoader {
                 
             }
 
-            transformedClass = runExplicitTransformers(transformedName, this.runTransformers(untransformedName, transformedName, getClassBytes(untransformedName)));
+            transformedClass = this.transformClass(untransformedName, transformedName, getClassBytes(untransformedName));
             if (DUMP) {
                 saveClassBytes(transformedClass, transformedName);
             }
@@ -345,6 +345,14 @@ public class ActualClassLoader extends URLClassLoader {
         return null;
     }
 
+    protected byte[] transformClass(final String name, final String transformedName, byte[] basicClass) {
+        return runASMTransformers(name, transformedName,
+            runExplicitTransformers(transformedName, 
+                runTransformers(name, transformedName, basicClass)
+            )
+        );
+    }
+
     protected byte[] runTransformers(final String name, final String transformedName, byte[] basicClass) {
         basicClass = transformerHolder.runTransformersFunction.apply(name, transformedName, basicClass);
         return basicClass;
@@ -352,6 +360,11 @@ public class ActualClassLoader extends URLClassLoader {
 
     protected byte[] runExplicitTransformers(final String transformedName, byte[] basicClass) {
         basicClass = transformerHolder.runExplicitTransformersFunction.apply(transformedName, basicClass);
+        return basicClass;
+    }
+
+    protected byte[] runASMTransformers(final String name, final String transformedName, byte[] basicClass) {
+        basicClass = transformerHolder.runTransformersFunction.apply(name, transformedName, basicClass);
         return basicClass;
     }
 

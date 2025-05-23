@@ -3,6 +3,12 @@ package top.outlands.foundation;
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 import top.outlands.foundation.boot.TransformerHolder;
+import top.outlands.foundation.util.ExplicitTransformerList;
+import top.outlands.foundation.util.TransformerList;
+import top.outlands.foundation.function.transformer.IASMTreeTransformer;
+import top.outlands.foundation.function.transformer.IASMVisitorTransformer;
+import top.outlands.foundation.function.transformer.IExplicitASMTreeTransformer;
+import top.outlands.foundation.function.transformer.IExplicitASMVisitorTransformer;
 
 import java.util.*;
 
@@ -82,6 +88,14 @@ public class TransformerDelegate {
         }
     }
 
+    public static void registerExplicitTransformer(IExplicitASMTreeTransformer transformer, String... targets) {
+        explicitASMTreeTransformers.register(transformer, targets);
+    }
+
+    public static void registerExplicitTransformer(IExplicitASMVisitorTransformer transformer, String... targets) {
+        explicitASMVisitorTransformers.register(transformer, targets);
+    }
+
     /**
      * Same as {@link net.minecraft.launchwrapper.LaunchClassLoader#registerTransformer(String)}
      * @param transformerClassName class name
@@ -107,6 +121,14 @@ public class TransformerDelegate {
     public static void registerTransformer(IClassTransformer transformer) {
         LOGGER.debug("Registering transformer instance: {}", transformer.getClass().getName());
         transformers.add(transformer);
+    }
+
+    public static void registerTransformer(IASMTreeTransformer transformer) {
+        asmTreeTransformers.register(transformer);
+    }
+
+    public static void registerTransformer(IASMVisitorTransformer transformer) {
+        asmVisitorTransformers.register(transformer);
     }
 
     /**
@@ -142,8 +164,13 @@ public class TransformerDelegate {
      * @param holder The one and only handler
      */
     static void fillTransformerHolder(TransformerHolder holder) {
-        explicitTransformers = new HashMap<>(20);
+        explicitTransformers = new ExplicitTransformerList<>();
+        explicitASMTreeTransformers = new ExplicitTransformerList<>();
+        explicitASMVisitorTransformers = new ExplicitTransformerList<>();
         transformers = new LinkedList<>();
+        asmTreeTransformers = new TransformerList<>();
+        asmVisitorTransformers = new TransformerList<>();
+
         holder.runTransformersFunction = (name, transformedName, basicClass) -> {
             for (final IClassTransformer transformer : Collections.unmodifiableList(transformers)) {
                 basicClass = transformer.transform(name, transformedName, basicClass);
@@ -162,18 +189,16 @@ public class TransformerDelegate {
                 LOGGER.error("Error registering transformer class {}", s, e);
             }
         };
-        holder.runExplicitTransformersFunction = (name, basicClass) -> {
-            if (explicitTransformers.containsKey(name)) {
-                PriorityQueue<IExplicitTransformer> queue = explicitTransformers.get(name);
-                if (queue != null) {
-                    while (!queue.isEmpty()) {
-                        basicClass = queue.poll().transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
-                    }
-                    explicitTransformers.remove(name); // GC
-                }
-            }
-            return basicClass;
-        };
+        holder.runExplicitTransformersFunction = explicitTransformers::run;
+        holder.runASMTransformersFunction = (name, transformedName, basicClass) -> {
+            ClassReader classReader = new ClassReader(basicClass);
+            ClassNode classNode = new ClassNode();
+            ClassVisitor classVisitor = classNode;
+            classReader.accept(explicitASMVisitorTransformers.run(transformedName, asmVisitorTransformers.run(name, transformedName, classVisitor)));
+            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+            explicitASMTreeTransformers.run(transformedName, asmTreeTransformers.run(name, transformedName, classNode)).accept(classWriter);
+            return classWriter.toByteArray();
+        }
         holder.transformNameFunction = s -> {
             if (renameTransformer != null) {
                 return renameTransformer.remapClassName(s);
