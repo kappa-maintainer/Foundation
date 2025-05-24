@@ -171,7 +171,7 @@ public class TransformerDelegate {
         explicitClassVisitorTransformers = new ExplicitTransformerList<>(new HashMap<>(20), Foundation.LOGGER);
         explicitCtClassTransformers = new ExplicitTransformerList<>(new HashMap<>(20), Foundation.LOGGER);
 
-        classByteTransformers = new TransformerList<>(transformers = new LinkedList<>(), Foundation.LOGGER);
+        classByteTransformers = new TransformerList<>((List<ITransformer<byte>>)(Object)(transformers = new LinkedList<>()), Foundation.LOGGER);
         classNodeTransformers = new TransformerList<>(new LinkedList(), Foundation.LOGGER);
         classVisitorTransformers = new TransformerList<>(new LinkedList(), Foundation.LOGGER);
         ctClassTransformers = new TransformerList<>(new LinkedList(), Foundation.LOGGER);
