@@ -3,7 +3,7 @@ package top.outlands;
 import net.lenni0451.reflect.Fields;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import top.outlands.foundation.IExplicitTransformer;
+import top.outlands.foundation.function.transformer.IExplicitTransformer;
 import top.outlands.foundation.boot.UnsafeHolder;
 import top.outlands.foundation.transformer.ASMClassWriterTransformer;
 import top.outlands.foundation.transformer.ASMVisitorTransformer;

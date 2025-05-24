@@ -5,7 +5,8 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import top.outlands.foundation.boot.TransformerHolder;
 import top.outlands.foundation.util.ExplicitTransformerList;
 import top.outlands.foundation.util.TransformerList;
-package top.outlands.foundation.function.transformer.ITransformer;
+import top.outlands.foundation.function.transformer.ITransformer;
+import top.outlands.foundation.transformer.ASMClassWriterTransformer
 
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -193,7 +194,12 @@ public class TransformerDelegate {
             ClassReader classReader = new ClassReader(basicClass);
             ClassNode classNode = new ClassNode();
             classReader.accept(explicitClassVisitorTransformers.run(transformedName, classVisitorTransformers.run(name, transformedName, classNode)));
-            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+            ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS){
+                @Override
+                public String getCommonSuperClass(String s1, String s2) {
+                    return ASMClassWriterTransformer.getCommonSuperClass(s1, s2);
+                }
+            };
             explicitClassNodeTransformers.run(transformedName, classNodeTransformers.run(name, transformedName, classNode)).accept(classWriter);
             return classWriter.toByteArray();
         }
