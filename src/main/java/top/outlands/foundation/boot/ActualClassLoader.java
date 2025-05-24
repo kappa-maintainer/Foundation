@@ -243,7 +243,7 @@ public class ActualClassLoader extends URLClassLoader {
             if (node != null && node.getValue()) {
                 try {
                     transformedClass = getClassBytes(name);
-                    transformedClass = runExplicitTransformers(transformedName, transformedClass);
+                    transformedClass = transformTransformerExcludedClass(untransformedName, transformedName, transformedClass);
                     final CodeSource codeSource = urlConnection == null ? null : new CodeSource(urlConnection.getURL(), signers);
                     if (transformedClass == null) throw new ClassNotFoundException(transformedName);
                     final Class<?> clazz = super.defineClass(name, transformedClass, 0, transformedClass.length, codeSource);
@@ -346,11 +346,14 @@ public class ActualClassLoader extends URLClassLoader {
     }
 
     protected byte[] transformClass(final String name, final String transformedName, byte[] basicClass) {
-        return runASMTransformers(name, transformedName,
-            runExplicitTransformers(transformedName, 
-                runTransformers(name, transformedName, basicClass)
-            )
-        );
+        return transformTransformerExcludedClass(name, transformedName, runTransformers(name, transformedName, basicClass));
+    }
+
+    protected byte[] transformTransformerExcludedClass(final String name, final String transformedName, byte[] basicClass) {
+        return runJavassistTransformers(name, transformedName,
+        runASMTransformers(name, transformedName,
+            runExplicitTransformers(transformedName, basicClass)
+        ));
     }
 
     protected byte[] runTransformers(final String name, final String transformedName, byte[] basicClass) {
@@ -364,7 +367,12 @@ public class ActualClassLoader extends URLClassLoader {
     }
 
     protected byte[] runASMTransformers(final String name, final String transformedName, byte[] basicClass) {
-        basicClass = transformerHolder.runTransformersFunction.apply(name, transformedName, basicClass);
+        basicClass = transformerHolder.runASMTransformersFunction.apply(name, transformedName, basicClass);
+        return basicClass;
+    }
+
+    protected byte[] runJavassistTransformers(final String name, final String transformedName, byte[] basicClass) {
+        basicClass = transformerHolder.runJavassistTransformersFunction.apply(name, transformedName, basicClass);
         return basicClass;
     }
 

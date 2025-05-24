@@ -5,12 +5,17 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import top.outlands.foundation.boot.TransformerHolder;
 import top.outlands.foundation.util.ExplicitTransformerList;
 import top.outlands.foundation.util.TransformerList;
-import top.outlands.foundation.function.transformer.IASMTreeTransformer;
-import top.outlands.foundation.function.transformer.IASMVisitorTransformer;
-import top.outlands.foundation.function.transformer.IExplicitASMTreeTransformer;
-import top.outlands.foundation.function.transformer.IExplicitASMVisitorTransformer;
+
+import javassist.ClassPool;
+import javassist.CtClass;
+
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.util.*;
+import java.io.ByteArrayInputStream;
 
 import static net.minecraft.launchwrapper.Launch.classLoader;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
@@ -22,6 +27,7 @@ import static top.outlands.foundation.boot.TransformerHolder.*;
 public class TransformerDelegate {
 
     private static final boolean VERBOSE = Boolean.parseBoolean(System.getProperty("foundation.verbose", "false"));
+    
     /**
      * @return list of transformers.
      */
@@ -33,8 +39,9 @@ public class TransformerDelegate {
      * Get explicit transformers map. It's exact same map in used, you can modify it at will.
      * @return the map
      */
+    @Deprecated
     public static Map<String, PriorityQueue<IExplicitTransformer>> getExplicitTransformers() {
-        return explicitTransformers;
+        return explicitClassByteTransformers.getTransformers();
     }
 
     /**
@@ -55,6 +62,7 @@ public class TransformerDelegate {
      * @param targets Target classes' name.
      * @param className Class name of the transformer.
      */
+    @Deprecated
     public static void registerExplicitTransformer(String className, String... targets) {
         if (targets.length == 0) return;
         LOGGER.debug("Registering explicit transformer: {}", className);
@@ -69,31 +77,25 @@ public class TransformerDelegate {
         }
     }
 
+    @Deprecated
     public static void registerExplicitTransformer(IExplicitTransformer transformer, String... targets) {
-        if (targets.length == 0) return;
-        LOGGER.debug("Registering explicit transformer instance: {}", transformer.getClass().getSimpleName());
-        try {
-            for (var target : targets) {
-                if (explicitTransformers.containsKey(target)) {
-                    explicitTransformers.get(target).add(transformer);
-                } else {
-                    var transformerSet = new PriorityQueue<>(Comparator.comparingInt(IExplicitTransformer::getPriority));
-                    transformerSet.add(transformer);
-                    explicitTransformers.put(target, transformerSet);
-                }
-            }
-
-        } catch (Exception e) {
-            LOGGER.error("Error registering explicit transformer class {}", transformer.getClass().getSimpleName(), e);
-        }
+        explicitClassByteTransformers.register(transformer, targets);
     }
 
-    public static void registerExplicitTransformer(IExplicitASMTreeTransformer transformer, String... targets) {
-        explicitASMTreeTransformers.register(transformer, targets);
+    public static void registerExplicitClassByteTransformer(top.outlands.foundation.function.transformer.IExplicitTransformer<byte[]> transformer, String... targets) {
+        explicitClassByteTransformers.register(transformer, targets);
     }
 
-    public static void registerExplicitTransformer(IExplicitASMVisitorTransformer transformer, String... targets) {
-        explicitASMVisitorTransformers.register(transformer, targets);
+    public static void registerExplicitClassNodeTransformer(top.outlands.foundation.function.transformer.IExplicitTransformer<ClassNode> transformer, String... targets) {
+        explicitClassNodeTransformers.register(transformer, targets);
+    }
+
+    public static void registerExplicitClassNodeTransformer(top.outlands.foundation.function.transformer.IExplicitTransformer<ClassVisitor> transformer, String... targets) {
+        explicitClassVisitorTransformers.register(transformer, targets);
+    }
+
+    public static void registerExplicitClassNodeTransformer(top.outlands.foundation.function.transformer.IExplicitTransformer<CtClass> transformer, String... targets) {
+        explicitCtClassTransformers.register(transformer, targets);
     }
 
     /**
@@ -118,31 +120,35 @@ public class TransformerDelegate {
      * In case you want to control how the transformer is initialized, in which you could <b>new</b> it yourself.
      * @param transformer The transformer
      */
+    @Deprecated
     public static void registerTransformer(IClassTransformer transformer) {
         LOGGER.debug("Registering transformer instance: {}", transformer.getClass().getName());
         transformers.add(transformer);
     }
 
-    public static void registerTransformer(IASMTreeTransformer transformer) {
-        asmTreeTransformers.register(transformer);
+    public static void registerClassByteTransformer(ITransformer<byte[]> transformer) {
+        classByteTransformers.register(transformer);
     }
 
-    public static void registerTransformer(IASMVisitorTransformer transformer) {
-        asmVisitorTransformers.register(transformer);
+    public static void registerClassNodeTransformer(ITransformer<ClassNode> transformer) {
+        classNodeTransformers.register(transformer);
+    }
+
+    public static void registerClassVisitorTransformer(ITransformer<ClassVisitor> transformer) {
+        classVisitorTransformers.register(transformer);
+    }
+
+    public static void registerCtClassTransformer(ITransformer<CtClass> transformer) {
+        ctClassTransformers.register(transformer);
     }
 
     /**
      * Call this with class name to remove all transformers with target class name.
      * @param name The transformer name you want to un-register
      */
-    public static void unRegisterTransformer(String name) {
+    public static void unRegisterTransformer(final String name) {
         LOGGER.debug("Unregistering all transformers call: {}", name);
-        try {
-            transformers.stream().filter(transformer -> transformer.getClass().getName().equals(name)).forEach(transformers::remove);
-            transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
-        } catch (Exception e) {
-            LOGGER.error("Error removing transformer class {}", name, e);
-        }
+        classByteTransformers.unregister(transformer -> name.equals(transformer.getClass().getName()));
     }
 
     /**
@@ -150,13 +156,7 @@ public class TransformerDelegate {
      * @param transformer The transformer you want to un-register
      */
     public static void unRegisterTransformer(IClassTransformer transformer) {
-        LOGGER.debug("Unregistering transformer: {}", transformer.getClass().getSimpleName());
-        try {
-            transformers.remove(transformer);
-            transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
-        } catch (Exception e) {
-            LOGGER.error("Error removing transformer class {}", transformer, e);
-        }
+        classByteTransformers.unregister(transformer);
     }
 
     /**
@@ -164,40 +164,43 @@ public class TransformerDelegate {
      * @param holder The one and only handler
      */
     static void fillTransformerHolder(TransformerHolder holder) {
-        explicitTransformers = new ExplicitTransformerList<>();
-        explicitASMTreeTransformers = new ExplicitTransformerList<>();
-        explicitASMVisitorTransformers = new ExplicitTransformerList<>();
-        transformers = new LinkedList<>();
-        asmTreeTransformers = new TransformerList<>();
-        asmVisitorTransformers = new TransformerList<>();
+        explicitClassByteTransformers = new ExplicitTransformerList<>(new HashMap<>(20), Foundation.LOGGER);
+        explicitClassNodeTransformers = new ExplicitTransformerList<>(new HashMap<>(20), Foundation.LOGGER);
+        explicitClassVisitorTransformers = new ExplicitTransformerList<>(new HashMap<>(20), Foundation.LOGGER);
+        explicitCtClassTransformers = new ExplicitTransformerList<>(new HashMap<>(20), Foundation.LOGGER);
 
-        holder.runTransformersFunction = (name, transformedName, basicClass) -> {
-            for (final IClassTransformer transformer : Collections.unmodifiableList(transformers)) {
-                basicClass = transformer.transform(name, transformedName, basicClass);
-            }
-            return basicClass;
-        };
+        classByteTransformers = new TransformerList<>(transformers = new LinkedList<>(), Foundation.LOGGER);
+        classNodeTransformers = new TransformerList<>(new LinkedList(), Foundation.LOGGER);
+        classVisitorTransformers = new TransformerList<>(new LinkedList(), Foundation.LOGGER);
+        ctClassTransformers = new TransformerList<>(new LinkedList(), Foundation.LOGGER);
+
+        holder.runTransformersFunction = classByteTransformers::run;
         holder.registerTransformerFunction = s -> {
             if (!s.contains(".")) {
                 s = s.replace('/', '.');
             }
             try {
                 IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(s).getConstructor().newInstance();
-                transformers.add(transformer);
-                transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
+                classByteTransformers.register(transformer);
             } catch (Exception e) {
                 LOGGER.error("Error registering transformer class {}", s, e);
             }
         };
-        holder.runExplicitTransformersFunction = explicitTransformers::run;
+        holder.runExplicitTransformersFunction = explicitClassByteTransformers::run;
         holder.runASMTransformersFunction = (name, transformedName, basicClass) -> {
+            if (basicClass == null) return null;
             ClassReader classReader = new ClassReader(basicClass);
             ClassNode classNode = new ClassNode();
-            ClassVisitor classVisitor = classNode;
-            classReader.accept(explicitASMVisitorTransformers.run(transformedName, asmVisitorTransformers.run(name, transformedName, classVisitor)));
+            classReader.accept(explicitClassVisitorTransformers.run(transformedName, classVisitorTransformers.run(name, transformedName, classNode)));
             ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-            explicitASMTreeTransformers.run(transformedName, asmTreeTransformers.run(name, transformedName, classNode)).accept(classWriter);
+            explicitClassNodeTransformers.run(transformedName, classNodeTransformers.run(name, transformedName, classNode)).accept(classWriter);
             return classWriter.toByteArray();
+        }
+        holder.runJavassistTransformersFunction = (name, transformedName, basicClass) -> {
+            if (basicClass == null) return null;
+            var cp = ClassPool.getDefault();
+            CtClass cc = cp.makeClass(new ByteArrayInputStream(basicClass));
+            return explicitCtClassTransformers.run(transformedName, ctClassTransformers.run(name, transformedName, cc)).toBytecode();
         }
         holder.transformNameFunction = s -> {
             if (renameTransformer != null) {

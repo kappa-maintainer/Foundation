@@ -4,29 +4,22 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Comparator;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.PriorityQueue;
-import java.util.function.Supplier;
 
-import top.outlands.foundation.boot.Foundation;
 import top.outlands.foundation.function.transformer.IExplicitTransformer;
 
-public class ExplicitTransformerList<T extends IExplicitTransformer>{
-    private final Map<String, PriorityQueue<T>> transformers;
-    private final Supplier<Logger> logger;
+public class ExplicitTransformerList<T>{
+    private final Map<String, PriorityQueue<IExplicitTransformer<T>>> transformers;
+    private final Logger logger;
 
-    public ExplicitTransformerList(){
-        this(() -> new HashMap<>(20), () -> Foundation.LOGGER);
-    }
-
-    public ExplicitTransformerList(Supplier<Map<String, PriorityQueue<T>>> constructor, Supplier<Logger> logger){
-        this.transformers = constructor.get();
+    public ExplicitTransformerList(Map<String, PriorityQueue<IExplicitTransformer<T>>> map, Logger logger){
+        this.transformers = map;
         this.logger = logger;
     }
 
-    public void register(T transformer, String... targets){
+    public void register(IExplicitTransformer<T> transformer, String... targets){
         if (targets.length == 0) return;
-        logger.get().debug("Registering explicit transformer instance: {}", transformer.getClass().getSimpleName());
+        logger.debug("Registering explicit transformer instance: {}", transformer.getClass().getSimpleName());
         try {
             for (String target : targets) {
                 if (transformers.containsKey(target)) {
@@ -43,12 +36,16 @@ public class ExplicitTransformerList<T extends IExplicitTransformer>{
         }
     }
 
-    public PriorityQueue<T> getTransformer(String transformedName) {
+    public PriorityQueue<IExplicitTransformer<T>> getTransformer(String transformedName) {
         return transformers.get(transformedName);
     }
 
+    public Map<String, PriorityQueue<IExplicitTransformer<T>>> getTransformers() {
+        return transformers;
+    }
+
     public T run(String transformedName, T value) {
-        PriorityQueue<T> queue = transformers.get(transformedName);
+        PriorityQueue<IExplicitTransformer<T>> queue = transformers.get(transformedName);
         if (queue != null) {
             while (!queue.isEmpty()) {
                 value = queue.poll().transform(value); // We are not doing hotswap, so classes only loaded once. Let's free their memory
