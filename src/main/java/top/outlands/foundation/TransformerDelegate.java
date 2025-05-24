@@ -5,6 +5,7 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import top.outlands.foundation.boot.TransformerHolder;
 import top.outlands.foundation.util.ExplicitTransformerList;
 import top.outlands.foundation.util.TransformerList;
+package top.outlands.foundation.function.transformer.ITransformer;
 
 import javassist.ClassPool;
 import javassist.CtClass;
