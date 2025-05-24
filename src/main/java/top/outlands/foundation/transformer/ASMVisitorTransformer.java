@@ -16,7 +16,7 @@ public class ASMVisitorTransformer implements IExplicitTransformer<CtClass> {
                         }
                     """;
     @Override
-    public byte[] transform(byte[] cc) {
+    public CtClass transform(CtClass cc) {
         LOGGER.debug("Patching " + cc.getName());
         var cotr = cc.getConstructor("(I)V");
         cotr.insertAfter(CODE);

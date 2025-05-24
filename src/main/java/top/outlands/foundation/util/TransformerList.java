@@ -54,7 +54,7 @@ public class TransformerList<T> {
     }
 
     public T run(String name, String transformedName, T value) {
-        for(T transformer : Collections.unmodifiableList(transformers)) {
+        for(ITransformer<T> transformer : Collections.unmodifiableList(transformers)) {
             vlaue = transformer.transform(name, transformedName, value);
         }
         return T;

@@ -25,7 +25,7 @@ public class ExplicitTransformerList<T>{
                 if (transformers.containsKey(target)) {
                     transformers.get(target).add(transformer);
                 } else {
-                    PriorityQueue<T> transformerSet = new PriorityQueue<>(Comparator.comparingInt(IExplicitTransformer::getPriority));
+                    PriorityQueue<<IExplicitTransformer<T>> transformerSet = new PriorityQueue<>(Comparator.comparingInt(IExplicitTransformer::getPriority));
                     transformerSet.add(transformer);
                     transformers.put(target, transformerSet);
                 }

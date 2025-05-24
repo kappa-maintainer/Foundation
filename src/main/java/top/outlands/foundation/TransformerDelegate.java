@@ -6,7 +6,7 @@ import top.outlands.foundation.boot.TransformerHolder;
 import top.outlands.foundation.util.ExplicitTransformerList;
 import top.outlands.foundation.util.TransformerList;
 import top.outlands.foundation.function.transformer.ITransformer;
-import top.outlands.foundation.transformer.ASMClassWriterTransformer
+import top.outlands.foundation.transformer.ASMClassWriterTransformer；
 
 import javassist.ClassPool;
 import javassist.CtClass;
