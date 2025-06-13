@@ -355,7 +355,7 @@ public class ActualClassLoader extends URLClassLoader {
         return basicClass;
     }
 
-    public static List<IClassTransformer> getTransformers() {
+    public List<IClassTransformer> getTransformers() {
         return transformers;
     }
 
