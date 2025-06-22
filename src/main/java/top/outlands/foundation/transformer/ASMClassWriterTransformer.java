@@ -31,20 +31,20 @@ public class ASMClassWriterTransformer implements IExplicitTransformer {
         Class<?> class1;
         try {
             class1 = Class.forName(type1.replace('/', '.'), false, classLoader);
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException | NoClassDefFoundError e) {
             try {
                 class1 = Class.forName(type1.replace('/', '.'), false, Launch.classLoader);
-            } catch (ClassNotFoundException e1) {
+            } catch (ClassNotFoundException | NoClassDefFoundError e1) {
                 throw new TypeNotPresentException(type1, e1);
             }
         }
         Class<?> class2;
         try {
             class2 = Class.forName(type2.replace('/', '.'), false, classLoader);
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException | NoClassDefFoundError e) {
             try {
                 class2 = Class.forName(type2.replace('/', '.'), false, Launch.classLoader);
-            } catch (ClassNotFoundException e2) {
+            } catch (ClassNotFoundException | NoClassDefFoundError e2) {
                 throw new TypeNotPresentException(type2, e2);
             }
         }
