@@ -187,12 +187,14 @@ public class TransformerDelegate {
             return s;
         };
         holder.debugPrinter = () -> {
-            LOGGER.info("Running transformers: ");
+            LOGGER.debug("Running transformers: ");
             getTransformers().stream().map(t -> t.toString() + " : " + t.getPriority()).forEach(s -> LOGGER.info(s));
-            LOGGER.info("Transformer Exclusions: ");
-            classLoader.getTransformerExclusions().forEach(s -> LOGGER.info(s));
-            LOGGER.info("Class Paths: ");
-            Arrays.stream(classLoader.getURLs()).forEach(s -> LOGGER.info(s));
+            explicitTransformers.forEach((s, t)
+                    -> LOGGER.debug("{}'s transformers:{}", s, Arrays.toString(t.toArray())));
+            LOGGER.debug("Transformer Exclusions: ");
+            classLoader.getTransformerExclusions().forEach(s -> LOGGER.debug(s));
+            LOGGER.debug("Class Paths: ");
+            Arrays.stream(classLoader.getURLs()).forEach(s -> LOGGER.debug(s));
         };
     }
 }

@@ -193,8 +193,9 @@ public class ActualClassLoader extends URLClassLoader {
             if (VERBOSE) {
                 LOGGER.debug("Loading class: {}", transformedName);
                 if (!TARGET.isEmpty() && transformedName.equals(TARGET)) {
-                    LOGGER.info("Target found");
-                    Arrays.stream(Thread.currentThread().getStackTrace()).forEach(LOGGER::info);
+                    LOGGER.debug("Target found");
+                    Arrays.stream(Thread.currentThread().getStackTrace()).forEach(LOGGER::debug);
+                    transformerHolder.debugPrinter.run();
                 }
             }
             if (cachedClasses.containsKey(transformedName)) {
