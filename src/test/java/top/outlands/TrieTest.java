@@ -1,10 +1,12 @@
 package top.outlands;
 
 
+import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import top.outlands.foundation.boot.UnsafeHolder;
 import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
 

@@ -27,7 +27,7 @@ public class TransformerDelegate {
      * Get explicit transformers map. It's exact same map in used, you can modify it at will.
      * @return the map
      */
-    public static Map<String, SortedSet<IExplicitTransformer>> getExplicitTransformers() {
+    public static Map<String, PriorityQueue<IExplicitTransformer>> getExplicitTransformers() {
         return explicitTransformers;
     }
 
@@ -71,7 +71,7 @@ public class TransformerDelegate {
                 if (explicitTransformers.containsKey(target)) {
                     explicitTransformers.get(target).add(transformer);
                 } else {
-                    var transformerSet = new TreeSet<>(Comparator.comparingInt(IExplicitTransformer::getPriority));
+                    var transformerSet = new PriorityQueue<>(Comparator.comparingInt(IExplicitTransformer::getPriority));
                     transformerSet.add(transformer);
                     explicitTransformers.put(target, transformerSet);
                 }
@@ -164,23 +164,12 @@ public class TransformerDelegate {
         };
         holder.runExplicitTransformersFunction = (name, basicClass) -> {
             if (explicitTransformers.containsKey(name)) {
-                SortedSet<IExplicitTransformer> set = explicitTransformers.get(name);
-                if (set != null) {
-                    for (var explicitTransformer : set) {
-                        basicClass = explicitTransformer.transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
+                PriorityQueue<IExplicitTransformer> queue = explicitTransformers.get(name);
+                if (queue != null) {
+                    while (!queue.isEmpty()) {
+                        basicClass = queue.poll().transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
                     }
                     explicitTransformers.remove(name); // GC
-                }
-            }
-            return basicClass;
-        };
-        holder.runExplicitTransformersFunctionWithoutRemoval = (name, basicClass) -> {
-            if (explicitTransformers.containsKey(name)) {
-                SortedSet<IExplicitTransformer> set = explicitTransformers.get(name);
-                if (set != null) {
-                    for (var explicitTransformer : set) {
-                        basicClass = explicitTransformer.transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
-                    }
                 }
             }
             return basicClass;

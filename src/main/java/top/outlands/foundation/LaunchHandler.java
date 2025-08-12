@@ -4,6 +4,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.minecraft.launchwrapper.ITweaker;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 import top.outlands.foundation.transformer.ASMClassWriterTransformer;
 import top.outlands.foundation.transformer.ASMVisitorTransformer;
 
@@ -75,12 +76,11 @@ public class LaunchHandler {
             blackboard.put("Tweaks", tweakers);
             ITweaker primaryTweaker = null;
             do {
-                int i = 0;
-                while (i < tweakClassNames.size()) {
-                    final String tweakName = tweakClassNames.get(i);
+                for (final Iterator<String> it = tweakClassNames.iterator(); it.hasNext(); ) {
+                    final String tweakName = it.next();
                     if (allTweakerNames.contains(tweakName)) {
                         LOGGER.warn("Tweak name {} has already been visited -- skipping", tweakName);
-                        tweakClassNames.remove(i);
+                        it.remove();
                         continue;
                     } else {
                         allTweakerNames.add(tweakName);
@@ -91,7 +91,7 @@ public class LaunchHandler {
                     final ITweaker tweaker = (ITweaker) Class.forName(tweakName, true, classLoader).getConstructor().newInstance();
                     tweakers.add(tweaker);
 
-                    tweakClassNames.remove(i);
+                    it.remove();
                     if (primaryTweaker == null) {
                         LOGGER.info("Using primary tweak name {}", tweakName);
                         primaryTweaker = tweaker;
@@ -111,6 +111,7 @@ public class LaunchHandler {
             for (final ITweaker tweaker : allTweakers) {
                 argumentList.addAll(Arrays.asList(tweaker.getLaunchArguments()));
             }
+            MixinEnvironment.gotoPhase(MixinEnvironment.Phase.DEFAULT);
 
             final String launchTarget = primaryTweaker.getLaunchTarget();
             final Class<?> clazz = Class.forName(launchTarget, false, classLoader);

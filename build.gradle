@@ -18,7 +18,7 @@ repositories {
 
 group = 'top.outlands'
 base.archivesName = 'foundation'
-version = '0.16.0'
+version = '0.15.4'
 java.targetCompatibility(JavaVersion.VERSION_21)
 
 dependencies {
@@ -29,11 +29,11 @@ dependencies {
     implementation 'com.google.guava:guava:33.4.8-jre'
     implementation 'zone.rong:imaginebreaker:2.1'
     implementation 'org.ow2.asm:asm:9.8'
+    implementation 'com.cleanroommc:sponge-mixin:0.20.10+mixin.0.8.7'
     implementation "net.lenni0451:Reflect:1.5.0"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
     testImplementation 'com.google.guava:guava:33.4.8-jre'
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 
 }
 
@@ -49,20 +49,10 @@ tasks.register('sourcesJar', Jar) {
     from sourceSets.main.allSource
 }
 
-test {
-    useJUnitPlatform()
-    filter {
-        includeTestsMatching("*")
-    }
-}
-
 tasks.register('testTools', Test) {
     group = 'verification'
 
     useJUnitPlatform()
-    filter {
-        includeTestsMatching("*")
-    }
 
     maxHeapSize = '1G'
 

@@ -356,17 +356,6 @@ public class ActualClassLoader extends URLClassLoader {
         return basicClass;
     }
 
-    /**
-     * Added for transform Mixin classes with explicit transformers, but also can be used
-     * @param transformedName the transformed class name for transformer matching
-     * @param basicClass class bytes
-     * @return transformed bytes
-     */
-    public byte[] runExplicitTransformersWithoutRemoval(final String transformedName, byte[] basicClass) {
-        basicClass = transformerHolder.runExplicitTransformersFunctionWithoutRemoval.apply(transformedName, basicClass);
-        return basicClass;
-    }
-
     public List<IClassTransformer> getTransformers() {
         return transformers;
     }
