@@ -32,7 +32,7 @@ import static top.outlands.foundation.boot.TransformerHolder.transformers;
 
 @SuppressWarnings({"deprecation", "unused"})
 public class ActualClassLoader extends URLClassLoader {
-    
+
     public static final int BUFFER_SIZE = 1 << 12;
     private final List<URL> sources;
     private final Set<String> jarNames = new HashSet<>();
@@ -42,7 +42,7 @@ public class ActualClassLoader extends URLClassLoader {
     private final Map<String, Class<?>> cachedClasses = new ConcurrentHashMap<>();
     private final Set<String> invalidClasses = new HashSet<>(1024);
 
-    private final Map<String,byte[]> resourceCache = new ConcurrentHashMap<>(1024);
+    private final Map<String, byte[]> resourceCache = new ConcurrentHashMap<>(1024);
     private final Set<String> negativeResourceCache = ConcurrentHashMap.newKeySet();
 
     private final ThreadLocal<byte[]> loadBuffer = new ThreadLocal<>();
@@ -57,6 +57,7 @@ public class ActualClassLoader extends URLClassLoader {
     private static Manifest EMPTY = new Manifest();
     private static final MethodHandles.Lookup LOOKUP = ImagineBreaker.lookup();
     private static Consumer<URL> addURL;
+
     static {
         try {
             Class<?> loader = LOOKUP.findClass("jdk.internal.loader.BuiltinClassLoader");
@@ -87,7 +88,7 @@ public class ActualClassLoader extends URLClassLoader {
         }
     }
 
-    
+
     public ActualClassLoader(URL[] sources) {
         this(sources, null);
     }
@@ -256,7 +257,7 @@ public class ActualClassLoader extends URLClassLoader {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                
+
             }
 
             transformedClass = runExplicitTransformers(transformedName, this.runTransformers(untransformedName, transformedName, getClassBytes(untransformedName)));
@@ -276,10 +277,10 @@ public class ActualClassLoader extends URLClassLoader {
                 Arrays.stream(e.getStackTrace()).forEach(LOGGER::debug);
             }
             throw new ClassNotFoundException(name, e);
-            
+
         }
     }
-    
+
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         return findClass(name);
@@ -412,13 +413,16 @@ public class ActualClassLoader extends URLClassLoader {
         }
         return buffer;
     }
+
     private void addClassLoaderExclusion0(String toExclude) {
         LOGGER.debug("Adding classloader exclusion {}", toExclude);
         classLoaderExceptions.put(toExclude, true);
     }
+
     public void addClassLoaderExclusion(String toExclude) {
         addTransformerExclusion(toExclude);
     }
+
     public void addTransformerExclusion(String toExclude) {
         LOGGER.debug("Adding transformer exclusion {}", toExclude);
         transformerExceptions.put(toExclude, true);
@@ -517,7 +521,8 @@ public class ActualClassLoader extends URLClassLoader {
 
     /**
      * Wrapper of defineClass()
-     * @param name class name
+     *
+     * @param name   class name
      * @param buffer class byte array
      * @return the defined class
      */
@@ -541,6 +546,7 @@ public class ActualClassLoader extends URLClassLoader {
 
     /**
      * Check is a class loaded in this class loader without actually loading it
+     *
      * @param name class name
      * @return if the class loaded
      */
@@ -550,6 +556,7 @@ public class ActualClassLoader extends URLClassLoader {
 
     /**
      * Check is a class exists without actually loading/defining it
+     *
      * @param name class name
      * @return if the class exists
      */

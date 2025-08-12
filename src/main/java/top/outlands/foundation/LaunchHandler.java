@@ -4,7 +4,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.minecraft.launchwrapper.ITweaker;
-import org.spongepowered.asm.mixin.MixinEnvironment;
 import top.outlands.foundation.transformer.ASMClassWriterTransformer;
 import top.outlands.foundation.transformer.ASMVisitorTransformer;
 
@@ -42,7 +41,7 @@ public class LaunchHandler {
         blackboard = new HashMap<>();
         Thread.currentThread().setContextClassLoader(classLoader);
         fillTransformerHolder(classLoader.getTransformerHolder());
-        
+
         TransformerDelegate.registerExplicitTransformer(
                 new ASMVisitorTransformer(),
                 "org.objectweb.asm.FieldVisitor",
@@ -87,7 +86,7 @@ public class LaunchHandler {
                     }
                     LOGGER.info("Loading tweak name {}", tweakName);
 
-                    classLoader.addTransformerExclusion(tweakName.substring(0,tweakName.lastIndexOf('.')));
+                    classLoader.addTransformerExclusion(tweakName.substring(0, tweakName.lastIndexOf('.')));
                     final ITweaker tweaker = (ITweaker) Class.forName(tweakName, true, classLoader).getConstructor().newInstance();
                     tweakers.add(tweaker);
 
@@ -111,7 +110,6 @@ public class LaunchHandler {
             for (final ITweaker tweaker : allTweakers) {
                 argumentList.addAll(Arrays.asList(tweaker.getLaunchArguments()));
             }
-            MixinEnvironment.gotoPhase(MixinEnvironment.Phase.DEFAULT);
 
             final String launchTarget = primaryTweaker.getLaunchTarget();
             final Class<?> clazz = Class.forName(launchTarget, false, classLoader);
@@ -124,6 +122,6 @@ public class LaunchHandler {
             System.exit(1);
         }
     }
-    
+
 
 }
