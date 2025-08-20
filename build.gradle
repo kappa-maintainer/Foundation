@@ -5,21 +5,23 @@ plugins {
 
 repositories {
     maven {
-        url "https://libraries.minecraft.net/"
+        url = "https://libraries.minecraft.net/"
     }
     maven {
-        url "https://repo.cleanroommc.com/releases"
+        url = "https://repo.cleanroommc.com/releases"
     }
     maven {
-        url "https://maven.outlands.top/releases"
+        url = "https://maven.outlands.top/releases"
     }
     mavenCentral()
 }
 
 group = 'top.outlands'
 base.archivesName = 'foundation'
-version = '0.16.1'
-java.targetCompatibility(JavaVersion.VERSION_21)
+version = '0.16.2'
+java { 
+    targetCompatibility = JavaVersion.VERSION_21 
+}
 
 dependencies {
     implementation 'net.sf.jopt-simple:jopt-simple:5.0.4'
@@ -30,9 +32,10 @@ dependencies {
     implementation 'zone.rong:imaginebreaker:2.1'
     implementation 'org.ow2.asm:asm:9.8'
     implementation "net.lenni0451:Reflect:1.5.0"
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.13.4'
     testImplementation 'com.google.guava:guava:33.4.8-jre'
+    testImplementation 'org.junit.platform:junit-platform-launcher:1.13.4'
 
 }
 
@@ -48,10 +51,24 @@ tasks.register('sourcesJar', Jar) {
     from sourceSets.main.allSource
 }
 
+test {
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching("*Test")
+    }
+}
+
 tasks.register('testTools', Test) {
     group = 'verification'
 
     useJUnitPlatform()
+
+    test {
+        useJUnitPlatform()
+        filter {
+            includeTestsMatching("*Test")
+        }
+    }
 
     maxHeapSize = '1G'
 

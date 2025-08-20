@@ -75,11 +75,11 @@ public class LaunchHandler {
             blackboard.put("Tweaks", tweakers);
             ITweaker primaryTweaker = null;
             do {
-                for (final Iterator<String> it = tweakClassNames.iterator(); it.hasNext(); ) {
-                    final String tweakName = it.next();
+                while (!tweakClassNames.isEmpty()) {
+                    final String tweakName = tweakClassNames.getFirst();
                     if (allTweakerNames.contains(tweakName)) {
                         LOGGER.warn("Tweak name {} has already been visited -- skipping", tweakName);
-                        it.remove();
+                        tweakClassNames.removeFirst();
                         continue;
                     } else {
                         allTweakerNames.add(tweakName);
@@ -89,8 +89,8 @@ public class LaunchHandler {
                     classLoader.addTransformerExclusion(tweakName.substring(0, tweakName.lastIndexOf('.')));
                     final ITweaker tweaker = (ITweaker) Class.forName(tweakName, true, classLoader).getConstructor().newInstance();
                     tweakers.add(tweaker);
-
-                    it.remove();
+                    
+                    tweakClassNames.removeFirst();
                     if (primaryTweaker == null) {
                         LOGGER.info("Using primary tweak name {}", tweakName);
                         primaryTweaker = tweaker;
