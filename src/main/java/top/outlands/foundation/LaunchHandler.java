@@ -8,7 +8,9 @@ import top.outlands.foundation.transformer.ASMClassWriterTransformer;
 import top.outlands.foundation.transformer.ASMVisitorTransformer;
 
 import java.io.File;
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.*;
 
 import static net.minecraft.launchwrapper.Launch.*;
@@ -113,11 +115,14 @@ public class LaunchHandler {
 
             final String launchTarget = primaryTweaker.getLaunchTarget();
             final Class<?> clazz = Class.forName(launchTarget, false, classLoader);
-            final Method mainMethod = clazz.getMethod("main", String[].class);
+
+            // use MethodHandle instead of Method to make stacktrace cleaner
+            final MethodHandle mainMethod = MethodHandles.lookup()
+                .findStatic(clazz, "main", MethodType.methodType(void.class, String[].class));
 
             LOGGER.info("Launching wrapped minecraft {}", launchTarget);
-            mainMethod.invoke(null, (Object) argumentList.toArray(new String[0]));
-        } catch (Exception e) {
+            mainMethod.invoke((Object) argumentList.toArray(new String[0]));
+        } catch (Throwable e) {
             LOGGER.fatal("Unable to launch", e);
             System.exit(1);
         }
