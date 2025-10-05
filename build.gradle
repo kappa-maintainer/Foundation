@@ -18,7 +18,7 @@ repositories {
 
 group = 'top.outlands'
 base.archivesName = 'foundation'
-version = '0.16.3'
+version = '0.16.4'
 java { 
     targetCompatibility = JavaVersion.VERSION_21 
 }
@@ -30,7 +30,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api:2.25.2'
     implementation 'com.google.guava:guava:33.5.0-jre'
     implementation 'zone.rong:imaginebreaker:2.1'
-    implementation 'org.ow2.asm:asm:9.8'
+    implementation 'org.ow2.asm:asm:9.9'
     implementation "net.lenni0451:Reflect:1.5.0"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.4'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.13.4'

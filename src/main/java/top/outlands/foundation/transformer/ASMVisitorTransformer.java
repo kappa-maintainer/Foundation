@@ -2,6 +2,7 @@ package top.outlands.foundation.transformer;
 
 import javassist.ClassPool;
 import javassist.CtClass;
+import org.objectweb.asm.Opcodes;
 import top.outlands.foundation.IExplicitTransformer;
 
 import java.io.ByteArrayInputStream;
@@ -20,7 +21,7 @@ public class ASMVisitorTransformer implements IExplicitTransformer {
     public byte[] transform(byte[] basicClass) {
         try {
             CtClass cc = ClassPool.getDefault().makeClass(new ByteArrayInputStream(basicClass));
-            LOGGER.debug("Patching " + cc.getName());
+            LOGGER.debug("Patching {}", cc.getName());
             var cotr = cc.getConstructor("(I)V");
             cotr.insertAfter(CODE);
             cotr = switch (cc.getSimpleName()) {
