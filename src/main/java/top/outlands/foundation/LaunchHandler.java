@@ -4,6 +4,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.minecraft.launchwrapper.ITweaker;
+import top.outlands.foundation.boot.ActualClassLoader;
 import top.outlands.foundation.transformer.ASMClassWriterTransformer;
 import top.outlands.foundation.transformer.ASMVisitorTransformer;
 
@@ -42,7 +43,7 @@ public class LaunchHandler {
         final List<String> argumentList = new ArrayList<>();
         blackboard = new HashMap<>();
         Thread.currentThread().setContextClassLoader(classLoader);
-        fillTransformerHolder(classLoader.getTransformerHolder());
+        fillTransformerHolder(ActualClassLoader.getTransformerHolder());
 
         TransformerDelegate.registerExplicitTransformer(
                 new ASMVisitorTransformer(),

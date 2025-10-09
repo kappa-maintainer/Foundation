@@ -3,6 +3,7 @@ package net.minecraft.launchwrapper;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import top.outlands.foundation.boot.Foundation;
 
 public class LogWrapper {
     public static LogWrapper log = new LogWrapper();
@@ -10,7 +11,7 @@ public class LogWrapper {
     private Logger myLog;
 
     private static void configureLogging() {
-        log.myLog = LogManager.getLogger("Foundation");
+        log.myLog = Foundation.LOGGER;
         configured = true;
     }
 

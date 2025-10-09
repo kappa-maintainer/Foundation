@@ -37,6 +37,7 @@ public class ActualClassLoader extends URLClassLoader {
     private final List<URL> sources;
     private final Set<String> jarNames = new HashSet<>();
     private ClassLoader parent = getClass().getClassLoader();
+    public static final PrefixTrie<Boolean> classLoaderInclusions = new PrefixTrie<>();
     public static final PrefixTrie<Boolean> classLoaderExceptions = new PrefixTrie<>();
     public static final PrefixTrie<Boolean> transformerExceptions = new PrefixTrie<>();
     private final Map<String, Class<?>> cachedClasses = new ConcurrentHashMap<>();
@@ -56,37 +57,6 @@ public class ActualClassLoader extends URLClassLoader {
     private Map<Package, Manifest> packageManifests = null;
     private static Manifest EMPTY = new Manifest();
     private static final MethodHandles.Lookup LOOKUP = ImagineBreaker.lookup();
-    private static Consumer<URL> addURL;
-
-    static {
-        try {
-            Class<?> loader = LOOKUP.findClass("jdk.internal.loader.BuiltinClassLoader");
-            Class<?> ucp = LOOKUP.findClass("jdk.internal.loader.URLClassPath");
-            VarHandle ucpField = MethodHandles.privateLookupIn(loader, LOOKUP)
-                    .findVarHandle(loader, "ucp", ucp);
-            MethodHandle add = LOOKUP.findVirtual(ucp, "addURL", MethodType.methodType(Void.TYPE, URL.class));
-            add.bindTo(ucpField.get(Launch.appClassLoader));
-            addURL = url -> {
-                try {
-                    add.invokeWithArguments(ucpField.get(Launch.appClassLoader), url);
-                } catch (Throwable e) {
-                    LOGGER.error(e);
-                }
-            };
-        } catch (Throwable t1) {
-            LOGGER.warn(t1);
-            try {
-                Class<?> loader = Classes.forName("jdk.internal.loader.BuiltinClassLoader");
-                Class<?> ucp = Classes.forName("jdk.internal.loader.URLClassPath", false, Launch.appClassLoader);
-                Field ucpField = Fields.getDeclaredField(loader, "ucp");
-                Method add = Methods.getDeclaredMethod(ucp, "addURL");
-                addURL = url -> Methods.invoke(Fields.getObject(Launch.appClassLoader, ucpField), add, new Object[]{url});
-            } catch (Throwable t2) {
-                LOGGER.warn(t2);
-                LOGGER.fatal("Can't get parent class ucp");
-            }
-        }
-    }
 
 
     public ActualClassLoader(URL[] sources) {
@@ -95,55 +65,32 @@ public class ActualClassLoader extends URLClassLoader {
 
     public ActualClassLoader(URL[] sources, ClassLoader loader) {
         super(sources, loader);
-        if (loader != null) {
+        if (parent != loader) {
             parent = loader;
         }
         this.sources = new ArrayList<>(Arrays.asList(sources));
+        addClassLoaderInclusion("org.objectweb.asm.");
+        addClassLoaderInclusion("org.spongepowered.asm.");
+        addClassLoaderInclusion("com.llamalad7.mixinextras.");
+        addClassLoaderInclusion("net.minecraft");
+        addClassLoaderInclusion("top.outlands.foundation.");
+        addClassLoaderInclusion("org.lwjgl");
+        addClassLoaderInclusion("com.cleanroommc.");
+        addClassLoaderInclusion("ibxm.");
+        addClassLoaderInclusion("paulscode.sound.codecs.");
+        addClassLoaderInclusion("zone.rong.mixinbooter.");
+        addClassLoaderInclusion("paulscode.sound.");
+        
         addClassLoaderExclusion0("java.");
-        addClassLoaderExclusion0("javax.");
-        addClassLoaderExclusion0("org.w3c.dom.");
-        addClassLoaderExclusion0("org.xml.sax.");
-        addClassLoaderExclusion0("jdk.");
-        addClassLoaderExclusion0("sun.");
-        addClassLoaderExclusion0("org.apache.logging.");
-        addClassLoaderExclusion0("org.apache.commons.");
-        addClassLoaderExclusion0("org.apache.http.");
-        addClassLoaderExclusion0("org.apache.maven.");
-        addClassLoaderExclusion0("org.openjdk.nashorn.");
-        addClassLoaderExclusion0("org.omg.");
-        addClassLoaderExclusion0("org.slf4j.");
-        addClassLoaderExclusion0("org.burningwave.");
-        addClassLoaderExclusion0("org.ietf.jgss.");
-        addClassLoaderExclusion0("org.jcp.xml.dsig.internal.");
-        addClassLoaderExclusion0("netscape.javascript.");
-        addClassLoaderExclusion0("com.sun.");
+        
         addClassLoaderExclusion0("net.minecraft.launchwrapper.LaunchClassLoader");
         addClassLoaderExclusion0("net.minecraft.launchwrapper.Launch");
         addClassLoaderExclusion0("top.outlands.foundation.boot.");
         addClassLoaderExclusion0("top.outlands.foundation.function.");
         addClassLoaderExclusion0("top.outlands.foundation.trie.");
-        addClassLoaderExclusion0("io.github.toolfactory.");
-        addClassLoaderExclusion0("org.burningwave.");
-        addClassLoaderExclusion0("javassist.");
-        addClassLoaderExclusion0("com.jcraft.");
-        addClassLoaderExclusion0("com.google.gson.");
-        addClassLoaderExclusion0("com.google.common.");
-        addClassLoaderExclusion0("com.google.thirdparty.publicsuffix.");
-        addClassLoaderExclusion0("io.netty.");
-        addClassLoaderExclusion0("org.jline.");
-        addClassLoaderExclusion0("com.mojang.util.QueueLogAppender");
         addClassLoaderExclusion0("net.minecraftforge.server.terminalconsole.");
-        addClassLoaderExclusion0("net.lenni0451.reflect.");
-        addClassLoaderExclusion0("com.yourkit.");
-        addTransformerExclusion("org.spongepowered.asm.launch.");
-        addTransformerExclusion("org.spongepowered.asm.logging.");
-        addTransformerExclusion("org.spongepowered.asm.mixin.");
-        addTransformerExclusion("org.spongepowered.asm.obfuscation.");
-        addTransformerExclusion("org.spongepowered.asm.service.");
-        addTransformerExclusion("org.spongepowered.asm.transformers.");
-        addTransformerExclusion("org.spongepowered.asm.util.");
-        addTransformerExclusion("org.spongepowered.include.com.google.");
-        addTransformerExclusion("org.spongepowered.tools.");
+        
+        addTransformerExclusion("org.spongepowered.asm.");
         addTransformerExclusion("com.llamalad7.mixinextras.");
         if (DUMP) {
             File dumpDir = new File(Launch.minecraftHome, "CLASS_DUMP");
@@ -283,7 +230,11 @@ public class ActualClassLoader extends URLClassLoader {
 
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
-        return findClass(name);
+        TrieNode<Boolean> node = classLoaderInclusions.getFirstKeyValueNode(name);
+        if (node != null && node.getValue()) {
+            return findClass(name);
+        }
+        return super.loadClass(name);
     }
 
     public void saveClassBytes(final byte[] data, final String transformedName) {
@@ -371,7 +322,6 @@ public class ActualClassLoader extends URLClassLoader {
             }
             super.addURL(url);
             sources.add(url);
-            addURL.accept(url);
         }
     }
 
@@ -418,8 +368,15 @@ public class ActualClassLoader extends URLClassLoader {
         LOGGER.debug("Adding classloader exclusion {}", toExclude);
         classLoaderExceptions.put(toExclude, true);
     }
+    
+    private void addClassLoaderInclusion(String toInclude) {
+        LOGGER.debug("Adding classloader inclusion {}", toInclude);
+        classLoaderInclusions.put(toInclude, true);
+    }
 
+    @Deprecated
     public void addClassLoaderExclusion(String toExclude) {
+        LOGGER.debug("A mod is trying to add CL exclusion {}, adding transformer exclude instead.", toExclude);
         addTransformerExclusion(toExclude);
     }
 
@@ -429,7 +386,7 @@ public class ActualClassLoader extends URLClassLoader {
     }
 
     public void removeTransformerExclusion(String toExclude) {
-        LOGGER.debug("Removing transformer exclusion " + toExclude);
+        LOGGER.debug("Removing transformer exclusion {}", toExclude);
         TrieNode<Boolean> node = transformerExceptions.getKeyValueNode(toExclude);
         if (node != null) {
             node.setValue(false);

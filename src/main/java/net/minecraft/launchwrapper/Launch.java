@@ -9,6 +9,6 @@ public class Launch {
     public static Map<String,Object> blackboard;
     public static LaunchClassLoader classLoader;
     
-    public static final ClassLoader appClassLoader = LaunchClassLoader.class.getClassLoader(); 
+    public static final ClassLoader appClassLoader = ClassLoader.getSystemClassLoader(); 
     
 }

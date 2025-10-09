@@ -36,29 +36,16 @@ public class LaunchClassLoader extends ActualClassLoader {
     }
     
     private static URL[] getUCP(){
+        String[] classpaths = System.getProperty("java.class.path").split(File.pathSeparator);
+        List<URL> urls = new ArrayList<>();
         try {
-            Class<?> loader = MethodHandles.lookup().findClass("jdk.internal.loader.BuiltinClassLoader");
-            Class<?> ucp = MethodHandles.lookup().findClass("jdk.internal.loader.URLClassPath");
-            VarHandle ucpField = MethodHandles.privateLookupIn(loader, MethodHandles.lookup())
-                    .findVarHandle(loader, "ucp", ucp);
-            VarHandle pathsField = MethodHandles.privateLookupIn(ucp, MethodHandles.lookup())
-                    .findVarHandle(ucp, "path", ArrayList.class);
-            @SuppressWarnings("unchecked")
-            ArrayList<URL> urls = (ArrayList<URL>) pathsField.get(ucpField.get(Launch.appClassLoader));
-            return urls.toArray(new URL[0]);
-        } catch (Throwable t) {
-            Foundation.LOGGER.warn("Failed to get ucp with reflection, trying another way");
-            String[] classpaths = System.getProperty("java.class.path").split(File.pathSeparator);
-            List<URL> urls = new ArrayList<>();
-            try {
-                for (String classpath : classpaths) {
-                    urls.add(new File(classpath).toURI().toURL());
-                }
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
+            for (String classpath : classpaths) {
+                urls.add(new File(classpath).toURI().toURL());
             }
-            return urls.toArray(new URL[0]);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
         }
+        return urls.toArray(new URL[0]);
     }
 
     /**

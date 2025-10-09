@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Foundation {
-    public static Logger LOGGER = System.getProperty("java.system.class.loader") == null ? LogManager.getLogger("Foundation") : new EmptyLogger();
+    public static Logger LOGGER = LogManager.getLogger("Foundation");
     private static final Set<String> OUTDATED_VISITOR = new HashSet<>();
 
     /**
@@ -32,10 +32,6 @@ public class Foundation {
             breakModuleAndReflection();
             if (Launch.classLoader == null) {
                 Launch.classLoader = new LaunchClassLoader(ClassLoader.getSystemClassLoader());
-                LOGGER.info("System ClassLoader is AppCL");
-            } else {
-                LOGGER = LogManager.getLogger("Foundation");
-                LOGGER.info("System ClassLoader is LCL");
             }
             Object handler = Class.forName("top.outlands.foundation.LaunchHandler", true, Launch.classLoader).getConstructor().newInstance();
             MethodHandles.lookup()
