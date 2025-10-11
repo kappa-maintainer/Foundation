@@ -70,8 +70,7 @@ public class ActualClassLoader extends URLClassLoader {
         }
         this.sources = new ArrayList<>(Arrays.asList(sources));
         addClassLoaderInclusion("org.objectweb.asm.");
-        addClassLoaderInclusion("org.spongepowered.asm.");
-        addClassLoaderInclusion("com.llamalad7.mixinextras.");
+        addClassLoaderInclusion("org.spongepowered.asm.synthetic.");
         addClassLoaderInclusion("net.minecraft");
         addClassLoaderInclusion("top.outlands.foundation.");
         addClassLoaderInclusion("org.lwjgl");
@@ -89,19 +88,7 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("top.outlands.foundation.function.");
         addClassLoaderExclusion0("top.outlands.foundation.trie.");
         addClassLoaderExclusion0("net.minecraftforge.server.terminalconsole.");
-
-        addTransformerExclusion("org.spongepowered.asm.bridge.");
-        addTransformerExclusion("org.spongepowered.asm.lib.");
-        addTransformerExclusion("org.spongepowered.asm.launch.");
-        addTransformerExclusion("org.spongepowered.asm.logging.");
-        addTransformerExclusion("org.spongepowered.asm.mixin.");
-        addTransformerExclusion("org.spongepowered.asm.obfuscation.");
-        addTransformerExclusion("org.spongepowered.asm.service.");
-        addTransformerExclusion("org.spongepowered.asm.transformers.");
-        addTransformerExclusion("org.spongepowered.asm.util.");
-        addTransformerExclusion("org.spongepowered.include.com.google.");
-        addTransformerExclusion("org.spongepowered.tools.");
-        addTransformerExclusion("com.llamalad7.mixinextras.");
+        
         if (DUMP) {
             File dumpDir = new File(Launch.minecraftHome, "CLASS_DUMP");
 
