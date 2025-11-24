@@ -31,7 +31,10 @@ public class Foundation {
         try {
             breakModuleAndReflection();
             if (Launch.classLoader == null) {
-                Launch.classLoader = new LaunchClassLoader(ClassLoader.getSystemClassLoader());
+                boolean loadsall = Boolean.parseBoolean(System.getProperty("foundation.loadsall", "false"));
+                Launch.classLoader = loadsall
+                    ? new LoadsAllClassLoader(ClassLoader.getSystemClassLoader())
+                    : new LaunchClassLoader(ClassLoader.getSystemClassLoader());
             }
             Object handler = Class.forName("top.outlands.foundation.LaunchHandler", true, Launch.classLoader).getConstructor().newInstance();
             MethodHandles.lookup()

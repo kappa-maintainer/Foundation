@@ -22,6 +22,7 @@ import java.security.CodeSource;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -56,7 +57,6 @@ public class ActualClassLoader extends URLClassLoader {
     static TransformerHolder transformerHolder = new TransformerHolder();
     private Map<Package, Manifest> packageManifests = null;
     private static Manifest EMPTY = new Manifest();
-    private static final MethodHandles.Lookup LOOKUP = ImagineBreaker.lookup();
 
 
     public ActualClassLoader(URL[] sources) {
