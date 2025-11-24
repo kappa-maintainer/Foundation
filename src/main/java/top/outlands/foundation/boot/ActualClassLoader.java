@@ -82,6 +82,16 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderInclusion("paulscode.sound.");
         
         addClassLoaderExclusion0("java.");
+        addClassLoaderExclusion0("org.apache.");
+        addClassLoaderExclusion0("com.google.");
+        addClassLoaderExclusion0("org.apache.");
+        addClassLoaderExclusion0("com.ibm.icu.");
+        addClassLoaderExclusion0("io.netty.");
+        addClassLoaderExclusion0("jakarta.");
+        addClassLoaderExclusion0("net.java.");
+        addClassLoaderExclusion0("org.openjdk.");
+        addClassLoaderExclusion0("oshi.");
+        addClassLoaderExclusion0("it.unimi.dsi.");
         
         addClassLoaderExclusion0("net.minecraft.launchwrapper.LaunchClassLoader");
         addClassLoaderExclusion0("net.minecraft.launchwrapper.Launch");
