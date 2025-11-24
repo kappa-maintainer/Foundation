@@ -84,7 +84,6 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("java.");
         addClassLoaderExclusion0("org.apache.");
         addClassLoaderExclusion0("com.google.");
-        addClassLoaderExclusion0("org.apache.");
         addClassLoaderExclusion0("com.ibm.icu.");
         addClassLoaderExclusion0("io.netty.");
         addClassLoaderExclusion0("jakarta.");
