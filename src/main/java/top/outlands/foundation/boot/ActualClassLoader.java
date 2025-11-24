@@ -82,7 +82,12 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderInclusion("paulscode.sound.");
         
         addClassLoaderExclusion0("java.");
-        addClassLoaderExclusion0("org.apache.");
+        addClassLoaderExclusion0("org.apache.commons.");
+        addClassLoaderExclusion0("org.apache.logging.");
+        addClassLoaderExclusion0("org.apache.hc.");
+        addClassLoaderExclusion0("org.apache.maven.");
+        addClassLoaderExclusion0("org.slf4j.");
+        addClassLoaderExclusion0("gnu.trove.");
         addClassLoaderExclusion0("com.google.");
         addClassLoaderExclusion0("com.ibm.icu.");
         addClassLoaderExclusion0("io.netty.");
