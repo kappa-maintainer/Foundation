@@ -21,7 +21,7 @@ public class Foundation {
      */
     public static void add(String name) {
         if (!OUTDATED_VISITOR.contains(name)) {
-            LOGGER.warn("{} can't handle Java 21 class, please port the mod (if you are the author)!", name);
+            LOGGER.debug("{} can't handle Java 21 class, please port the mod (if you are the author)!", name);
             OUTDATED_VISITOR.add(name);
         }
     }
