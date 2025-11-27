@@ -88,7 +88,9 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("org.apache.maven.");
         addClassLoaderExclusion0("org.slf4j.");
         addClassLoaderExclusion0("gnu.trove.");
-        addClassLoaderExclusion0("com.google.");
+        addClassLoaderExclusion0("com.google.common.");
+        addClassLoaderExclusion0("com.google.gson.");
+        addClassLoaderExclusion0("com.google.thirdparty.publicsuffix.");
         addClassLoaderExclusion0("com.ibm.icu.");
         addClassLoaderExclusion0("io.netty.");
         addClassLoaderExclusion0("jakarta.");
