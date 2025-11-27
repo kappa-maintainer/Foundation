@@ -142,7 +142,7 @@ public class TransformerDelegate {
      * @param holder The one and only handler
      */
     static void fillTransformerHolder(TransformerHolder holder) {
-        explicitTransformers = new HashMap<>(20);
+        explicitTransformers = new TreeMap<>();
         transformers = new LinkedList<>();
         holder.runTransformersFunction = (name, transformedName, basicClass) -> {
             for (final IClassTransformer transformer : Collections.unmodifiableList(transformers)) {
