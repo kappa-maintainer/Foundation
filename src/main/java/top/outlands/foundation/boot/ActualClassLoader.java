@@ -165,9 +165,8 @@ public class ActualClassLoader extends URLClassLoader {
         try {
             final String transformedName = transformName(name);
             if (VERBOSE) {
-                LOGGER.debug("Loading class: {}", transformedName);
+                LOGGER.debug("Loading target class: {}", transformedName);
                 if (!TARGET.isEmpty() && transformedName.equals(TARGET)) {
-                    LOGGER.debug("Target found");
                     Arrays.stream(Thread.currentThread().getStackTrace()).forEach(LOGGER::debug);
                     transformerHolder.debugPrinter.run();
                 }
@@ -242,6 +241,13 @@ public class ActualClassLoader extends URLClassLoader {
             if (transformedClass == null) throw new ClassNotFoundException();
             final Class<?> clazz = defineClass(transformedName, transformedClass, 0, transformedClass.length, codeSource);
             cachedClasses.put(transformedName, clazz);
+            if (VERBOSE) {
+                LOGGER.debug("Target class with name {} was successfully loaded.", transformedName);
+                if (!TARGET.isEmpty() && transformedName.equals(TARGET)) {
+                    LOGGER.debug("Class: {}", clazz);
+                    LOGGER.debug("Class source: {}", clazz.getProtectionDomain().getCodeSource().getLocation());
+                }
+            }
             return clazz;
         } catch (Throwable e) {
             invalidClasses.add(name);
