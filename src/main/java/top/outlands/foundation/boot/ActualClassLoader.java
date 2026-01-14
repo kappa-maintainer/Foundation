@@ -87,6 +87,7 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderInclusion("paulscode.sound.");
         
         addClassLoaderExclusion0("java.");
+        addClassLoaderExclusion0("javax.");
         addClassLoaderExclusion0("org.apache.commons.");
         addClassLoaderExclusion0("org.apache.logging.");
         addClassLoaderExclusion0("org.apache.hc.");
