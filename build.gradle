@@ -18,24 +18,24 @@ repositories {
 
 group = 'top.outlands'
 base.archivesName = 'foundation'
-version = '0.18.3'
+version = '0.18.4'
 java { 
-    targetCompatibility = JavaVersion.VERSION_21 
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21 
 }
 
 dependencies {
     implementation 'net.sf.jopt-simple:jopt-simple:5.0.4'
     implementation 'org.javassist:javassist:3.30.2-GA'
-    implementation 'org.apache.logging.log4j:log4j-core:2.25.2'
-    implementation 'org.apache.logging.log4j:log4j-api:2.25.2'
+    implementation 'org.apache.logging.log4j:log4j-core:2.25.3'
+    implementation 'org.apache.logging.log4j:log4j-api:2.25.3'
     implementation 'com.google.guava:guava:33.5.0-jre'
     implementation 'zone.rong:imaginebreaker:2.1'
-    implementation 'org.ow2.asm:asm:9.9'
-    implementation "net.lenni0451:Reflect:1.5.0"
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.4'
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.13.4'
+    implementation 'org.ow2.asm:asm:9.9.1'
+    implementation "net.lenni0451:Reflect:1.6.1"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:6.0.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:6.0.2'
     testImplementation 'com.google.guava:guava:33.5.0-jre'
-    testImplementation 'org.junit.platform:junit-platform-launcher:1.14.0'
+    testImplementation 'org.junit.platform:junit-platform-launcher:6.0.2'
 
 }
 
@@ -77,7 +77,7 @@ tasks.register('testTools', Test) {
     }
 
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
