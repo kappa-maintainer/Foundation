@@ -15,7 +15,7 @@ public class ASMClassWriterTransformer implements IExplicitTransformer {
         try {
             var cp = ClassPool.getDefault();
             CtClass cc = cp.makeClass(new ByteArrayInputStream(basicClass));
-            LOGGER.debug("Patching " + cc.getName());
+            LOGGER.debug("Patching {}", cc.getName());
             var method = cc.getDeclaredMethod("getCommonSuperClass");
             method.setBody("{return top.outlands.foundation.transformer.ASMClassWriterTransformer.getCommonSuperClass($$);}");
 
@@ -27,6 +27,9 @@ public class ASMClassWriterTransformer implements IExplicitTransformer {
         return basicClass;
     }
     public static String getCommonSuperClass(final String type1, final String type2) {
+        if (type1.equals("java/lang/Object") || type2.equals("java/lang/Object")) {
+            return "java/lang/Object";
+        }
         ClassLoader classLoader = Launch.appClassLoader;
         Class<?> class1;
         try {
