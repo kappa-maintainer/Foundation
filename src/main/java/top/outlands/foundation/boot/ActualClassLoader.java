@@ -199,7 +199,7 @@ public class ActualClassLoader extends URLClassLoader {
 
                         Package pkg = getDefinedPackage(packageName);
                         getClassBytes(untransformedName);
-                        signers = entry.getCodeSigners();
+                        signers = entry == null ? null : entry.getCodeSigners();
                         if (pkg == null) {
                             definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
                         } else {
