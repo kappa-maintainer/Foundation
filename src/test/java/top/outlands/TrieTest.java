@@ -1,12 +1,10 @@
 package top.outlands;
 
 
-import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import top.outlands.foundation.boot.UnsafeHolder;
 import top.outlands.foundation.trie.PrefixTrie;
 import top.outlands.foundation.trie.TrieNode;
 
@@ -21,13 +19,13 @@ public class TrieTest {
         PrefixTrie<String> trie = new PrefixTrie<>();
         String[] keys = new String[]{"net.minecraft", "net.minecraftforge", "com.sun", "net.ibm", "net."};
         for (String key : keys) {
-            log.info("putting " + key);
+            log.info("putting {}", key);
             trie.put(key, "first");
         }
         //Test key and value retrieving
         for (String key : keys) {
-            log.info("getting " + key);
-            log.info("node snippet is " + trie.getFirstKeyValueNode(key).getSnippet());
+            log.info("getting {}", key);
+            log.info("node snippet is {}", trie.getFirstKeyValueNode(key).getSnippet());
             Assertions.assertEquals(key, trie.getKeyValueNode(key).getKey());
             Assertions.assertEquals("first", trie.getKeyValueNode(key).getValue());
         }
