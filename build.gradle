@@ -18,7 +18,7 @@ repositories {
 
 group = 'top.outlands'
 base.archivesName = 'foundation'
-version = '0.19.0'
+version = '0.19.1'
 java { 
     sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21 
 }
@@ -31,19 +31,12 @@ dependencies {
     implementation 'com.google.guava:guava:33.5.0-jre'
     implementation 'zone.rong:imaginebreaker:2.1'
     implementation 'org.ow2.asm:asm:9.9.1'
-    implementation "net.lenni0451:Reflect:1.6.1"
+    implementation "net.lenni0451:Reflect:1.6.2"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:6.0.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:6.0.2'
     testImplementation 'com.google.guava:guava:33.5.0-jre'
     testImplementation 'org.junit.platform:junit-platform-launcher:6.0.2'
 
-}
-
-compileJava {
-    options.compilerArgs += [
-            '--add-exports=java.base/jdk.internal.reflect=ALL-UNNAMED',
-            '--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED'
-    ]
 }
 
 tasks.register('sourcesJar', Jar) {

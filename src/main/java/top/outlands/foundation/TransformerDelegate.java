@@ -4,6 +4,7 @@ import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 import top.outlands.foundation.boot.TransformerHolder;
 
+import java.lang.classfile.ClassFile;
 import java.util.*;
 
 import static net.minecraft.launchwrapper.Launch.classLoader;
@@ -15,7 +16,7 @@ import static top.outlands.foundation.boot.TransformerHolder.*;
  */
 public class TransformerDelegate {
 
-    private static final boolean VERBOSE = Boolean.parseBoolean(System.getProperty("foundation.verbose", "false"));
+    private static final boolean DEBUG_TRANSFORMER = Boolean.parseBoolean(System.getProperty("foundation.debug_transformer", "false"));
     /**
      * @return list of transformers.
      */
@@ -144,12 +145,30 @@ public class TransformerDelegate {
     static void fillTransformerHolder(TransformerHolder holder) {
         explicitTransformers = new TreeMap<>();
         transformers = new LinkedList<>();
-        holder.runTransformersFunction = (name, transformedName, basicClass) -> {
-            for (final IClassTransformer transformer : Collections.unmodifiableList(transformers)) {
-                basicClass = transformer.transform(name, transformedName, basicClass);
-            }
-            return basicClass;
-        };
+        if (DEBUG_TRANSFORMER) {
+            holder.runTransformersFunction = (name, transformedName, basicClass) -> {
+                int hash = Arrays.hashCode(basicClass);
+                for (final IClassTransformer transformer : transformers) {
+                    basicClass = transformer.transform(name, transformedName, basicClass);
+                    if (Arrays.hashCode(basicClass) != hash) {
+                        LOGGER.debug("Class {} has been modified by transformer {}", transformedName, transformer);
+                        List<VerifyError> errors = ClassFile.of().verify(basicClass);
+                        if (!errors.isEmpty()) {
+                            LOGGER.error("Transformer {} generated a invalid class with error:", transformer);
+                            errors.forEach(error -> LOGGER.error("  {}", error.getMessage()));
+                        }
+                    }
+                }
+                return basicClass;
+            };
+        } else {
+            holder.runTransformersFunction = (name, transformedName, basicClass) -> {
+                for (final IClassTransformer transformer : transformers) {
+                    basicClass = transformer.transform(name, transformedName, basicClass);
+                }
+                return basicClass;
+            };
+        }
         holder.registerTransformerFunction = s -> {
             if (!s.contains(".")) {
                 s = s.replace('/', '.');
@@ -162,18 +181,39 @@ public class TransformerDelegate {
                 LOGGER.error("Error registering transformer class {}", s, e);
             }
         };
-        holder.runExplicitTransformersFunction = (name, basicClass) -> {
-            if (explicitTransformers.containsKey(name)) {
-                PriorityQueue<IExplicitTransformer> queue = explicitTransformers.get(name);
-                if (queue != null) {
-                    while (!queue.isEmpty()) {
-                        basicClass = queue.poll().transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
+        if (DEBUG_TRANSFORMER) {
+            holder.runExplicitTransformersFunction = (name, basicClass) -> {
+                if (explicitTransformers.containsKey(name)) {
+                    PriorityQueue<IExplicitTransformer> queue = explicitTransformers.get(name);
+                    if (queue != null) {
+                        while (!queue.isEmpty()) {
+                            IExplicitTransformer transformer = queue.poll();
+                            basicClass = transformer.transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
+                            List<VerifyError> errors = ClassFile.of().verify(basicClass);
+                            if (!errors.isEmpty()) {
+                                LOGGER.error("Explicit transformer {} generated a invalid class with error:", transformer);
+                                errors.forEach(error -> LOGGER.error("  {}", error.getMessage()));
+                            }
+                        }
+                        explicitTransformers.remove(name); // GC
                     }
-                    explicitTransformers.remove(name); // GC
                 }
-            }
-            return basicClass;
-        };
+                return basicClass;
+            };
+        } else {
+            holder.runExplicitTransformersFunction = (name, basicClass) -> {
+                if (explicitTransformers.containsKey(name)) {
+                    PriorityQueue<IExplicitTransformer> queue = explicitTransformers.get(name);
+                    if (queue != null) {
+                        while (!queue.isEmpty()) {
+                            basicClass = queue.poll().transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
+                        }
+                        explicitTransformers.remove(name); // GC
+                    }
+                }
+                return basicClass;
+            };
+        }
         holder.transformNameFunction = s -> {
             if (renameTransformer != null) {
                 return renameTransformer.remapClassName(s);
