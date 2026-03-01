@@ -20,7 +20,7 @@ group = 'top.outlands'
 base.archivesName = 'foundation'
 version = '0.19.1'
 java { 
-    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_21 
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_25 
 }
 
 dependencies {
