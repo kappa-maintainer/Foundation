@@ -152,11 +152,6 @@ public class TransformerDelegate {
                     basicClass = transformer.transform(name, transformedName, basicClass);
                     if (Arrays.hashCode(basicClass) != hash) {
                         LOGGER.debug("Class {} has been modified by transformer {}", transformedName, transformer);
-                        List<VerifyError> errors = ClassFile.of().verify(basicClass);
-                        if (!errors.isEmpty()) {
-                            LOGGER.error("Transformer {} generated a invalid class with error:", transformer);
-                            errors.forEach(error -> LOGGER.error("  {}", error.getMessage()));
-                        }
                     }
                 }
                 return basicClass;
@@ -189,11 +184,7 @@ public class TransformerDelegate {
                         while (!queue.isEmpty()) {
                             IExplicitTransformer transformer = queue.poll();
                             basicClass = transformer.transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
-                            List<VerifyError> errors = ClassFile.of().verify(basicClass);
-                            if (!errors.isEmpty()) {
-                                LOGGER.error("Explicit transformer {} generated a invalid class with error:", transformer);
-                                errors.forEach(error -> LOGGER.error("  {}", error.getMessage()));
-                            }
+                            LOGGER.debug("Class {} has been modified by explicit transformer {}", basicClass, transformer);
                         }
                         explicitTransformers.remove(name); // GC
                     }
