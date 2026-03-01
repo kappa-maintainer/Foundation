@@ -150,8 +150,10 @@ public class TransformerDelegate {
                 int hash = Arrays.hashCode(basicClass);
                 for (final IClassTransformer transformer : transformers) {
                     basicClass = transformer.transform(name, transformedName, basicClass);
-                    if (Arrays.hashCode(basicClass) != hash) {
+                    int tempHash = Arrays.hashCode(basicClass);
+                    if (tempHash != hash) {
                         LOGGER.debug("Class {} has been modified by transformer {}", transformedName, transformer);
+                        hash = tempHash;
                     }
                 }
                 return basicClass;
