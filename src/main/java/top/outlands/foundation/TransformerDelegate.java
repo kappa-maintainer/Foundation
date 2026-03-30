@@ -16,6 +16,7 @@ import static top.outlands.foundation.boot.TransformerHolder.*;
 public class TransformerDelegate {
 
     private static final boolean DEBUG_TRANSFORMER = Boolean.parseBoolean(System.getProperty("foundation.debug_transformer", "false"));
+
     /**
      * @return list of transformers.
      */
@@ -25,6 +26,7 @@ public class TransformerDelegate {
 
     /**
      * Get explicit transformers map. It's exact same map in used, you can modify it at will.
+     *
      * @return the map
      */
     public static Map<String, PriorityQueue<IExplicitTransformer>> getExplicitTransformers() {
@@ -34,6 +36,7 @@ public class TransformerDelegate {
     /**
      * Checking this every registration is dumb, so let's make another method
      * Do not use if you aren't Forge
+     *
      * @param transformer The name transformer instance
      */
     public static void registerRenameTransformer(IClassNameTransformer transformer) {
@@ -46,7 +49,8 @@ public class TransformerDelegate {
 
     /**
      * Call this to register an explicit transformer.
-     * @param targets Target classes' name.
+     *
+     * @param targets   Target classes' name.
      * @param className Class name of the transformer.
      */
     public static void registerExplicitTransformer(String className, String... targets) {
@@ -84,6 +88,7 @@ public class TransformerDelegate {
 
     /**
      * Same as {@link net.minecraft.launchwrapper.LaunchClassLoader#registerTransformer(String)}
+     *
      * @param transformerClassName class name
      */
     public static void registerTransformer(String transformerClassName) {
@@ -102,6 +107,7 @@ public class TransformerDelegate {
 
     /**
      * In case you want to control how the transformer is initialized, in which you could <b>new</b> it yourself.
+     *
      * @param transformer The transformer
      */
     public static void registerTransformer(IClassTransformer transformer) {
@@ -111,6 +117,7 @@ public class TransformerDelegate {
 
     /**
      * Call this with class name to remove all transformers with target class name.
+     *
      * @param name The transformer name you want to un-register
      */
     public static void unRegisterTransformer(String name) {
@@ -125,6 +132,7 @@ public class TransformerDelegate {
 
     /**
      * Call this to remove your transformer, you need to keep track of the instances yourself.
+     *
      * @param transformer The transformer you want to un-register
      */
     public static void unRegisterTransformer(IClassTransformer transformer) {
@@ -139,6 +147,7 @@ public class TransformerDelegate {
 
     /**
      * We use lambda trick to fill method implementations after the class loader ready
+     *
      * @param holder The one and only handler
      */
     static void fillTransformerHolder(TransformerHolder holder) {
@@ -185,7 +194,7 @@ public class TransformerDelegate {
                         while (!queue.isEmpty()) {
                             IExplicitTransformer transformer = queue.poll();
                             basicClass = transformer.transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
-                            LOGGER.debug("Class {} has been modified by explicit transformer {}", basicClass, transformer);
+                            LOGGER.debug("Class {} has been modified by explicit transformer {}", name, transformer);
                         }
                         explicitTransformers.remove(name); // GC
                     }
@@ -223,7 +232,7 @@ public class TransformerDelegate {
             getTransformers().stream().map(t -> t.toString() + " : " + t.getPriority()).forEach(s -> LOGGER.debug(s));
             LOGGER.debug("============== Running explicit transformers ==============");
             explicitTransformers.forEach((s, t)
-                    -> LOGGER.debug("{}'s transformers:{}", s, Arrays.toString(t.toArray())));
+                -> LOGGER.debug("{}'s transformers:{}", s, Arrays.toString(t.toArray())));
             LOGGER.debug("================= Transformer Exclusions ==================");
             classLoader.getTransformerExclusions().forEach(s -> LOGGER.debug(s));
             LOGGER.debug("====================== Class Paths ========================");
