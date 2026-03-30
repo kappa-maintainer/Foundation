@@ -167,7 +167,6 @@ public class ActualClassLoader extends URLClassLoader {
 
         byte[] transformedClass;
 
-
         try {
             final String transformedName = transformName(name);
             if (VERBOSE) {
@@ -267,12 +266,12 @@ public class ActualClassLoader extends URLClassLoader {
     }
 
     @Override
-    public Class<?> loadClass(String name) throws ClassNotFoundException {
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         TrieNode<Boolean> node = classLoaderInclusions.getFirstKeyValueNode(name);
         if (node != null && node.getValue()) {
             return findClass(name);
         }
-        return super.loadClass(name);
+        return super.loadClass(name, resolve);
     }
 
     public void saveClassBytes(final byte[] data, final String transformedName) {

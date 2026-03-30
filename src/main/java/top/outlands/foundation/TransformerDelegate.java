@@ -4,7 +4,6 @@ import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 import top.outlands.foundation.boot.TransformerHolder;
 
-import java.lang.classfile.ClassFile;
 import java.util.*;
 
 import static net.minecraft.launchwrapper.Launch.classLoader;
