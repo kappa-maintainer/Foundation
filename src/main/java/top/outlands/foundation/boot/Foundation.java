@@ -1,10 +1,11 @@
 package top.outlands.foundation.boot;
 
+import net.lenni0451.reflect.JavaBypass;
+import net.lenni0451.reflect.Modules;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import zone.rong.imaginebreaker.ImagineBreaker;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -26,7 +27,7 @@ public class Foundation {
         }
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Foundation.LOGGER.error(thread, throwable));
         try {
             breakModuleAndReflection();
@@ -46,9 +47,8 @@ public class Foundation {
         }
     }
     
-    private static void breakModuleAndReflection() {
-        ImagineBreaker.openBootModules();
-        ImagineBreaker.wipeFieldFilters();
-        ImagineBreaker.wipeMethodFilters();
+    private static void breakModuleAndReflection() throws ClassNotFoundException {
+        JavaBypass.clearReflectionFilter();
+        Modules.openBootModule();
     }
 }
