@@ -27,7 +27,7 @@ public class Foundation {
         }
     }
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Foundation.LOGGER.error(thread, throwable));
         try {
             breakModuleAndReflection();
