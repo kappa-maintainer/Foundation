@@ -50,5 +50,6 @@ public class Foundation {
     private static void breakModuleAndReflection() throws ClassNotFoundException {
         JavaBypass.clearReflectionFilter();
         Modules.openBootModule();
+        Modules.enableNativeAccessToAllUnnamed();
     }
 }
