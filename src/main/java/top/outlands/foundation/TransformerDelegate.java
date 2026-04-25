@@ -154,10 +154,10 @@ public class TransformerDelegate {
         explicitTransformers = new TreeMap<>();
         transformers = new LinkedList<>();
         if (DEBUG_TRANSFORMER) {
-            holder.runTransformersFunction = (name, transformedName, basicClass) -> {
+            holder.runTransformersFunction = (name, transformedName, basicClass, pkg, manifest) -> {
                 int hash = Arrays.hashCode(basicClass);
                 for (final IClassTransformer transformer : transformers) {
-                    basicClass = transformer.transform(name, transformedName, basicClass);
+                    basicClass = transformer.transform(name, transformedName, basicClass, pkg, manifest);
                     int tempHash = Arrays.hashCode(basicClass);
                     if (tempHash != hash) {
                         LOGGER.debug("Class {} has been modified by transformer {}", transformedName, transformer);
@@ -167,9 +167,9 @@ public class TransformerDelegate {
                 return basicClass;
             };
         } else {
-            holder.runTransformersFunction = (name, transformedName, basicClass) -> {
+            holder.runTransformersFunction = (name, transformedName, basicClass, pkg, manifest) -> {
                 for (final IClassTransformer transformer : transformers) {
-                    basicClass = transformer.transform(name, transformedName, basicClass);
+                    basicClass = transformer.transform(name, transformedName, basicClass, pkg, manifest);
                 }
                 return basicClass;
             };

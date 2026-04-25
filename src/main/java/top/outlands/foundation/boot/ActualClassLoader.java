@@ -165,16 +165,16 @@ public class ActualClassLoader extends URLClassLoader {
         byte[] transformedClass;
 
         try {
-            final String transformedName = transformName(name);
+            final String remappedName = transformName(name);
             if (VERBOSE) {
-                LOGGER.debug("Loading target class: {}", transformedName);
-                if (!TARGET.isEmpty() && transformedName.equals(TARGET)) {
+                LOGGER.debug("Loading target class: {}", remappedName);
+                if (!TARGET.isEmpty() && remappedName.equals(TARGET)) {
                     Arrays.stream(Thread.currentThread().getStackTrace()).forEach(LOGGER::debug);
                     transformerHolder.debugPrinter.run();
                 }
             }
-            if (cachedClasses.containsKey(transformedName)) {
-                return cachedClasses.get(transformedName);
+            if (cachedClasses.containsKey(remappedName)) {
+                return cachedClasses.get(remappedName);
             }
 
             final String untransformedName = untransformName(name);
@@ -185,15 +185,17 @@ public class ActualClassLoader extends URLClassLoader {
             URLConnection urlConnection = findCodeSourceConnectionFor(fileName);
 
             CodeSigner[] signers = null;
+            Manifest manifest = null;
+            Package pkg = null;
             if (lastDot > -1 && !untransformedName.startsWith("net.minecraft.")) {
                 if (urlConnection instanceof JarURLConnection jarURLConnection) {
                     final JarFile jarFile = jarURLConnection.getJarFile();
 
                     if (jarFile != null && jarFile.getManifest() != null) {
-                        Manifest manifest = jarFile.getManifest();
+                        manifest = jarFile.getManifest();
                         final JarEntry entry = jarFile.getJarEntry(fileName);
 
-                        Package pkg = getDefinedPackage(packageName);
+                        pkg = getDefinedPackage(packageName);
                         getClassBytes(untransformedName);
                         signers = entry == null ? null : entry.getCodeSigners();
                         if (pkg == null) {
@@ -207,7 +209,7 @@ public class ActualClassLoader extends URLClassLoader {
                         }
                     }
                 } else {
-                    Package pkg = getPackage(packageName);
+                    pkg = getPackage(packageName);
                     if (pkg == null) {
                         definePackage(packageName, null, null, null, null, null, null, null);
                     } else if (pkg.isSealed() && urlConnection != null) {
@@ -219,13 +221,13 @@ public class ActualClassLoader extends URLClassLoader {
             if (floor != null && name.startsWith(floor)) {
                 try {
                     transformedClass = getClassBytes(name);
-                    transformedClass = runExplicitTransformers(transformedName, transformedClass);
+                    transformedClass = runExplicitTransformers(remappedName, transformedClass);
                     final CodeSource codeSource = urlConnection == null ? null : new CodeSource(urlConnection.getURL(), signers);
-                    if (transformedClass == null) throw new ClassNotFoundException(transformedName);
+                    if (transformedClass == null) throw new ClassNotFoundException(remappedName);
                     final Class<?> clazz = super.defineClass(name, transformedClass, 0, transformedClass.length, codeSource);
                     cachedClasses.put(name, clazz);
                     if (DUMP) {
-                        saveClassBytes(transformedClass, transformedName);
+                        saveClassBytes(transformedClass, remappedName);
                     }
                     return clazz;
                 } catch (IOException e) {
@@ -234,18 +236,18 @@ public class ActualClassLoader extends URLClassLoader {
 
             }
 
-            transformedClass = runExplicitTransformers(transformedName, this.runTransformers(untransformedName, transformedName, getClassBytes(untransformedName)));
+            transformedClass = runExplicitTransformers(remappedName, this.runTransformers(untransformedName, remappedName, getClassBytes(untransformedName), pkg, manifest));
             if (DUMP) {
-                saveClassBytes(transformedClass, transformedName);
+                saveClassBytes(transformedClass, remappedName);
             }
 
             final CodeSource codeSource = urlConnection == null ? null : new CodeSource(urlConnection.getURL(), signers);
             if (transformedClass == null) throw new ClassNotFoundException();
-            final Class<?> clazz = defineClass(transformedName, transformedClass, 0, transformedClass.length, codeSource);
-            cachedClasses.put(transformedName, clazz);
+            final Class<?> clazz = defineClass(remappedName, transformedClass, 0, transformedClass.length, codeSource);
+            cachedClasses.put(remappedName, clazz);
             if (VERBOSE) {
-                LOGGER.debug("Target class with name {} was successfully loaded.", transformedName);
-                if (!TARGET.isEmpty() && transformedName.equals(TARGET)) {
+                LOGGER.debug("Target class with name {} was successfully loaded.", remappedName);
+                if (!TARGET.isEmpty() && remappedName.equals(TARGET)) {
                     LOGGER.debug("Class: {}", clazz);
                     LOGGER.debug("Class source: {}", clazz.getProtectionDomain().getCodeSource().getLocation());
                 }
@@ -332,8 +334,8 @@ public class ActualClassLoader extends URLClassLoader {
         return null;
     }
 
-    protected byte[] runTransformers(final String name, final String transformedName, byte[] basicClass) {
-        basicClass = transformerHolder.runTransformersFunction.apply(name, transformedName, basicClass);
+    protected byte[] runTransformers(final String name, final String transformedName, byte[] basicClass, Package pkg, Manifest manifest) {
+        basicClass = transformerHolder.runTransformersFunction.apply(name, transformedName, basicClass, pkg, manifest);
         return basicClass;
     }
 

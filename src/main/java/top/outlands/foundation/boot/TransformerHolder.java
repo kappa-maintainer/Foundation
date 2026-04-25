@@ -22,7 +22,7 @@ public class TransformerHolder {
     public static List<IClassTransformer> transformers = null;
     public static IClassNameTransformer renameTransformer;
     public ExplicitTransformerFunction runExplicitTransformersFunction = ((s, bytes) -> bytes);
-    public TransformerFunction runTransformersFunction = ((name, transformedName, basicClass) -> basicClass);
+    public TransformerFunction runTransformersFunction = ((name, transformedName, basicClass, pkg, manifest) -> basicClass);
     public Consumer<String> registerTransformerFunction = s -> {};
     public Function<String, String> transformNameFunction = s -> s;
     public Function<String, String> unTransformNameFunction = s -> s;

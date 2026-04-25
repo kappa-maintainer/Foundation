@@ -7,13 +7,26 @@ import java.util.jar.Manifest;
  */
 public interface IClassTransformer {
     /**
-     * Original transform method, could be replaced by the new one with manifest. (In case you want to check it)
-     * @param name Untransformed class name. Not sure why it exists. Do not use.
-     * @param transformedName Transformed class name.
-     * @param basicClass Class bytes.
+     * Original transform method, could be replaced by the new one with manifest. (You still need to implement an empty method of this)
+     * @param name Raw class name. Not sure why it exists. Do not use.
+     * @param remappedName Remapped class name.
+     * @param bytes Class bytes.
      * @return Transformed class bytes.
      */
-    byte[] transform(String name, String transformedName, byte[] basicClass);
+    byte[] transform(String name, String remappedName, byte[] bytes);
+
+    /**
+     * New transform method actually been called.
+     * @param name Raw class name. Not sure why it exists. Do not use.
+     * @param remappedName Remapped class name.
+     * @param bytes Class bytes.
+     * @param pkg The {@link Package} instance of loading class. Used for annotation checking. 
+     * @param manifest The {@link Manifest} instance of loading class. Used for manifest checking.
+     * @return Transformed class bytes.
+     */
+    default byte[] transform(String name, String remappedName, byte[] bytes, Package pkg, Manifest manifest) {
+        return transform(name, remappedName, bytes);
+    }
 
     /**
      * Override this to set your transformer's priority.
