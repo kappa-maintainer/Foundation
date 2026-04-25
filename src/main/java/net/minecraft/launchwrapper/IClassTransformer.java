@@ -13,7 +13,9 @@ public interface IClassTransformer {
      * @param bytes Class bytes.
      * @return Transformed class bytes.
      */
-    byte[] transform(String name, String remappedName, byte[] bytes);
+    default byte[] transform(String name, String remappedName, byte[] bytes) {
+        return bytes;
+    }
 
     /**
      * New transform method actually been called.
