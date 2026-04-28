@@ -3,13 +3,18 @@ package top.outlands;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import top.outlands.foundation.trie.PrefixTrie;
+import top.outlands.foundation.trie.TrieNode;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class TrieTest {
     private final Logger log = (Logger) LogManager.getLogger("test");
     @Test
     public void TestGenericTrie() throws ClassNotFoundException {
-        /*
         log.info("start testing");
         PrefixTrie<String> trie = new PrefixTrie<>();
         String[] keys = new String[]{"net.minecraft", "net.minecraftforge", "com.sun", "net.ibm", "net."};
@@ -84,7 +89,7 @@ public class TrieTest {
             Assertions.assertTrue(trie.getKeyValueNode(s).isKeyValueNode());
             Assertions.assertNotNull(trie.getNode(s));
         }
-        trie.getRoot().getKeyValueNodes().forEach(node -> log.info(node.getKey()));*/
+        trie.getRoot().getKeyValueNodes().forEach(node -> log.info(node.getKey()));
     }
     
 }

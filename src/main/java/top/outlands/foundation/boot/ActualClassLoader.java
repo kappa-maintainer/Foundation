@@ -2,6 +2,8 @@ package top.outlands.foundation.boot;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.Launch;
+import top.outlands.foundation.trie.PrefixTrie;
+import top.outlands.foundation.trie.TrieNode;
 
 
 import java.io.Closeable;
@@ -25,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -42,9 +43,9 @@ public class ActualClassLoader extends URLClassLoader {
     private final List<URL> sources;
     private final Set<String> jarNames = new HashSet<>();
     private ClassLoader parent = getClass().getClassLoader();
-    public static final TreeSet<String> classLoaderInclusions = new TreeSet<>();
-    public static final TreeSet<String> classLoaderExceptions = new TreeSet<>();
-    public static final TreeSet<String> transformerExceptions = new TreeSet<>();
+    public static final PrefixTrie<Boolean> classLoaderInclusions = new PrefixTrie<>();
+    public static final PrefixTrie<Boolean> classLoaderExceptions = new PrefixTrie<>();
+    public static final PrefixTrie<Boolean> transformerExceptions = new PrefixTrie<>();
     private final Map<String, Class<?>> cachedClasses = new ConcurrentHashMap<>();
     private final Set<String> invalidClasses = new HashSet<>(1024);
 
@@ -153,8 +154,8 @@ public class ActualClassLoader extends URLClassLoader {
         if (invalidClasses.contains(name)) {
             throw new ClassNotFoundException("Found " + name + " in invalid classes.");
         }
-        String floor = classLoaderExceptions.floor(name);
-        if (floor != null && name.startsWith(floor)) {
+        TrieNode<Boolean> node = classLoaderExceptions.getFirstKeyValueNode(name);
+        if (node != null && node.getValue()) {
             return parent.loadClass(name);
         }
 
@@ -217,8 +218,8 @@ public class ActualClassLoader extends URLClassLoader {
                     }
                 }
             }
-            floor = transformerExceptions.floor(name);
-            if (floor != null && name.startsWith(floor)) {
+            node = transformerExceptions.getFirstKeyValueNode(name);
+            if (node != null && node.getValue()) {
                 try {
                     transformedClass = getClassBytes(name);
                     transformedClass = runExplicitTransformers(remappedName, transformedClass);
@@ -266,8 +267,8 @@ public class ActualClassLoader extends URLClassLoader {
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        String floor = classLoaderInclusions.floor(name);
-        if (floor != null && name.startsWith(floor)) {
+        TrieNode<Boolean> node = classLoaderInclusions.getFirstKeyValueNode(name);
+        if (node != null && node.getValue()) {
             return findClass(name);
         }
         return super.loadClass(name, resolve);
@@ -402,12 +403,12 @@ public class ActualClassLoader extends URLClassLoader {
 
     private void addClassLoaderExclusion0(String toExclude) {
         LOGGER.debug("Adding classloader exclusion {}", toExclude);
-        classLoaderExceptions.add(toExclude);
+        classLoaderExceptions.put(toExclude, true);
     }
     
     private void addClassLoaderInclusion(String toInclude) {
         LOGGER.debug("Adding classloader inclusion {}", toInclude);
-        classLoaderInclusions.add(toInclude);
+        classLoaderInclusions.put(toInclude, true);
     }
 
     @Deprecated
@@ -418,12 +419,17 @@ public class ActualClassLoader extends URLClassLoader {
 
     public void addTransformerExclusion(String toExclude) {
         LOGGER.debug("Adding transformer exclusion {}", toExclude);
-        transformerExceptions.add(toExclude);
+        transformerExceptions.put(toExclude, true);
     }
 
     public void removeTransformerExclusion(String toExclude) {
         LOGGER.debug("Removing transformer exclusion {}", toExclude);
-        transformerExceptions.remove(toExclude);
+        TrieNode<Boolean> node = transformerExceptions.getKeyValueNode(toExclude);
+        if (node != null) {
+            node.setValue(false);
+        } else {
+            transformerExceptions.put(toExclude, false);
+        }
     }
 
     public byte[] getClassBytes(String name) throws IOException {
@@ -574,6 +580,6 @@ public class ActualClassLoader extends URLClassLoader {
     }
 
     public List<String> getTransformerExclusions() {
-        return transformerExceptions.stream().toList();
+        return transformerExceptions.getRoot().getKeyValueNodes().stream().map(TrieNode::getKey).toList();
     }
 }
