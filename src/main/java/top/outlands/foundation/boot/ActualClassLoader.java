@@ -82,7 +82,6 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderInclusion("top.outlands.foundation.");
         addClassLoaderInclusion("com.cleanroommc.");
         addClassLoaderInclusion("ibxm.");
-        addClassLoaderInclusion("paulscode.sound.codecs.");
         addClassLoaderInclusion("zone.rong.mixinbooter.");
         addClassLoaderInclusion("paulscode.sound.");
         

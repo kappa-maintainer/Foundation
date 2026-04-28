@@ -54,9 +54,4 @@ public class LaunchClassLoader extends ActualClassLoader {
     public byte[] runTransformers(final String name, final String transformedName, byte[] basicClass) {
         return super.runTransformers(name, transformedName, basicClass, null, null);
     }
-    
-    public byte[] runTransformers(final String name, final String transformedName, byte[] basicClass, Package pkg, Manifest manifest) {
-        return super.runTransformers(name, transformedName, basicClass, pkg, manifest);
-    }
-    
 }
