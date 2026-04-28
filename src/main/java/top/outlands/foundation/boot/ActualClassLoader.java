@@ -78,6 +78,7 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderInclusion("org.spongepowered.asm.");
         addClassLoaderInclusion("com.llamalad7.mixinextras.");
         addClassLoaderInclusion("net.minecraft");
+        addClassLoaderInclusion("org.lwjgl");
         addClassLoaderInclusion("top.outlands.foundation.");
         addClassLoaderInclusion("com.cleanroommc.");
         addClassLoaderInclusion("ibxm.");
