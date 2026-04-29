@@ -341,6 +341,11 @@ public class ActualClassLoader extends URLClassLoader {
         return basicClass;
     }
 
+    @Deprecated
+    protected byte[] runTransformers(final String name, final String transformedName, byte[] basicClass) {
+        return runTransformers(name, transformedName, basicClass, null, null);
+    }
+
     protected byte[] runExplicitTransformers(final String transformedName, byte[] basicClass) {
         basicClass = transformerHolder.runExplicitTransformersFunction.apply(transformedName, basicClass);
         return basicClass;
