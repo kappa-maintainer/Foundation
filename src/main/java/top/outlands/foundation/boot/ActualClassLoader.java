@@ -74,7 +74,7 @@ public class ActualClassLoader extends URLClassLoader {
             parent = loader;
         }
         this.sources = new ArrayList<>(Arrays.asList(sources));
-        FILE_MANIFEST.getMainAttributes().put("Lwjgl3-Aware", "true");
+        FILE_MANIFEST.getMainAttributes().putValue("Lwjgl3-Aware", "true");
         addClassLoaderInclusion("org.objectweb.asm.");
         addClassLoaderInclusion("org.spongepowered.asm.");
         addClassLoaderInclusion("com.llamalad7.mixinextras.");
