@@ -62,8 +62,8 @@ public class ActualClassLoader extends URLClassLoader {
     static TransformerHolder transformerHolder = new TransformerHolder();
     private Map<Package, Manifest> packageManifests = null;
     private static Manifest EMPTY = new Manifest();
-
-
+    private static final Manifest FILE_MANIFEST = new Manifest();
+    
     public ActualClassLoader(URL[] sources) {
         this(sources, null);
     }
@@ -74,6 +74,7 @@ public class ActualClassLoader extends URLClassLoader {
             parent = loader;
         }
         this.sources = new ArrayList<>(Arrays.asList(sources));
+        FILE_MANIFEST.getMainAttributes().put("Lwjgl3-Aware", "true");
         addClassLoaderInclusion("org.objectweb.asm.");
         addClassLoaderInclusion("org.spongepowered.asm.");
         addClassLoaderInclusion("com.llamalad7.mixinextras.");
@@ -211,6 +212,7 @@ public class ActualClassLoader extends URLClassLoader {
                         }
                     }
                 } else {
+                    manifest = FILE_MANIFEST;
                     pkg = getPackage(packageName);
                     if (pkg == null) {
                         definePackage(packageName, null, null, null, null, null, null, null);
