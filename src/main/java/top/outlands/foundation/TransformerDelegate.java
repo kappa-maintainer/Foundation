@@ -144,7 +144,34 @@ public class TransformerDelegate {
     static void fillTransformerHolder(TransformerHolder holder) {
         explicitTransformers = new TreeMap<>();
         transformers = new LinkedList<>();
+        // Pre-load TransformerCache + its proxy classes before installing the lambda that
+        // references them. Without this, the first runTransformersFunction.apply() call would
+        // trigger lazy class loading of TransformerCache from inside the lambda body, which
+        // re-enters the same lambda via ActualClassLoader.findClass → ClassCircularityError.
+        // At this point holder.runTransformersFunction is still the default no-op identity
+        // lambda (see TransformerHolder), so the pre-load passes through transformation safely.
+        final boolean cacheEnabled =
+            Boolean.parseBoolean(System.getProperty("foundation.transformerCache", "false"));
+        if (cacheEnabled) {
+            try {
+                Class.forName(TransformerCache.class.getName(), true, TransformerDelegate.class.getClassLoader());
+                Class.forName(TransformerCache.class.getName() + "$Entry", true, TransformerDelegate.class.getClassLoader());
+                Class.forName(CachedTransformerProxy.class.getName(), true, TransformerDelegate.class.getClassLoader());
+                Class.forName(CachedNameTransformerProxy.class.getName(), true, TransformerDelegate.class.getClassLoader());
+            } catch (ClassNotFoundException e) {
+                LOGGER.error("Failed to pre-load TransformerCache classes", e);
+            }
+        }
         holder.runTransformersFunction = (name, transformedName, basicClass) -> {
+            // Lazy install of TransformerCache proxies if the feature is enabled.
+            // Re-tries on every call until every cacheable target has been wrapped,
+            // because tweakers (e.g. FMLDeobfTweaker) register their transformers
+            // incrementally, sometimes after the first runTransformers call has fired
+            // for Foundation's own bootstrap classes. installProxies short-circuits
+            // cheaply once the transformers list size hasn't changed since last scan.
+            if (cacheEnabled) {
+                TransformerCache.installProxies();
+            }
             for (final IClassTransformer transformer : Collections.unmodifiableList(transformers)) {
                 basicClass = transformer.transform(name, transformedName, basicClass);
             }
