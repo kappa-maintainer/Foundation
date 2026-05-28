@@ -62,6 +62,8 @@ public class ActualClassLoader extends URLClassLoader {
     static TransformerHolder transformerHolder = new TransformerHolder();
     private Map<Package, Manifest> packageManifests = null;
     private static Manifest EMPTY = new Manifest();
+    // URLJarFile.getManifest() deep-clones every call; cache the result per jar.
+    private final Map<String, Manifest> manifestCache = new ConcurrentHashMap<>();
 
 
     public ActualClassLoader(URL[] sources) {
@@ -191,9 +193,9 @@ public class ActualClassLoader extends URLClassLoader {
             if (lastDot > -1 && !untransformedName.startsWith("net.minecraft.")) {
                 if (urlConnection instanceof JarURLConnection jarURLConnection) {
                     final JarFile jarFile = jarURLConnection.getJarFile();
+                    Manifest manifest = jarFile == null ? null : getCachedManifest(jarFile);
 
-                    if (jarFile != null && jarFile.getManifest() != null) {
-                        Manifest manifest = jarFile.getManifest();
+                    if (manifest != null) {
                         final JarEntry entry = jarFile.getJarEntry(fileName);
 
                         Package pkg = getDefinedPackage(packageName);
@@ -320,6 +322,18 @@ public class ActualClassLoader extends URLClassLoader {
             }
         }
         return "true".equalsIgnoreCase(sealed);
+    }
+
+    private Manifest getCachedManifest(final JarFile jarFile) throws IOException {
+        Manifest cached = manifestCache.get(jarFile.getName());
+        if (cached != null) {
+            return cached;
+        }
+        Manifest fresh = jarFile.getManifest();
+        if (fresh != null) {
+            manifestCache.put(jarFile.getName(), fresh);
+        }
+        return fresh;
     }
 
     protected URLConnection findCodeSourceConnectionFor(final String name) {
