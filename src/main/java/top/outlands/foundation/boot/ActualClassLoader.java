@@ -191,9 +191,8 @@ public class ActualClassLoader extends URLClassLoader {
             if (lastDot > -1 && !untransformedName.startsWith("net.minecraft.")) {
                 if (urlConnection instanceof JarURLConnection jarURLConnection) {
                     final JarFile jarFile = jarURLConnection.getJarFile();
-
-                    if (jarFile != null && jarFile.getManifest() != null) {
-                        Manifest manifest = jarFile.getManifest();
+                    final Manifest manifest = jarFile.getManifest();
+                    if (manifest != null) {
                         final JarEntry entry = jarFile.getJarEntry(fileName);
 
                         Package pkg = getDefinedPackage(packageName);
