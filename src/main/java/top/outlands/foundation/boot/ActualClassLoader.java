@@ -88,7 +88,9 @@ public class ActualClassLoader extends URLClassLoader {
         
         addClassLoaderExclusion0("java.");
         addClassLoaderExclusion0("javax.");
-        addClassLoaderExclusion0("org.apache.commons.");
+        addClassLoaderExclusion0("org.apache.commons.compress.");
+        addClassLoaderExclusion0("org.apache.commons.lang3.");
+        addClassLoaderExclusion0("org.apache.commons.text.");
         addClassLoaderExclusion0("org.apache.logging.");
         addClassLoaderExclusion0("org.apache.hc.");
         addClassLoaderExclusion0("org.apache.maven.");
