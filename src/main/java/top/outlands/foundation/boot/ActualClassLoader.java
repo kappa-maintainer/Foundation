@@ -85,6 +85,7 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderInclusion("paulscode.sound.codecs.");
         addClassLoaderInclusion("zone.rong.mixinbooter.");
         addClassLoaderInclusion("paulscode.sound.");
+        addClassLoaderInclusion("com.mojang.");
         
         addClassLoaderExclusion0("java.");
         addClassLoaderExclusion0("javax.");
