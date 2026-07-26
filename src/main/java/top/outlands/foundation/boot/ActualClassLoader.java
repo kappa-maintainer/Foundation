@@ -88,7 +88,12 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderInclusion("com.mojang.");
         
         addClassLoaderExclusion0("java.");
-        addClassLoaderExclusion0("org.apache.commons.");
+        addClassLoaderExclusion0("org.apache.commons.compress.");
+        addClassLoaderExclusion0("org.apache.commons.logging.");
+        addClassLoaderExclusion0("org.apache.commons.codec.");
+        addClassLoaderExclusion0("org.apache.commons.lang3.");
+        addClassLoaderExclusion0("org.apache.commons.text.");
+        addClassLoaderExclusion0("org.apache.commons.io.");
         addClassLoaderExclusion0("org.apache.logging.");
         addClassLoaderExclusion0("org.apache.hc.");
         addClassLoaderExclusion0("org.apache.maven.");
