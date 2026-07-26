@@ -88,7 +88,6 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderInclusion("com.mojang.");
         
         addClassLoaderExclusion0("java.");
-        addClassLoaderExclusion0("javax.");
         addClassLoaderExclusion0("org.apache.commons.");
         addClassLoaderExclusion0("org.apache.logging.");
         addClassLoaderExclusion0("org.apache.hc.");
@@ -105,6 +104,24 @@ public class ActualClassLoader extends URLClassLoader {
         addClassLoaderExclusion0("org.openjdk.");
         addClassLoaderExclusion0("oshi.");
         addClassLoaderExclusion0("it.unimi.dsi.");
+        
+        addClassLoaderExclusion0("javax.accessibility.");
+        addClassLoaderExclusion0("javax.annotation");
+        addClassLoaderExclusion0("javax.crypto.");
+        addClassLoaderExclusion0("javax.imageio.");
+        addClassLoaderExclusion0("javax.lang");
+        addClassLoaderExclusion0("javax.management.");
+        addClassLoaderExclusion0("javax.naming.");
+        addClassLoaderExclusion0("javax.net.");
+        addClassLoaderExclusion0("javax.print.");
+        addClassLoaderExclusion0("javax.script.");
+        addClassLoaderExclusion0("javax.smartcardio.");
+        addClassLoaderExclusion0("javax.sound.");
+        addClassLoaderExclusion0("javax.sql.");
+        addClassLoaderExclusion0("javax.swing.");
+        addClassLoaderExclusion0("javax.tools.");
+        addClassLoaderExclusion0("javax.transaction.");
+        addClassLoaderExclusion0("javax.xml.");
         
         addClassLoaderExclusion0("net.minecraft.launchwrapper.LaunchClassLoader");
         addClassLoaderExclusion0("net.minecraft.launchwrapper.Launch");
