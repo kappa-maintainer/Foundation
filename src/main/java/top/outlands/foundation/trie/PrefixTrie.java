@@ -161,7 +161,7 @@ public class PrefixTrie<V> extends AbstractTrie<V> {
 		TrieNode<V> node = root;
 		int i = 0;
         while (i < maxPrefixLength) {
-            if (key.substring(i).startsWith(node.snippet)) {
+            if (key.startsWith(node.snippet, i)) {
                 i += node.snippet.length();
 				if (i == key.length()) {
 					return node;
@@ -183,7 +183,7 @@ public class PrefixTrie<V> extends AbstractTrie<V> {
 		TrieNode<V> node = root;
 		int i = 0;
         while (i < key.length()) {
-			if (key.substring(i).startsWith(node.snippet)) {
+			if (key.startsWith(node.snippet, i)) {
 				if (node.isKeyValueNode) {
 					return node;
 				}
