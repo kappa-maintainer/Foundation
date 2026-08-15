@@ -4,7 +4,15 @@ import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
 import top.outlands.foundation.boot.TransformerHolder;
 
-import java.util.*;
+import java.lang.classfile.ClassFile;
+import java.lang.classfile.ClassHierarchyResolver;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.TreeMap;
 
 import static net.minecraft.launchwrapper.Launch.classLoader;
 import static top.outlands.foundation.boot.Foundation.LOGGER;
@@ -154,14 +162,25 @@ public class TransformerDelegate {
         explicitTransformers = new TreeMap<>();
         transformers = new LinkedList<>();
         if (DEBUG_TRANSFORMER) {
+            final ClassFile verifier = ClassFile.of(ClassFile.ClassHierarchyResolverOption.of(
+                    ClassHierarchyResolver.ofResourceParsing(classLoader)));
             holder.runTransformersFunction = (name, transformedName, basicClass) -> {
-                int hash = Arrays.hashCode(basicClass);
+                byte[] before;
                 for (final IClassTransformer transformer : transformers) {
+                    before = basicClass;
                     basicClass = transformer.transform(name, transformedName, basicClass);
-                    int tempHash = Arrays.hashCode(basicClass);
-                    if (tempHash != hash) {
-                        LOGGER.debug("Class {} has been modified by transformer {}", transformedName, transformer);
-                        hash = tempHash;
+                    if (basicClass != before && basicClass != null) {
+                        try {
+                            final List<VerifyError> errors = verifier.verify(basicClass);
+                            if (!errors.isEmpty()) {
+                                LOGGER.error("Transformer {} produced invalid class for {}: {}",
+                                        transformer, transformedName, errors);
+                            }
+                        } catch (Throwable t) {
+                            // diagnostics must never break the actual class load
+                            LOGGER.error("Class file verification failed for {} after transformer {}: {}",
+                                    transformedName, transformer, t);
+                        }
                     }
                 }
                 return basicClass;
@@ -193,8 +212,11 @@ public class TransformerDelegate {
                     if (queue != null) {
                         while (!queue.isEmpty()) {
                             IExplicitTransformer transformer = queue.poll();
+                            byte[] before = basicClass;
                             basicClass = transformer.transform(basicClass); // We are not doing hotswap, so classes only loaded once. Let's free their memory
-                            LOGGER.debug("Class {} has been modified by explicit transformer {}", name, transformer);
+                            if (basicClass != before && basicClass != null) {
+                                LOGGER.debug("Class {} has been modified by explicit transformer {}", name, transformer);
+                            }
                         }
                         explicitTransformers.remove(name); // GC
                     }
