@@ -22,6 +22,7 @@ import java.security.CodeSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -47,7 +48,8 @@ public class ActualClassLoader extends URLClassLoader {
     public static final PrefixTrie<Boolean> classLoaderExceptions = new PrefixTrie<>();
     public static final PrefixTrie<Boolean> transformerExceptions = new PrefixTrie<>();
     private final Map<String, Class<?>> cachedClasses = new ConcurrentHashMap<>();
-    private final Map<String, Throwable> invalidClasses = new ConcurrentHashMap<>(1024);
+    private final Map<String, Throwable> invalidClassesMap = new ConcurrentHashMap<>(1024);
+    private final Set<String> invalidClasses = Collections.unmodifiableSet(invalidClassesMap.keySet());
 
     private final Map<String, byte[]> resourceCache = new ConcurrentHashMap<>(1024);
     private final Set<String> negativeResourceCache = ConcurrentHashMap.newKeySet();
@@ -177,7 +179,7 @@ public class ActualClassLoader extends URLClassLoader {
 
     @Override
     public Class<?> findClass(final String name) throws ClassNotFoundException {
-        Throwable invalidCause = invalidClasses.get(name);
+        Throwable invalidCause = invalidClassesMap.get(name);
         if (invalidCause != null) {
             throw new ClassNotFoundException(
                 "Found " + name + " in invalid classes. Original failure:",
@@ -283,7 +285,7 @@ public class ActualClassLoader extends URLClassLoader {
             }
             return clazz;
         } catch (Throwable e) {
-            invalidClasses.put(name, e);
+            invalidClassesMap.put(name, e);
             if (VERBOSE) {
                 LOGGER.debug("Failed to load class {}, caused by {}", name, e);
                 Arrays.stream(e.getStackTrace()).forEach(LOGGER::debug);
@@ -538,7 +540,7 @@ public class ActualClassLoader extends URLClassLoader {
     }
 
     public Set<String> getInvalidClasses() {
-        return invalidClasses.keySet();
+        return invalidClassesMap.keySet();
     }
 
     /**
