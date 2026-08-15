@@ -48,8 +48,8 @@ public class ActualClassLoader extends URLClassLoader {
     public static final PrefixTrie<Boolean> classLoaderExceptions = new PrefixTrie<>();
     public static final PrefixTrie<Boolean> transformerExceptions = new PrefixTrie<>();
     private final Map<String, Class<?>> cachedClasses = new ConcurrentHashMap<>();
-    private final Map<String, Throwable> invalidClassesMap = new ConcurrentHashMap<>(1024);
-    private final Set<String> invalidClasses = new HashSet<>(1024);
+    private final Map<String, Throwable> invalidClassesMap = new ConcurrentHashMap<>(32);
+    private final Set<String> invalidClasses = new HashSet<>(32);
 
     private final Map<String, byte[]> resourceCache = new ConcurrentHashMap<>(1024);
     private final Set<String> negativeResourceCache = ConcurrentHashMap.newKeySet();
