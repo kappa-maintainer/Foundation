@@ -230,7 +230,13 @@ public class ActualClassLoader extends URLClassLoader {
                         getClassBytes(untransformedName);
                         signers = entry == null ? null : entry.getCodeSigners();
                         if (pkg == null) {
-                            definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
+                            try {
+                                definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
+                            } catch (IllegalArgumentException iae) {
+                                if (getDefinedPackage(packageName) == null) {
+                                    throw iae;
+                                }
+                            }
                         } else {
                             if (pkg.isSealed() && !pkg.isSealed(jarURLConnection.getJarFileURL())) {
                                 LOGGER.warn("The jar file {} is trying to seal already secured path {}", jarFile.getName(), packageName);
@@ -242,7 +248,13 @@ public class ActualClassLoader extends URLClassLoader {
                 } else {
                     Package pkg = getPackage(packageName);
                     if (pkg == null) {
-                        definePackage(packageName, null, null, null, null, null, null, null);
+                        try {
+                            definePackage(packageName, null, null, null, null, null, null, null);
+                        } catch (IllegalArgumentException iae) {
+                            if (getDefinedPackage(packageName) == null) {
+                                throw iae;
+                            }
+                        }
                     } else if (pkg.isSealed() && urlConnection != null) {
                         LOGGER.warn("The URL {} is defining elements for sealed path {}", urlConnection.getURL(), packageName);
                     }
