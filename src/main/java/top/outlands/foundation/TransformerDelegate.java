@@ -2,10 +2,17 @@ package top.outlands.foundation;
 
 import net.minecraft.launchwrapper.IClassNameTransformer;
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.Launch;
 import top.outlands.foundation.boot.TransformerHolder;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
+
+import java.io.InputStream;
 import java.lang.classfile.ClassFile;
+import java.lang.classfile.ClassHierarchyResolver.ClassHierarchyInfo;
 import java.lang.classfile.ClassHierarchyResolver;
+import java.lang.constant.ClassDesc;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -154,6 +161,42 @@ public class TransformerDelegate {
     }
 
     /**
+     * A {@link ClassHierarchyResolver} that make {@link ClassFile#verify} works with notch names
+     */
+    private static ClassHierarchyResolver newRemappingHierarchyResolver() {
+        return classDesc -> {
+            String desc = classDesc.descriptorString();
+            String internal = desc.substring(1, desc.length() - 1);
+            String mapped = classLoader.untransformName(internal.replace('/', '.')).replace('.', '/');
+            boolean remapped = !mapped.equals(internal);
+            InputStream stream = classLoader.getResourceAsStream(mapped + ".class");
+            if (stream == null && remapped) {
+                // fall back to the literal name in case the jar is already
+                // deobfuscated and file names match the query form
+                stream = classLoader.getResourceAsStream(internal + ".class");
+                remapped = false;
+            }
+            if (stream == null) {
+                return null; // unknown → optimistic verification
+            }
+            try (InputStream in = stream) {
+                ClassReader reader = new ClassReader(in);
+                if ((reader.getAccess() & Opcodes.ACC_INTERFACE) != 0) {
+                    return ClassHierarchyInfo.ofInterface();
+                }
+                String superName = reader.getSuperName();
+                if (superName != null && remapped) {
+                    superName = classLoader.transformName(superName.replace('/', '.')).replace('.', '/');
+                }
+                return ClassHierarchyInfo.ofClass(
+                        superName == null ? null : ClassDesc.ofDescriptor("L" + superName + ";"));
+            } catch (Throwable t) {
+                return null; // diagnostics must never break verification
+            }
+        };
+    }
+
+    /**
      * We use lambda trick to fill method implementations after the class loader ready
      *
      * @param holder The one and only handler
@@ -163,7 +206,7 @@ public class TransformerDelegate {
         transformers = new LinkedList<>();
         if (DEBUG_TRANSFORMER) {
             final ClassFile verifier = ClassFile.of(ClassFile.ClassHierarchyResolverOption.of(
-                    ClassHierarchyResolver.ofResourceParsing(classLoader)));
+                    newRemappingHierarchyResolver()));
             holder.runTransformersFunction = (name, transformedName, basicClass) -> {
                 byte[] before;
                 for (final IClassTransformer transformer : transformers) {
