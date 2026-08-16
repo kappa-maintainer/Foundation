@@ -7,9 +7,12 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 public class Foundation {
@@ -29,6 +32,19 @@ public class Foundation {
 
     public static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> Foundation.LOGGER.error(thread, throwable));
+        // The process main thread becomes the client thread; anchor it for the SDL marshaling executor.
+        MainThreadExecutor.init();
+        // macOS: initialize AWT on the main thread so the JVM attaches a Cocoa run loop to it,
+        // which SDL requires for the video/event subsystem (same pattern as RetroFuturaBootstrap).
+        if (System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("mac")) {
+            System.setProperty("java.awt.headless", "true");
+            try {
+                GraphicsEnvironment.getLocalGraphicsEnvironment();
+                Toolkit.getDefaultToolkit().getDesktopProperty("awt.mouse.numButtons");
+            } catch (Throwable t) {
+                LOGGER.warn("Failed to initialize AWT on the main thread", t);
+            }
+        }
         try {
             breakModuleAndReflection();
             if (Launch.classLoader == null) {
