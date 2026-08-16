@@ -236,18 +236,7 @@ public class TransformerDelegate {
                 return basicClass;
             };
         }
-        holder.registerTransformerFunction = s -> {
-            if (!s.contains(".")) {
-                s = s.replace('/', '.');
-            }
-            try {
-                IClassTransformer transformer = (IClassTransformer) classLoader.loadClass(s).getConstructor().newInstance();
-                transformers.add(transformer);
-                transformers.sort(Comparator.comparingInt(IClassTransformer::getPriority));
-            } catch (Exception e) {
-                LOGGER.error("Error registering transformer class {}", s, e);
-            }
-        };
+        holder.registerTransformerFunction = TransformerDelegate::registerTransformer;
         if (DEBUG_TRANSFORMER) {
             holder.runExplicitTransformersFunction = (name, basicClass) -> {
                 if (explicitTransformers.containsKey(name)) {

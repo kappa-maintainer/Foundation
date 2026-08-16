@@ -173,7 +173,6 @@ public class ActualClassLoader extends URLClassLoader {
     }
 
     public void registerTransformer(String transformerClassName) {
-        LOGGER.debug("Registering transformer: {}", transformerClassName);
         transformerHolder.registerTransformerFunction.accept(transformerClassName);
     }
 
