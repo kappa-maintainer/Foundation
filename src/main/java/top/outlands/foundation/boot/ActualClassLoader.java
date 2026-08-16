@@ -196,6 +196,7 @@ public class ActualClassLoader extends URLClassLoader {
         }
 
         byte[] transformedClass;
+        boolean contextPushed = false;
 
         try {
             final String transformedName = transformName(name);
@@ -218,14 +219,16 @@ public class ActualClassLoader extends URLClassLoader {
             URLConnection urlConnection = findCodeSourceConnectionFor(fileName);
 
             CodeSigner[] signers = null;
+            Manifest manifest = null;
+            Package pkg = null;
             if (lastDot > -1 && !untransformedName.startsWith("net.minecraft.")) {
                 if (urlConnection instanceof JarURLConnection jarURLConnection) {
                     final JarFile jarFile = jarURLConnection.getJarFile();
-                    final Manifest manifest = jarFile.getManifest();
+                    manifest = jarFile.getManifest();
                     if (manifest != null) {
                         final JarEntry entry = jarFile.getJarEntry(fileName);
 
-                        Package pkg = getDefinedPackage(packageName);
+                        pkg = getDefinedPackage(packageName);
                         getClassBytes(untransformedName);
                         signers = entry == null ? null : entry.getCodeSigners();
                         if (pkg == null) {
@@ -245,7 +248,7 @@ public class ActualClassLoader extends URLClassLoader {
                         }
                     }
                 } else {
-                    Package pkg = getPackage(packageName);
+                    pkg = getPackage(packageName);
                     if (pkg == null) {
                         try {
                             definePackage(packageName, null, null, null, null, null, null, null);
@@ -259,6 +262,16 @@ public class ActualClassLoader extends URLClassLoader {
                     }
                 }
             }
+            // expose the loading context to transformers without changing their signatures
+            if (pkg == null && lastDot > -1) {
+                pkg = getDefinedPackage(packageName);
+            }
+            final URL codeSourceUrl = urlConnection == null ? null
+                    : urlConnection instanceof JarURLConnection jarURLConnection ? jarURLConnection.getJarFileURL()
+                    : urlConnection.getURL();
+            LoadingContext.push(pkg, manifest, codeSourceUrl);
+            contextPushed = true;
+
             node = transformerExceptions.getFirstKeyValueNode(name);
             if (node != null && node.getValue()) {
                 try {
@@ -303,7 +316,10 @@ public class ActualClassLoader extends URLClassLoader {
                 Arrays.stream(e.getStackTrace()).forEach(LOGGER::debug);
             }
             throw new ClassNotFoundException(name, e);
-
+        } finally {
+            if (contextPushed) {
+                LoadingContext.pop();
+            }
         }
     }
 
