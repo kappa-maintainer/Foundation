@@ -7,15 +7,7 @@ import java.util.jar.Manifest;
 
 /**
  * Per-thread stack of the loading context (package, manifest, code source) of the
- * class currently being loaded by {@link ActualClassLoader}. {@link
- * ActualClassLoader#findClass(String)} pushes the context before running the
- * transformer chain and pops it afterwards, so transformers can inspect the class
- * being loaded through {@link #current()} without any signature change to the
- * transformer interfaces.
- *
- * <p>Nested loads on the same thread (a transformer loading another class) push
- * their own context, and concurrent loads on different threads are isolated by the
- * thread local. No context is retained once the load finishes.
+ * class currently being loaded by {@link ActualClassLoader}.
  */
 public record LoadingContext(Package pkg, Manifest manifest, URL codeSourceUrl) {
 
@@ -32,15 +24,17 @@ public record LoadingContext(Package pkg, Manifest manifest, URL codeSourceUrl) 
 
     /**
      * Pushes a loading context for the current thread. Must be paired with {@link #pop()}.
+     * Package-private: only {@link ActualClassLoader} may push.
      */
-    public static void push(Package pkg, Manifest manifest, URL codeSourceUrl) {
+    static void push(Package pkg, Manifest manifest, URL codeSourceUrl) {
         stack().push(new LoadingContext(pkg, manifest, codeSourceUrl));
     }
 
     /**
      * Pops the innermost loading context of the current thread.
+     * Package-private: only {@link ActualClassLoader} may pop.
      */
-    public static void pop() {
+    static void pop() {
         Deque<LoadingContext> stack = STACK.get();
         if (stack == null || stack.isEmpty()) {
             return; // defensive: an unbalanced pop must never break class loading
